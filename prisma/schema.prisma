@@ -1,0 +1,74 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            Int         @id @default(autoincrement())
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  email         String      @unique @db.VarChar(255)
+  name          String?     @db.VarChar(100)
+  lists         ToDoList[]
+  shares        ListShare[]  // Lists shared with this user
+
+  @@index([email])
+}
+
+model ToDoList {
+  id            Int         @id @default(autoincrement())
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt // Activity tracking
+  name          String      @db.VarChar(255)
+  ownerId       Int 
+  owner         User        @relation(fields: [ownerId], references: [id])
+  tasks         Task[]
+  shares        ListShare[]  // All users this list is shared with
+  order         Int         @default(autoincrement())
+  deletedAt     DateTime?
+} 
+
+model ListShare {
+  id            Int         @id @default(autoincrement())
+  sharedWithId  Int 
+  sharedWith    User        @relation(fields: [sharedWithId], references: [id])
+  toDoListId    Int 
+  toDoList      ToDoList    @relation(fields: [toDoListId], references: [id])
+
+  @@unique([sharedWithId, toDoListId])
+}
+
+model Task {
+  id            Int          @id @default(autoincrement())
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt         // Activity tracking
+  description   String       @db.VarChar(255)   // Max length enforced
+  completed     Boolean      @default(false)
+  todoListId    Int   
+  todoList      ToDoList     @relation(fields: [todoListId], references: [id])
+  steps         Step[]    
+  order         Int          @default(autoincrement())
+  deletedAt     DateTime?
+}
+
+model Step {
+  id            Int          @id @default(autoincrement())
+  createdAt     DateTime     @default(now())
+  description   String
+  completed     Boolean      @default(false)
+  taskId        Int
+  task          Task         @relation(fields: [taskId], references: [id])
+  order         Int          @default(autoincrement())
+  deletedAt     DateTime?
+}
