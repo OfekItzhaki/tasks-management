@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./todo-backend
+        working-directory: todo-backend
     env:
       # Ensure DATABASE_URL is set in your repository secrets
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
