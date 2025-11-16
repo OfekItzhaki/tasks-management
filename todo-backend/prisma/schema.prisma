@@ -17,7 +17,6 @@ model User {
   name          String?     @db.VarChar(100)
   lists         ToDoList[]
   shares        ListShare[]  // Lists shared with this user
->>>>>>> 46fb9267339e6e90a8594e8c46fead8909e3578d
 
   @@index([email])
 }
@@ -41,7 +40,6 @@ model ListShare {
   sharedWith    User        @relation(fields: [sharedWithId], references: [id])
   toDoListId    Int 
   toDoList      ToDoList    @relation(fields: [toDoListId], references: [id])
->>>>>>> 46fb9267339e6e90a8594e8c46fead8909e3578d
 
   @@unique([sharedWithId, toDoListId])
 }
@@ -69,5 +67,4 @@ model Step {
   task          Task         @relation(fields: [taskId], references: [id])
   order         Int          @default(autoincrement())
   deletedAt     DateTime?
->>>>>>> 46fb9267339e6e90a8594e8c46fead8909e3578d
 }
