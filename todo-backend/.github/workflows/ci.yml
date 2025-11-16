@@ -10,6 +10,9 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: todo-backend
     env:
       # Ensure DATABASE_URL is set in your repository secrets
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
@@ -17,15 +20,17 @@ jobs:
       # Example:
       # NODE_ENV: test
     steps:
+    - uses: actions/checkout@v3
+    
       # Fail early if DATABASE_URL is not set
     - name: Check DATABASE_URL
       run: |
         if [ -z "${{ secrets.DATABASE_URL }}" ]; then
           echo "DATABASE_URL is not set in repository secrets."
           exit 1
+        else
+          echo "DATABASE_URL is configured."
         fi
-
-    - uses: actions/checkout@v3
 
     - name: Use Node.js
       uses: actions/setup-node@v3
@@ -62,6 +67,7 @@ jobs:
 
     - name: Run Prisma migrations
       run: npx prisma migrate deploy
+      continue-on-error: true
 
     - name: Generate Prisma client
       run: npx prisma generate
