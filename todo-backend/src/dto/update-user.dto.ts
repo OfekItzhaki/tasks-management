@@ -1,8 +1,9 @@
 import { IsEmail, IsOptional, IsString, IsUrl } from 'class-validator';
 
-export class CreateUserDto {
+export class UpdateUserDto {
+  @IsOptional()
   @IsEmail()
-  email: string;
+  email?: string;
 
   @IsOptional()
   @IsString()
@@ -13,3 +14,5 @@ export class CreateUserDto {
   @IsUrl()
   profilePicture?: string;
 }
+
+

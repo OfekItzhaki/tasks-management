@@ -23,12 +23,45 @@
 
 ## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+To-Do List API built with NestJS, Prisma, and PostgreSQL. Features include:
+- Multiple list types (Daily, Weekly, Monthly, Yearly, Custom)
+- Task scheduling with reminders
+- User management with profile pictures
+- List sharing between users
+- Daily task aggregation
+
+## Prerequisites
+
+- Node.js (v18 or higher)
+- PostgreSQL database
+- pnpm (or npm/yarn)
 
 ## Project setup
 
+1. **Install dependencies:**
 ```bash
 $ pnpm install
+```
+
+2. **Set up environment variables:**
+Create a `.env` file in the `todo-backend` directory:
+```env
+DATABASE_URL="postgresql://username:password@localhost:5432/todo_db?schema=public"
+PORT=3000
+```
+
+3. **Run database migrations:**
+```bash
+# Generate Prisma client and run migrations
+$ npx prisma migrate dev
+
+# Or if you want to create a new migration
+$ npx prisma migrate dev --name your_migration_name
+```
+
+4. **Generate Prisma Client:**
+```bash
+$ npx prisma generate
 ```
 
 ## Compile and run the project
@@ -37,11 +70,58 @@ $ pnpm install
 # development
 $ pnpm run start
 
-# watch mode
+# watch mode (recommended for development)
 $ pnpm run start:dev
 
 # production mode
 $ pnpm run start:prod
+```
+
+The API will be available at `http://localhost:3000` (or the port specified in your `.env` file).
+
+## API Endpoints
+
+### Users
+- `GET /users` - Get all users
+- `GET /users/:id` - Get user by ID
+- `POST /users` - Create a new user
+- `PATCH /users/:id` - Update user
+- `DELETE /users/:id` - Delete user (soft delete)
+
+### To-Do Lists
+- `GET /todo-lists` - Get all lists
+- `GET /todo-lists/defaults` - Get default lists (Daily, Weekly, Monthly, Yearly)
+- `GET /todo-lists/:id` - Get list by ID
+- `POST /todo-lists` - Create a new list
+- `PATCH /todo-lists/:id` - Update list
+- `DELETE /todo-lists/:id` - Delete list (soft delete)
+
+### Tasks
+- `GET /tasks` - Get all tasks (optional: `?todoListId=1`)
+- `GET /tasks/by-date` - Get all tasks for a specific date (optional: `?date=YYYY-MM-DD`)
+- `GET /tasks/reminders` - Get tasks with reminders for a specific date
+- `GET /tasks/:id` - Get task by ID
+- `POST /tasks/todo-list/:todoListId` - Create a task in a list
+- `PATCH /tasks/:id` - Update task
+- `DELETE /tasks/:id` - Delete task (soft delete)
+
+### List Sharing
+- `POST /list-shares/todo-list/:todoListId` - Share a list with a user
+- `GET /list-shares/user/:userId` - Get all lists shared with a user
+- `GET /list-shares/todo-list/:todoListId` - Get all users a list is shared with
+- `DELETE /list-shares/todo-list/:todoListId/user/:userId` - Unshare a list with a user
+
+## Database Management
+
+```bash
+# Open Prisma Studio (database GUI)
+$ npx prisma studio
+
+# Reset database (WARNING: deletes all data)
+$ npx prisma migrate reset
+
+# View migration status
+$ npx prisma migrate status
 ```
 
 ## Run tests

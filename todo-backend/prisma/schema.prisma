@@ -1,6 +1,5 @@
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -9,13 +8,15 @@ datasource db {
 }
 
 model User {
-  id        Int         @id @default(autoincrement())
-  createdAt DateTime    @default(now())
-  updatedAt DateTime
-  email     String      @unique @db.VarChar(255)
-  name      String?     @db.VarChar(100)
-  shares    ListShare[]
-  lists     ToDoList[]
+  id             Int         @id @default(autoincrement())
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  email          String      @unique @db.VarChar(255)
+  name           String?     @db.VarChar(100)
+  deletedAt      DateTime?
+  profilePicture String?     @db.VarChar(500)
+  shares         ListShare[]
+  lists          ToDoList[]
 
   @@index([email])
 }
@@ -23,11 +24,12 @@ model User {
 model ToDoList {
   id        Int         @id @default(autoincrement())
   createdAt DateTime    @default(now())
-  updatedAt DateTime
+  updatedAt DateTime    @updatedAt
   name      String      @db.VarChar(255)
   ownerId   Int
   order     Int         @default(autoincrement())
   deletedAt DateTime?
+  type      ListType    @default(CUSTOM)
   shares    ListShare[]
   tasks     Task[]
   owner     User        @relation(fields: [ownerId], references: [id])
@@ -44,16 +46,19 @@ model ListShare {
 }
 
 model Task {
-  id          Int       @id @default(autoincrement())
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime
-  description String    @db.VarChar(255)
-  completed   Boolean   @default(false)
-  todoListId  Int
-  order       Int       @default(autoincrement())
-  deletedAt   DateTime?
-  steps       Step[]
-  todoList    ToDoList  @relation(fields: [todoListId], references: [id])
+  id                 Int       @id @default(autoincrement())
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  description        String    @db.VarChar(255)
+  completed          Boolean   @default(false)
+  todoListId         Int
+  order              Int       @default(autoincrement())
+  deletedAt          DateTime?
+  dueDate            DateTime?
+  reminderDaysBefore Int       @default(1)
+  specificDayOfWeek  Int?
+  steps              Step[]
+  todoList           ToDoList  @relation(fields: [todoListId], references: [id])
 }
 
 model Step {
@@ -65,4 +70,12 @@ model Step {
   order       Int       @default(autoincrement())
   deletedAt   DateTime?
   task        Task      @relation(fields: [taskId], references: [id])
+}
+
+enum ListType {
+  DAILY
+  WEEKLY
+  MONTHLY
+  YEARLY
+  CUSTOM
 }
