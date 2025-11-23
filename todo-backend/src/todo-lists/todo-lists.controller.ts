@@ -12,8 +12,8 @@ import {
 import { TodoListsService } from './todo-lists.service';
 import { CreateToDoListDto } from './dto/create-todo-list.dto';
 import { UpdateToDoListDto } from './dto/update-todo-list.dto';
-import { JwtAuthGuard } from './auth/jwt-auth.guard';
-import { CurrentUser, CurrentUserPayload } from './auth/current-user.decorator';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { CurrentUser, CurrentUserPayload } from '../auth/current-user.decorator';
 
 @UseGuards(JwtAuthGuard)
 @Controller('todo-lists')

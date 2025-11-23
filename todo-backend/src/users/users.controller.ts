@@ -12,8 +12,8 @@ import {
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import UsersService from './users.service';
-import { JwtAuthGuard } from './auth/jwt-auth.guard';
-import { CurrentUser, CurrentUserPayload } from './auth/current-user.decorator';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { CurrentUser, CurrentUserPayload } from '../auth/current-user.decorator';
 
 @Controller('users')
 class UsersController {

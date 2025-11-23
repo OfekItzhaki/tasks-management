@@ -13,8 +13,8 @@ import { CreateStepDto } from './dto/create-step.dto';
 import { UpdateStepDto } from './dto/update-step.dto';
 import { ReorderStepsDto } from './dto/reorder-steps.dto';
 import { StepsService } from './steps.service';
-import { JwtAuthGuard } from './auth/jwt-auth.guard';
-import { CurrentUser, CurrentUserPayload } from './auth/current-user.decorator';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { CurrentUser, CurrentUserPayload } from '../auth/current-user.decorator';
 
 @UseGuards(JwtAuthGuard)
 @Controller()

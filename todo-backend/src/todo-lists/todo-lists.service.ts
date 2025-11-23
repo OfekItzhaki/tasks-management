@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from './prisma.service';
+import { PrismaService } from '../prisma/prisma.service';
 import { CreateToDoListDto } from './dto/create-todo-list.dto';
 import { UpdateToDoListDto } from './dto/update-todo-list.dto';
 import { ListType } from './dto/create-todo-list.dto';

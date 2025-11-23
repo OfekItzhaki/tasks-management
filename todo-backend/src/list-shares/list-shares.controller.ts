@@ -11,8 +11,8 @@ import {
 } from '@nestjs/common';
 import { ListSharesService } from './list-shares.service';
 import { ShareListDto } from './dto/share-list.dto';
-import { JwtAuthGuard } from './auth/jwt-auth.guard';
-import { CurrentUser, CurrentUserPayload } from './auth/current-user.decorator';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { CurrentUser, CurrentUserPayload } from '../auth/current-user.decorator';
 
 @UseGuards(JwtAuthGuard)
 @Controller('list-shares')
