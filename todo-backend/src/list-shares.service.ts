@@ -6,11 +6,11 @@ import { ShareListDto } from './dto/share-list.dto';
 export class ListSharesService {
   constructor(private prisma: PrismaService) {}
 
-  async shareList(todoListId: number, shareListDto: ShareListDto) {
-    // Verify list exists and is not deleted
+  private async ensureOwnedList(todoListId: number, ownerId: number) {
     const list = await this.prisma.toDoList.findFirst({
       where: {
         id: todoListId,
+        ownerId,
         deletedAt: null,
       },
     });
@@ -18,6 +18,13 @@ export class ListSharesService {
     if (!list) {
       throw new NotFoundException(`ToDoList with ID ${todoListId} not found`);
     }
+
+    return list;
+  }
+
+  async shareList(todoListId: number, shareListDto: ShareListDto, ownerId: number) {
+    // Verify list exists and user owns it
+    await this.ensureOwnedList(todoListId, ownerId);
 
     // Verify user exists
     const user = await this.prisma.user.findFirst({
@@ -101,20 +108,9 @@ export class ListSharesService {
       .filter((list) => list !== null && list.deletedAt === null);
   }
 
-  async getListShares(todoListId: number) {
-    // Verify list exists
-    const list = await this.prisma.toDoList.findFirst({
-      where: {
-        id: todoListId,
-        deletedAt: null,
-      },
-    });
+  async getListShares(todoListId: number, ownerId: number) {
+    await this.ensureOwnedList(todoListId, ownerId);
 
-    if (!list) {
-      throw new NotFoundException(`ToDoList with ID ${todoListId} not found`);
-    }
-
-    // Get all users this list is shared with
     return this.prisma.listShare.findMany({
       where: {
         toDoListId: todoListId,
@@ -132,7 +128,9 @@ export class ListSharesService {
     });
   }
 
-  async unshareList(todoListId: number, userId: number) {
+  async unshareList(todoListId: number, userId: number, ownerId: number) {
+    await this.ensureOwnedList(todoListId, ownerId);
+
     // Verify share exists
     const share = await this.prisma.listShare.findUnique({
       where: {

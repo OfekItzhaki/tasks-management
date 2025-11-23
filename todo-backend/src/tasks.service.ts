@@ -8,14 +8,48 @@ import { ListType } from './dto/create-todo-list.dto';
 export class TasksService {
   constructor(private prisma: PrismaService) {}
 
-  async create(todoListId: number, createTaskDto: CreateTaskDto) {
-    // Verify list exists
+  private async ensureListAccess(todoListId: number, ownerId: number) {
     await this.prisma.toDoList.findFirstOrThrow({
       where: {
         id: todoListId,
+        ownerId,
         deletedAt: null,
       },
     });
+  }
+
+  private async findTaskForUser(id: number, ownerId: number) {
+    const task = await this.prisma.task.findFirst({
+      where: {
+        id,
+        deletedAt: null,
+        todoList: {
+          ownerId,
+          deletedAt: null,
+        },
+      },
+      include: {
+        steps: {
+          where: {
+            deletedAt: null,
+          },
+          orderBy: {
+            order: 'asc',
+          },
+        },
+        todoList: true,
+      },
+    });
+
+    if (!task) {
+      throw new NotFoundException(`Task with ID ${id} not found`);
+    }
+
+    return task;
+  }
+
+  async create(todoListId: number, createTaskDto: CreateTaskDto, ownerId: number) {
+    await this.ensureListAccess(todoListId, ownerId);
 
     return this.prisma.task.create({
       data: {
@@ -29,9 +63,13 @@ export class TasksService {
     });
   }
 
-  async findAll(todoListId?: number) {
+  async findAll(ownerId: number, todoListId?: number) {
     const where: any = {
       deletedAt: null,
+      todoList: {
+        ownerId,
+        deletedAt: null,
+      },
     };
 
     if (todoListId) {
@@ -57,34 +95,12 @@ export class TasksService {
     });
   }
 
-  async findOne(id: number) {
-    const task = await this.prisma.task.findFirst({
-      where: {
-        id,
-        deletedAt: null,
-      },
-      include: {
-        steps: {
-          where: {
-            deletedAt: null,
-          },
-          orderBy: {
-            order: 'asc',
-          },
-        },
-        todoList: true,
-      },
-    });
-
-    if (!task) {
-      throw new NotFoundException(`Task with ID ${id} not found`);
-    }
-
-    return task;
+  async findOne(id: number, ownerId: number) {
+    return this.findTaskForUser(id, ownerId);
   }
 
-  async update(id: number, updateTaskDto: UpdateTaskDto) {
-    await this.findOne(id);
+  async update(id: number, updateTaskDto: UpdateTaskDto, ownerId: number) {
+    await this.findTaskForUser(id, ownerId);
 
     return this.prisma.task.update({
       where: { id },
@@ -98,8 +114,8 @@ export class TasksService {
     });
   }
 
-  async remove(id: number) {
-    await this.findOne(id);
+  async remove(id: number, ownerId: number) {
+    await this.findTaskForUser(id, ownerId);
 
     return this.prisma.task.update({
       where: { id },
@@ -109,7 +125,7 @@ export class TasksService {
     });
   }
 
-  async getTasksByDate(date: Date = new Date()) {
+  async getTasksByDate(ownerId: number, date: Date = new Date()) {
     // Normalize date to start of day
     const targetDate = new Date(date);
     targetDate.setHours(0, 0, 0, 0);
@@ -119,6 +135,10 @@ export class TasksService {
       where: {
         deletedAt: null,
         completed: false,
+        todoList: {
+          ownerId,
+          deletedAt: null,
+        },
       },
       include: {
         todoList: true,
@@ -201,7 +221,7 @@ export class TasksService {
     return tasksForDate;
   }
 
-  async getTasksWithReminders(date: Date = new Date()) {
+  async getTasksWithReminders(ownerId: number, date: Date = new Date()) {
     // Get all tasks that have reminders set for this date
     const targetDate = new Date(date);
     targetDate.setHours(0, 0, 0, 0);
@@ -210,6 +230,10 @@ export class TasksService {
       where: {
         deletedAt: null,
         completed: false,
+        todoList: {
+          ownerId,
+          deletedAt: null,
+        },
       },
       include: {
         todoList: true,

@@ -8,20 +8,21 @@ import { ListType } from './dto/create-todo-list.dto';
 export class TodoListsService {
   constructor(private prisma: PrismaService) {}
 
-  async create(createToDoListDto: CreateToDoListDto) {
+  async create(createToDoListDto: CreateToDoListDto, ownerId: number) {
     return this.prisma.toDoList.create({
       data: {
         name: createToDoListDto.name,
         type: createToDoListDto.type || ListType.CUSTOM,
-        ownerId: createToDoListDto.ownerId || 1, // Temporary: will be replaced with auth later
+        ownerId,
       },
     });
   }
 
-  async findAll() {
+  async findAll(ownerId: number) {
     return this.prisma.toDoList.findMany({
       where: {
         deletedAt: null,
+        ownerId,
       },
       include: {
         tasks: {
@@ -39,10 +40,11 @@ export class TodoListsService {
     });
   }
 
-  async findOne(id: number) {
+  async findOne(id: number, ownerId: number) {
     const list = await this.prisma.toDoList.findFirst({
       where: {
         id,
+        ownerId,
         deletedAt: null,
       },
       include: {
@@ -74,9 +76,9 @@ export class TodoListsService {
     return list;
   }
 
-  async update(id: number, updateToDoListDto: UpdateToDoListDto) {
-    const list = await this.findOne(id);
-    
+  async update(id: number, updateToDoListDto: UpdateToDoListDto, ownerId: number) {
+    const list = await this.findOne(id, ownerId);
+
     return this.prisma.toDoList.update({
       where: { id },
       data: {
@@ -86,9 +88,9 @@ export class TodoListsService {
     });
   }
 
-  async remove(id: number) {
-    await this.findOne(id);
-    
+  async remove(id: number, ownerId: number) {
+    await this.findOne(id, ownerId);
+
     return this.prisma.toDoList.update({
       where: { id },
       data: {
@@ -97,12 +99,13 @@ export class TodoListsService {
     });
   }
 
-  async getDefaultLists() {
+  async getDefaultLists(ownerId: number) {
     return this.prisma.toDoList.findMany({
       where: {
         type: {
           in: [ListType.DAILY, ListType.WEEKLY, ListType.MONTHLY, ListType.YEARLY],
         },
+        ownerId,
         deletedAt: null,
       },
       include: {

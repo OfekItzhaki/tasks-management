@@ -48,6 +48,7 @@ Create a `.env` file in the `todo-backend` directory:
 ```env
 DATABASE_URL="postgresql://username:password@localhost:5432/todo_db?schema=public"
 PORT=3000
+JWT_SECRET="change-me"
 ```
 
 3. **Run database migrations:**
@@ -81,12 +82,17 @@ The API will be available at `http://localhost:3000` (or the port specified in y
 
 ## API Endpoints
 
+### Auth
+- `POST /auth/login` - Exchange email/password for a JWT access token.
+
+All other endpoints (except `POST /users`) require an `Authorization: Bearer <token>` header. Create a user first, then log in to obtain a token.
+
 ### Users
-- `GET /users` - Get all users
-- `GET /users/:id` - Get user by ID
-- `POST /users` - Create a new user
-- `PATCH /users/:id` - Update user
-- `DELETE /users/:id` - Delete user (soft delete)
+- `GET /users` - Get the authenticated user (array with a single entry)
+- `GET /users/:id` - Get the authenticated user by ID
+- `POST /users` - Create a new user (registration)
+- `PATCH /users/:id` - Update authenticated user
+- `DELETE /users/:id` - Soft delete authenticated user
 
 ### To-Do Lists
 - `GET /todo-lists` - Get all lists

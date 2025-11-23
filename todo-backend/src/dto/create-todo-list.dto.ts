@@ -16,8 +16,7 @@ export class CreateToDoListDto {
   @IsOptional()
   type?: ListType;
 
-  @IsOptional()
-  ownerId?: number;
 }
+
 
 

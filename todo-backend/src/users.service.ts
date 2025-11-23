@@ -1,39 +1,41 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from './prisma.service';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 class UsersService {
     constructor(private prisma: PrismaService) {}
 
-    async getAllUsers() {
-        const users = await this.prisma.user.findMany({
-            where: {
-                deletedAt: null,
-            },
-            include: {
-                lists: {
-                    where: {
-                        deletedAt: null,
-                    },
-                },
-                shares: {
-                    include: {
-                        toDoList: true,
-                    },
-                },
-            },
-        });
-
-        // Filter out shares with deleted toDoList
-        return users.map(user => ({
-            ...user,
-            shares: user.shares.filter(share => share.toDoList && share.toDoList.deletedAt === null),
-        }));
+    private sanitizeUser(user: any) {
+        if (!user) {
+            return null;
+        }
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { passwordHash, ...rest } = user;
+        return rest;
     }
 
-    async getUser(id: number) {
+    async findByEmail(email: string) {
+        return this.prisma.user.findFirst({
+            where: {
+                email,
+                deletedAt: null,
+            },
+        });
+    }
+
+    async getAllUsers(requestingUserId: number) {
+        const user = await this.getUser(requestingUserId, requestingUserId);
+        return [user];
+    }
+
+    async getUser(id: number, requestingUserId: number) {
+        if (id !== requestingUserId) {
+            throw new ForbiddenException('You can only access your own profile');
+        }
+
         const user = await this.prisma.user.findFirst({
             where: {
                 id,
@@ -73,7 +75,7 @@ class UsersService {
         }
 
         // Filter out shares with deleted toDoList and their deleted tasks
-        return {
+        const sanitized = {
             ...user,
             shares: user.shares
                 .filter(share => share.toDoList && share.toDoList.deletedAt === null)
@@ -85,41 +87,49 @@ class UsersService {
                     },
                 })),
         };
+
+        return this.sanitizeUser(sanitized);
     }
 
     async createUser(data: CreateUserDto) {
+        const passwordHash = await bcrypt.hash(data.password, 10);
+
         return this.prisma.user.create({
             data: {
                 email: data.email,
                 name: data.name,
                 profilePicture: data.profilePicture,
+                passwordHash,
             },
-        });
+        }).then((user) => this.sanitizeUser(user));
     }
 
-    async updateUser(id: number, data: UpdateUserDto) {
-        await this.getUser(id); // This will throw if user doesn't exist
+    async updateUser(id: number, data: UpdateUserDto, requestingUserId: number) {
+        await this.getUser(id, requestingUserId); // This will throw if user doesn't exist or unauthorized
 
         const updateData: any = {};
         if (data.email !== undefined) updateData.email = data.email;
         if (data.name !== undefined) updateData.name = data.name;
         if (data.profilePicture !== undefined) updateData.profilePicture = data.profilePicture;
+        if (data.password !== undefined) {
+            updateData.passwordHash = await bcrypt.hash(data.password, 10);
+        }
 
         return this.prisma.user.update({
             where: { id },
             data: updateData,
-        });
+        }).then((user) => this.sanitizeUser(user));
     }
 
-    async deleteUser(id: number) {
-        await this.getUser(id); // This will throw if user doesn't exist
+    async deleteUser(id: number, requestingUserId: number) {
+        await this.getUser(id, requestingUserId); // This will throw if user doesn't exist
 
         return this.prisma.user.update({
             where: { id },
             data: {
                 deletedAt: new Date(),
             },
-        });
+        }).then((user) => this.sanitizeUser(user));
     }
 }
 export default UsersService;
