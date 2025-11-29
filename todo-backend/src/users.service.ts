@@ -1,8 +1,9 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from './prisma.service';
 import * as bcrypt from 'bcrypt';
+import * as crypto from 'crypto';
 
 @Injectable()
 class UsersService {
@@ -13,7 +14,7 @@ class UsersService {
             return null;
         }
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { passwordHash, ...rest } = user;
+        const { passwordHash, emailVerificationToken, ...rest } = user;
         return rest;
     }
 
@@ -93,6 +94,7 @@ class UsersService {
 
     async createUser(data: CreateUserDto) {
         const passwordHash = await bcrypt.hash(data.password, 10);
+        const emailVerificationToken = crypto.randomBytes(32).toString('hex');
 
         return this.prisma.user.create({
             data: {
@@ -100,8 +102,57 @@ class UsersService {
                 name: data.name,
                 profilePicture: data.profilePicture,
                 passwordHash,
+                emailVerificationToken,
+                emailVerificationSentAt: new Date(),
             },
         }).then((user) => this.sanitizeUser(user));
+    }
+
+    async verifyEmail(token: string) {
+        const user = await this.prisma.user.findFirst({
+            where: {
+                emailVerificationToken: token,
+                deletedAt: null,
+            },
+        });
+
+        if (!user) {
+            throw new BadRequestException('Invalid or expired verification token');
+        }
+
+        if (user.emailVerified) {
+            throw new BadRequestException('Email is already verified');
+        }
+
+        return this.prisma.user.update({
+            where: { id: user.id },
+            data: {
+                emailVerified: true,
+                emailVerificationToken: null,
+            },
+        }).then((updatedUser) => this.sanitizeUser(updatedUser));
+    }
+
+    async resendVerificationEmail(email: string) {
+        const user = await this.findByEmail(email);
+        
+        if (!user) {
+            throw new NotFoundException('User not found');
+        }
+
+        if (user.emailVerified) {
+            throw new BadRequestException('Email is already verified');
+        }
+
+        const emailVerificationToken = crypto.randomBytes(32).toString('hex');
+
+        return this.prisma.user.update({
+            where: { id: user.id },
+            data: {
+                emailVerificationToken,
+                emailVerificationSentAt: new Date(),
+            },
+        }).then((updatedUser) => this.sanitizeUser(updatedUser));
     }
 
     async updateUser(id: number, data: UpdateUserDto, requestingUserId: number) {
