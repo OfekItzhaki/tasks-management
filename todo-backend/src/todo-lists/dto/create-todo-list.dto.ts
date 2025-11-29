@@ -15,8 +15,4 @@ export class CreateToDoListDto {
   @IsEnum(ListType)
   @IsOptional()
   type?: ListType;
-
 }
-
-
-

@@ -14,7 +14,10 @@ import { UpdateStepDto } from './dto/update-step.dto';
 import { ReorderStepsDto } from './dto/reorder-steps.dto';
 import { StepsService } from './steps.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { CurrentUser, CurrentUserPayload } from '../auth/current-user.decorator';
+import {
+  CurrentUser,
+  CurrentUserPayload,
+} from '../auth/current-user.decorator';
 
 @UseGuards(JwtAuthGuard)
 @Controller()
@@ -64,4 +67,3 @@ export class StepsController {
     return this.stepsService.reorder(taskId, user.userId, stepIds);
   }
 }
-

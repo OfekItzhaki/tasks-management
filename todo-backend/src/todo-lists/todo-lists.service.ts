@@ -76,7 +76,11 @@ export class TodoListsService {
     return list;
   }
 
-  async update(id: number, updateToDoListDto: UpdateToDoListDto, ownerId: number) {
+  async update(
+    id: number,
+    updateToDoListDto: UpdateToDoListDto,
+    ownerId: number,
+  ) {
     const list = await this.findOne(id, ownerId);
 
     return this.prisma.toDoList.update({
@@ -103,7 +107,12 @@ export class TodoListsService {
     return this.prisma.toDoList.findMany({
       where: {
         type: {
-          in: [ListType.DAILY, ListType.WEEKLY, ListType.MONTHLY, ListType.YEARLY],
+          in: [
+            ListType.DAILY,
+            ListType.WEEKLY,
+            ListType.MONTHLY,
+            ListType.YEARLY,
+          ],
         },
         ownerId,
         deletedAt: null,
@@ -124,4 +133,3 @@ export class TodoListsService {
     });
   }
 }
-

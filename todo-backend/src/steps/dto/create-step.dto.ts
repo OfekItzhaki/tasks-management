@@ -8,4 +8,3 @@ export class CreateStepDto {
   @IsBoolean()
   completed?: boolean;
 }
-

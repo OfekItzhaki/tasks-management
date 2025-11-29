@@ -134,13 +134,17 @@ export class StepsService {
     });
 
     if (existingSteps.length !== stepIds.length) {
-      throw new BadRequestException('All steps must be included when reordering');
+      throw new BadRequestException(
+        'All steps must be included when reordering',
+      );
     }
 
     const validStepIds = new Set(existingSteps.map((step) => step.id));
     stepIds.forEach((id) => {
       if (!validStepIds.has(id)) {
-        throw new BadRequestException(`Step ID ${id} does not belong to task ${taskId}`);
+        throw new BadRequestException(
+          `Step ID ${id} does not belong to task ${taskId}`,
+        );
       }
     });
 
@@ -155,4 +159,3 @@ export class StepsService {
     return this.findAll(taskId, ownerId);
   }
 }
-
