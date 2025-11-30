@@ -1,5 +1,9 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
-import { PrismaService } from './prisma.service';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
 import { ShareListDto } from './dto/share-list.dto';
 
 @Injectable()
@@ -22,7 +26,11 @@ export class ListSharesService {
     return list;
   }
 
-  async shareList(todoListId: number, shareListDto: ShareListDto, ownerId: number) {
+  async shareList(
+    todoListId: number,
+    shareListDto: ShareListDto,
+    ownerId: number,
+  ) {
     // Verify list exists and user owns it
     await this.ensureOwnedList(todoListId, ownerId);
 
@@ -35,7 +43,9 @@ export class ListSharesService {
     });
 
     if (!user) {
-      throw new NotFoundException(`User with ID ${shareListDto.sharedWithId} not found`);
+      throw new NotFoundException(
+        `User with ID ${shareListDto.sharedWithId} not found`,
+      );
     }
 
     // Check if already shared
@@ -152,4 +162,3 @@ export class ListSharesService {
     });
   }
 }
-

@@ -7,6 +7,3 @@ export class GetTasksByDateDto {
   @Type(() => Date)
   date?: Date;
 }
-
-
-
