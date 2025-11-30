@@ -1,4 +1,12 @@
-import { IsBoolean, IsDate, IsInt, IsOptional, IsString, Min, Max } from 'class-validator';
+import {
+  IsBoolean,
+  IsDate,
+  IsInt,
+  IsOptional,
+  IsString,
+  Min,
+  Max,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class CreateTaskDto {
@@ -25,6 +33,3 @@ export class CreateTaskDto {
   @IsBoolean()
   completed?: boolean;
 }
-
-
-

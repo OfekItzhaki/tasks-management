@@ -111,6 +111,13 @@ All other endpoints (except `POST /users`) require an `Authorization: Bearer <to
 - `PATCH /tasks/:id` - Update task
 - `DELETE /tasks/:id` - Delete task (soft delete)
 
+### Steps (sub-tasks)
+- `GET /tasks/:taskId/steps` - Get steps for a task (ordered)
+- `POST /tasks/:taskId/steps` - Create a new step (appends to the end)
+- `PATCH /steps/:id` - Update step description/completion
+- `DELETE /steps/:id` - Soft delete a step
+- `PATCH /tasks/:taskId/steps/reorder` - Reorder steps for drag-and-drop (body: `{ "stepIds": [/* desired order */] }`)
+
 ### List Sharing
 - `POST /list-shares/todo-list/:todoListId` - Share a list with a user
 - `GET /list-shares/user/:userId` - Get all lists shared with a user

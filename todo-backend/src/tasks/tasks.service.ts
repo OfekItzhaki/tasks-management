@@ -1,8 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from './prisma.service';
+import { PrismaService } from '../prisma/prisma.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
-import { ListType } from './dto/create-todo-list.dto';
+import { ListType } from '../todo-lists/dto/create-todo-list.dto';
 
 @Injectable()
 export class TasksService {
@@ -48,7 +48,11 @@ export class TasksService {
     return task;
   }
 
-  async create(todoListId: number, createTaskDto: CreateTaskDto, ownerId: number) {
+  async create(
+    todoListId: number,
+    createTaskDto: CreateTaskDto,
+    ownerId: number,
+  ) {
     await this.ensureListAccess(todoListId, ownerId);
 
     return this.prisma.task.create({
@@ -258,7 +262,8 @@ export class TasksService {
         taskDueDate.setHours(0, 0, 0, 0);
       } else if (task.specificDayOfWeek !== null) {
         // Find next occurrence of this day of week
-        const daysUntil = (task.specificDayOfWeek - targetDate.getDay() + 7) % 7;
+        const daysUntil =
+          (task.specificDayOfWeek - targetDate.getDay() + 7) % 7;
         taskDueDate = new Date(targetDate);
         taskDueDate.setDate(taskDueDate.getDate() + (daysUntil || 7));
         taskDueDate.setHours(0, 0, 0, 0);
@@ -275,7 +280,11 @@ export class TasksService {
             break;
           case ListType.MONTHLY:
             // First day of next month
-            taskDueDate = new Date(targetDate.getFullYear(), targetDate.getMonth() + 1, 1);
+            taskDueDate = new Date(
+              targetDate.getFullYear(),
+              targetDate.getMonth() + 1,
+              1,
+            );
             taskDueDate.setHours(0, 0, 0, 0);
             break;
           case ListType.YEARLY:
@@ -303,4 +312,3 @@ export class TasksService {
     return tasksWithReminders;
   }
 }
-

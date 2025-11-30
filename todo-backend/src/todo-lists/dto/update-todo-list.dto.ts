@@ -10,6 +10,3 @@ export class UpdateToDoListDto {
   @IsOptional()
   type?: ListType;
 }
-
-
-

@@ -11,8 +11,11 @@ import {
 } from '@nestjs/common';
 import { ListSharesService } from './list-shares.service';
 import { ShareListDto } from './dto/share-list.dto';
-import { JwtAuthGuard } from './auth/jwt-auth.guard';
-import { CurrentUser, CurrentUserPayload } from './auth/current-user.decorator';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import {
+  CurrentUser,
+  CurrentUserPayload,
+} from '../auth/current-user.decorator';
 
 @UseGuards(JwtAuthGuard)
 @Controller('list-shares')
@@ -25,7 +28,11 @@ export class ListSharesController {
     @Body() shareListDto: ShareListDto,
     @CurrentUser() user: CurrentUserPayload,
   ) {
-    return this.listSharesService.shareList(todoListId, shareListDto, user.userId);
+    return this.listSharesService.shareList(
+      todoListId,
+      shareListDto,
+      user.userId,
+    );
   }
 
   @Get('user/:userId')
@@ -56,6 +63,3 @@ export class ListSharesController {
     return this.listSharesService.unshareList(todoListId, userId, user.userId);
   }
 }
-
-
-

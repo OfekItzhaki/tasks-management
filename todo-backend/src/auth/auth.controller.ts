@@ -2,7 +2,7 @@ import { Body, Controller, Post, Param } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { ResendVerificationDto } from './dto/resend-verification.dto';
-import UsersService from '../users.service';
+import UsersService from '../users/users.service';
 
 @Controller('auth')
 export class AuthController {
@@ -26,4 +26,3 @@ export class AuthController {
     return this.usersService.resendVerificationEmail(resendVerificationDto.email);
   }
 }
-
