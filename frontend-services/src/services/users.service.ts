@@ -11,9 +11,15 @@ export class UsersService {
 
   /**
    * Get current authenticated user
+   * Note: Backend returns an array, but we extract the first element
+   * as this endpoint always returns a single user
    */
-  async getCurrent(): Promise<User[]> {
-    return apiClient.get<User[]>('/users');
+  async getCurrent(): Promise<User> {
+    const users = await apiClient.get<User[]>('/users');
+    if (!users || users.length === 0) {
+      throw new Error('No authenticated user found');
+    }
+    return users[0];
   }
 
   /**

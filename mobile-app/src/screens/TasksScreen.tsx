@@ -19,6 +19,7 @@ import { RootStackParamList } from '../navigation/AppNavigator';
 import { tasksService } from '../services/tasks.service';
 import { Task, CreateTaskDto, ReminderConfig, ReminderTimeframe, ReminderSpecificDate } from '../types';
 import ReminderConfigComponent from '../components/ReminderConfig';
+import DatePicker from '../components/DatePicker';
 
 type TasksScreenRouteProp = RouteProp<RootStackParamList, 'Tasks'>;
 
@@ -38,10 +39,14 @@ export default function TasksScreen() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [sortBy, setSortBy] = useState<'default' | 'dueDate' | 'completed' | 'alphabetical'>('default');
   const [showSortMenu, setShowSortMenu] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showSearch, setShowSearch] = useState(false);
 
   useEffect(() => {
     loadTasks();
   }, [listId]);
+
+  const [allTasks, setAllTasks] = useState<Task[]>([]);
 
   const loadTasks = async () => {
     try {
@@ -51,14 +56,23 @@ export default function TasksScreen() {
         ...task,
         completed: Boolean(task.completed),
       }));
-      setTasks(normalizedTasks);
-      applySorting(normalizedTasks);
+      setAllTasks(normalizedTasks);
     } catch (error: any) {
       Alert.alert('Error', error.message || 'Failed to load tasks');
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
+  };
+
+  const applyFilter = (tasksToFilter: Task[]): Task[] => {
+    if (!searchQuery.trim()) {
+      return tasksToFilter;
+    }
+    const query = searchQuery.toLowerCase().trim();
+    return tasksToFilter.filter((task) =>
+      task.description.toLowerCase().includes(query)
+    );
   };
 
   const applySorting = (tasksToSort: Task[]) => {
@@ -91,11 +105,14 @@ export default function TasksScreen() {
   };
 
   useEffect(() => {
-    if (tasks.length > 0) {
-      applySorting(tasks);
-    }
+    loadTasks();
+  }, [listId]);
+
+  useEffect(() => {
+    const filtered = applyFilter(allTasks);
+    applySorting(filtered);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sortBy]);
+  }, [searchQuery, sortBy, allTasks]);
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -269,8 +286,25 @@ export default function TasksScreen() {
       <View style={styles.header}>
         <View style={styles.headerTop}>
           <Text style={styles.title}>{listName}</Text>
-          <Text style={styles.taskCount}>{tasks.length} task{tasks.length !== 1 ? 's' : ''}</Text>
+          <View style={styles.headerActions}>
+            <TouchableOpacity
+              style={styles.searchButton}
+              onPress={() => setShowSearch(!showSearch)}
+            >
+              <Text style={styles.searchButtonText}>🔍</Text>
+            </TouchableOpacity>
+            <Text style={styles.taskCount}>{tasks.length} task{tasks.length !== 1 ? 's' : ''}</Text>
+          </View>
         </View>
+        {showSearch && (
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search tasks..."
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            autoFocus
+          />
+        )}
         <TouchableOpacity
           style={styles.sortButton}
           onPress={() => setShowSortMenu(true)}
@@ -381,12 +415,10 @@ export default function TasksScreen() {
                 autoFocus
               />
 
-              <TextInput
-                style={styles.input}
-                placeholder="Due date (YYYY-MM-DD) - Optional"
+              <DatePicker
                 value={newTaskDueDate}
-                onChangeText={setNewTaskDueDate}
-                keyboardType="default"
+                onChange={setNewTaskDueDate}
+                placeholder="Due date (Optional)"
               />
 
               <ReminderConfigComponent
@@ -503,9 +535,29 @@ const styles = StyleSheet.create({
     color: '#333',
     flex: 1,
   },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  searchButton: {
+    padding: 8,
+  },
+  searchButtonText: {
+    fontSize: 20,
+  },
   taskCount: {
     fontSize: 14,
     color: '#666',
+  },
+  searchInput: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 16,
+    backgroundColor: '#f9f9f9',
+    marginBottom: 10,
   },
   sortButton: {
     paddingVertical: 8,

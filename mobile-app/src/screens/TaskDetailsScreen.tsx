@@ -18,6 +18,7 @@ import { tasksService } from '../services/tasks.service';
 import { stepsService } from '../services/steps.service';
 import { Task, Step, UpdateTaskDto, CreateStepDto, ReminderConfig } from '../types';
 import ReminderConfigComponent from '../components/ReminderConfig';
+import DatePicker from '../components/DatePicker';
 
 type TaskDetailsRouteProp = RouteProp<RootStackParamList, 'TaskDetails'>;
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -252,21 +253,22 @@ export default function TaskDetailsScreen() {
 
         {/* Task Info */}
         <View style={styles.section}>
-          {task.dueDate && (
-            <View style={styles.infoRow}>
+              <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Due Date:</Text>
               {isEditing ? (
-                <TextInput
-                  style={styles.dateInput}
-                  placeholder="YYYY-MM-DD"
-                  value={editDueDate}
-                  onChangeText={setEditDueDate}
-                />
+                <View style={styles.datePickerContainer}>
+                  <DatePicker
+                    value={editDueDate}
+                    onChange={setEditDueDate}
+                    placeholder="No due date"
+                  />
+                </View>
               ) : (
-                <Text style={styles.infoValue}>{formatDate(task.dueDate)}</Text>
+                <Text style={styles.infoValue}>
+                  {task.dueDate ? formatDate(task.dueDate) : 'No due date'}
+                </Text>
               )}
             </View>
-          )}
 
           {task.reminderDaysBefore && task.reminderDaysBefore.length > 0 && (
             <View style={styles.infoRow}>
@@ -538,13 +540,8 @@ const styles = StyleSheet.create({
     color: '#333',
     flex: 1,
   },
-  dateInput: {
+  datePickerContainer: {
     flex: 1,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 8,
-    fontSize: 14,
   },
   stepItem: {
     flexDirection: 'row',
