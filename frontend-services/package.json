@@ -1,0 +1,20 @@
+{
+  "name": "@tasks-management/frontend-services",
+  "version": "1.0.0",
+  "description": "Front-end services for Tasks Management API",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch"
+  },
+  "keywords": ["tasks", "todo", "api", "client"],
+  "author": "",
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "@types/node": "^22.19.0",
+    "typescript": "^5.7.2"
+  }
+}
+
+
