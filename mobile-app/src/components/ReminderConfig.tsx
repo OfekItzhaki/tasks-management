@@ -253,8 +253,13 @@ function ReminderEditor({
       timeToUse = '09:00';
     }
     
+    // Validate EVERY_WEEK reminders have dayOfWeek set
+    if (config.timeframe === ReminderTimeframe.EVERY_WEEK && config.dayOfWeek === undefined) {
+      // Default to Monday (1) if not set
+      config.dayOfWeek = 1;
+    }
+    
     // For SPECIFIC_DATE with CUSTOM_DATE, customDate is optional (user might use daysBefore instead)
-    // For EVERY_WEEK, dayOfWeek should be set, but we'll allow undefined for now
     // For SPECIFIC_DATE with other options (START_OF_WEEK, etc.), no customDate needed
     
     onSave({

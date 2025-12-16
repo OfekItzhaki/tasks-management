@@ -156,25 +156,44 @@ export default function TaskDetailsScreen() {
       // They're handled client-side via notifications only
       // Skip EVERY_DAY reminders for backend storage
       if (reminder.timeframe === ReminderTimeframe.EVERY_DAY) {
+        console.log(`Skipping EVERY_DAY reminder: ${reminder.id}`);
         return; // Skip - handled by notification system only
       }
       
       // For reminders with daysBefore (relative to due date) - this is the primary use case
+      // This handles ALL reminder types that have daysBefore set (SPECIFIC_DATE, etc.)
+      // Only save if we have a due date (either existing or being set in this update)
       if (reminder.daysBefore !== undefined && reminder.daysBefore > 0) {
         if (dueDate) {
           daysBefore.push(reminder.daysBefore);
+          console.log(`Added daysBefore reminder: ${reminder.daysBefore} days (ID: ${reminder.id}, timeframe: ${reminder.timeframe})`);
+        } else {
+          console.log(`Skipping daysBefore reminder ${reminder.id}: no due date (daysBefore: ${reminder.daysBefore})`);
         }
-        // Note: daysBefore reminders require a due date, but we still want to save them
-        // if a due date is provided in the same request
+      } else {
+        console.log(`Reminder ${reminder.id} has no daysBefore (timeframe: ${reminder.timeframe}, daysBefore: ${reminder.daysBefore})`);
       }
 
-      // For weekly reminders
-      if (reminder.timeframe === ReminderTimeframe.EVERY_WEEK && reminder.dayOfWeek !== undefined) {
-        dayOfWeek = reminder.dayOfWeek;
+      // For weekly reminders (only one can be saved due to backend limitation)
+      if (reminder.timeframe === ReminderTimeframe.EVERY_WEEK) {
+        if (reminder.dayOfWeek !== undefined && reminder.dayOfWeek >= 0 && reminder.dayOfWeek <= 6) {
+          // If multiple weekly reminders exist, the last one will overwrite (backend limitation)
+          dayOfWeek = reminder.dayOfWeek;
+          console.log(`Set weekly reminder: day ${reminder.dayOfWeek} (reminder ID: ${reminder.id})`);
+        } else {
+          console.log(`WARNING: EVERY_WEEK reminder ${reminder.id} has invalid dayOfWeek: ${reminder.dayOfWeek}`);
+        }
       }
 
-      // For specific date reminders that are relative to due date
-      if (reminder.timeframe === ReminderTimeframe.SPECIFIC_DATE && dueDate && reminder.customDate) {
+      // For SPECIFIC_DATE reminders with customDate (not daysBefore) that are relative to due date
+      // Convert the custom date to daysBefore if it's before the due date
+      // NOTE: This should only run if daysBefore is NOT already set (to avoid double-counting)
+      if (
+        reminder.timeframe === ReminderTimeframe.SPECIFIC_DATE && 
+        dueDate && 
+        reminder.customDate &&
+        (reminder.daysBefore === undefined || reminder.daysBefore === 0) // Only process if daysBefore wasn't already set
+      ) {
         const reminderDate = new Date(reminder.customDate);
         const due = new Date(dueDate);
         const diffDays = Math.ceil((due.getTime() - reminderDate.getTime()) / (1000 * 60 * 60 * 24));
@@ -188,14 +207,22 @@ export default function TaskDetailsScreen() {
     if (daysBefore.length > 0) {
       // Remove duplicates and sort descending
       result.reminderDaysBefore = [...new Set(daysBefore)].sort((a, b) => b - a);
+      console.log(`Final reminderDaysBefore array: [${result.reminderDaysBefore.join(', ')}]`);
     } else {
       // Set empty array if no daysBefore reminders
       result.reminderDaysBefore = [];
+      console.log('No daysBefore reminders to save (empty array)');
     }
 
     // Set specificDayOfWeek (0-6 for weekly reminders only, backend doesn't support "every day")
+    // Always set it explicitly (even if null) so we can distinguish between "no weekly reminder" and "clear existing"
     if (dayOfWeek !== undefined && dayOfWeek >= 0 && dayOfWeek <= 6) {
       result.specificDayOfWeek = dayOfWeek;
+      console.log(`Final specificDayOfWeek: ${dayOfWeek}`);
+    } else {
+      // Explicitly set to undefined (will be converted to null in update)
+      result.specificDayOfWeek = undefined;
+      console.log('No weekly reminder to save (specificDayOfWeek will be null)');
     }
 
     return result;
@@ -215,19 +242,37 @@ export default function TaskDetailsScreen() {
       setEditDescription(taskData.description);
       setEditDueDate(taskData.dueDate ? taskData.dueDate.split('T')[0] : '');
       // Convert reminderDaysBefore to ReminderConfig format
-      const convertedReminders = convertBackendToReminders(
+      let convertedReminders = convertBackendToReminders(
         taskData.reminderDaysBefore,
         taskData.specificDayOfWeek,
         taskData.dueDate || undefined,
       );
+      
+      console.log('Loaded backend reminders:', {
+        reminderDaysBefore: taskData.reminderDaysBefore,
+        specificDayOfWeek: taskData.specificDayOfWeek,
+        convertedCount: convertedReminders.length,
+        converted: convertedReminders.map(r => ({
+          id: r.id,
+          timeframe: r.timeframe,
+          daysBefore: r.daysBefore,
+        })),
+      });
       
       // Load client-side stored "every day" reminders
       const everyDayReminders = await EveryDayRemindersStorage.getRemindersForTask(taskId);
       setDisplayEveryDayReminders(everyDayReminders || []);
       
       if (everyDayReminders && everyDayReminders.length > 0) {
-        convertedReminders.push(...everyDayReminders);
+        convertedReminders = [...convertedReminders, ...everyDayReminders];
+        console.log('Added EVERY_DAY reminders:', everyDayReminders.length);
       }
+      
+      console.log('Final editReminders after load:', convertedReminders.map(r => ({
+        id: r.id,
+        timeframe: r.timeframe,
+        daysBefore: r.daysBefore,
+      })));
       
       // Load alarm states for all reminders
       const alarmStates = await ReminderAlarmsStorage.getAlarmsForTask(taskId);
@@ -278,21 +323,43 @@ export default function TaskDetailsScreen() {
         updateData.dueDate = null;
       }
 
-      // Convert reminders to backend format
-      const reminderData = convertRemindersToBackend(editReminders, dueDateStr || undefined);
+      // Use existing task due date for reminder conversion if no new due date is being set
+      // This ensures reminders that reference due date are properly converted
+      const dueDateForConversion = dueDateStr || (task?.dueDate || undefined);
+
+      // Debug: Log reminders before conversion
+      console.log('Saving reminders:', {
+        editRemindersCount: editReminders.length,
+        editReminders: editReminders.map(r => ({
+          id: r.id,
+          timeframe: r.timeframe,
+          daysBefore: r.daysBefore,
+          dayOfWeek: r.dayOfWeek,
+          hasAlarm: r.hasAlarm,
+        })),
+        dueDateForConversion,
+      });
       
-      // Always set reminderDaysBefore - clear if no due date or no valid reminders
-      if (dueDateStr && reminderData.reminderDaysBefore && reminderData.reminderDaysBefore.length > 0) {
-        updateData.reminderDaysBefore = reminderData.reminderDaysBefore;
-      } else {
-        // Clear daysBefore reminders if no due date or no valid reminders
-        updateData.reminderDaysBefore = [];
-      }
+      // Convert reminders to backend format
+      const reminderData = convertRemindersToBackend(editReminders, dueDateForConversion);
+      
+      console.log('Converted reminder data:', reminderData);
+      
+      // Always set reminderDaysBefore based on conversion result
+      // convertRemindersToBackend returns empty array if no valid reminders or no due date
+      updateData.reminderDaysBefore = reminderData.reminderDaysBefore || [];
       
       // Always set specificDayOfWeek (weekly reminders don't require due date)
-      updateData.specificDayOfWeek = reminderData.specificDayOfWeek !== undefined 
-        ? reminderData.specificDayOfWeek 
-        : null;
+      // Only set to null if we explicitly want to clear it (when undefined means "don't change")
+      // But since we're always sending the full update, we should set it based on conversion result
+      if (reminderData.specificDayOfWeek !== undefined) {
+        updateData.specificDayOfWeek = reminderData.specificDayOfWeek;
+        console.log(`Setting specificDayOfWeek in update: ${reminderData.specificDayOfWeek}`);
+      } else {
+        // If no weekly reminder in conversion result, set to null to clear any existing one
+        updateData.specificDayOfWeek = null;
+        console.log('Setting specificDayOfWeek to null (no weekly reminder)');
+      }
 
       const updatedTask = await tasksService.update(taskId, updateData);
       
