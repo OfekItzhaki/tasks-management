@@ -7,7 +7,7 @@ export class TasksService {
    */
   async getAll(todoListId?: number): Promise<Task[]> {
     const path = todoListId
-      ? `/tasks?todoListId=${todoListId}`
+      ? `/tasks?todoListId=${todoListId}` // Numeric IDs are safe, no encoding needed
       : '/tasks';
     return apiClient.get<Task[]>(path);
   }
@@ -16,8 +16,11 @@ export class TasksService {
    * Get tasks for a specific date
    */
   async getByDate(date?: string): Promise<Task[]> {
-    const path = date ? `/tasks/by-date?date=${date}` : '/tasks/by-date';
-    return apiClient.get<Task[]>(path);
+    if (date) {
+      const encodedDate = encodeURIComponent(date);
+      return apiClient.get<Task[]>(`/tasks/by-date?date=${encodedDate}`);
+    }
+    return apiClient.get<Task[]>('/tasks/by-date');
   }
 
   /**
@@ -53,7 +56,7 @@ export class TasksService {
    */
   async getMyTasks(todoListId?: number): Promise<Task[]> {
     const path = todoListId
-      ? `/me/tasks?todoListId=${todoListId}`
+      ? `/me/tasks?todoListId=${todoListId}` // Numeric IDs are safe, no encoding needed
       : '/me/tasks';
     return apiClient.get<Task[]>(path);
   }

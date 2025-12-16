@@ -80,7 +80,9 @@ export class AuthService {
    */
   async verifyEmail(token: string): Promise<User> {
     try {
-      const response = await apiClient.post<User>(`/auth/verify-email/${token}`);
+      // Encode token in path segment to handle special characters
+      const encodedToken = encodeURIComponent(token);
+      const response = await apiClient.post<User>(`/auth/verify-email/${encodedToken}`);
       return response.data;
     } catch (error) {
       if (error instanceof ApiError) {

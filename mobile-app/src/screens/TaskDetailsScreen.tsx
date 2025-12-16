@@ -19,6 +19,8 @@ import { stepsService } from '../services/steps.service';
 import { Task, Step, UpdateTaskDto, CreateStepDto, ReminderConfig, ReminderTimeframe, ReminderSpecificDate } from '../types';
 import ReminderConfigComponent from '../components/ReminderConfig';
 import DatePicker from '../components/DatePicker';
+import { scheduleTaskReminders, cancelAllTaskNotifications } from '../services/notifications.service';
+import { EveryDayRemindersStorage, ReminderAlarmsStorage } from '../utils/storage';
 
 type TaskDetailsRouteProp = RouteProp<RootStackParamList, 'TaskDetails'>;
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -34,6 +36,8 @@ export default function TaskDetailsScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [displayEveryDayReminders, setDisplayEveryDayReminders] = useState<ReminderConfig[]>([]);
+  const [reminderAlarmStates, setReminderAlarmStates] = useState<Record<string, boolean>>({});
 
   // Edit form state
   const [editDescription, setEditDescription] = useState('');
@@ -114,8 +118,9 @@ export default function TaskDetailsScreen() {
     }
 
     // Convert specificDayOfWeek to ReminderConfig
-    // These don't require a due date, so always show them
-    if (specificDayOfWeek !== null && specificDayOfWeek !== undefined) {
+    // Note: Backend only supports 0-6 (weekly reminders), so "every day" reminders
+    // are handled client-side only via notifications
+    if (specificDayOfWeek !== null && specificDayOfWeek !== undefined && specificDayOfWeek >= 0 && specificDayOfWeek <= 6) {
       reminders.push({
         id: `day-of-week-${specificDayOfWeek}`,
         timeframe: ReminderTimeframe.EVERY_WEEK,
@@ -123,6 +128,9 @@ export default function TaskDetailsScreen() {
         dayOfWeek: specificDayOfWeek,
       });
     }
+    
+    // Note: EVERY_DAY reminders are stored client-side only (not in backend)
+    // They're handled via the notification system but won't persist in task details
 
     return reminders;
   };
@@ -138,27 +146,24 @@ export default function TaskDetailsScreen() {
       result.dueDate = new Date(dueDate).toISOString();
     }
 
-    // Process reminders
     const daysBefore: number[] = [];
     let dayOfWeek: number | undefined;
 
     reminders.forEach((reminder) => {
-      // For reminders with daysBefore (relative to due date) - this is the primary use case
-      if (reminder.daysBefore !== undefined && reminder.daysBefore > 0 && dueDate) {
-        daysBefore.push(reminder.daysBefore);
-      }
-
-      // For daily reminders - set to today's day of week (will remind on that day each week)
-      // Note: For true daily reminders, consider using a DAILY list type
+      // Note: EVERY_DAY reminders are NOT saved to backend (backend only supports 0-6 for weekly)
+      // They're handled client-side via notifications only
+      // Skip EVERY_DAY reminders for backend storage
       if (reminder.timeframe === ReminderTimeframe.EVERY_DAY) {
-        // Use current day of week (0 = Sunday, 1 = Monday, etc.)
-        // This will remind on this day each week
-        const today = new Date().getDay();
-        dayOfWeek = today;
-        // Also set reminderDaysBefore to [0] if there's a due date, to remind on the due date itself
+        return; // Skip - handled by notification system only
+      }
+      
+      // For reminders with daysBefore (relative to due date) - this is the primary use case
+      if (reminder.daysBefore !== undefined && reminder.daysBefore > 0) {
         if (dueDate) {
-          daysBefore.push(0);
+          daysBefore.push(reminder.daysBefore);
         }
+        // Note: daysBefore reminders require a due date, but we still want to save them
+        // if a due date is provided in the same request
       }
 
       // For weekly reminders
@@ -177,12 +182,17 @@ export default function TaskDetailsScreen() {
       }
     });
 
+    // Always set reminderDaysBefore if we have valid daysBefore values
     if (daysBefore.length > 0) {
       // Remove duplicates and sort descending
       result.reminderDaysBefore = [...new Set(daysBefore)].sort((a, b) => b - a);
+    } else {
+      // Set empty array if no daysBefore reminders
+      result.reminderDaysBefore = [];
     }
 
-    if (dayOfWeek !== undefined) {
+    // Set specificDayOfWeek (0-6 for weekly reminders only, backend doesn't support "every day")
+    if (dayOfWeek !== undefined && dayOfWeek >= 0 && dayOfWeek <= 6) {
       result.specificDayOfWeek = dayOfWeek;
     }
 
@@ -208,9 +218,30 @@ export default function TaskDetailsScreen() {
         taskData.specificDayOfWeek,
         taskData.dueDate || undefined,
       );
+      
+      // Load client-side stored "every day" reminders
+      const everyDayReminders = await EveryDayRemindersStorage.getRemindersForTask(taskId);
+      setDisplayEveryDayReminders(everyDayReminders || []);
+      
+      if (everyDayReminders && everyDayReminders.length > 0) {
+        convertedReminders.push(...everyDayReminders);
+      }
+      
+      // Load alarm states for all reminders
+      const alarmStates = await ReminderAlarmsStorage.getAlarmsForTask(taskId);
+      setReminderAlarmStates(alarmStates || {});
+      
+      if (alarmStates) {
+        convertedReminders = convertedReminders.map(r => ({
+          ...r,
+          hasAlarm: alarmStates[r.id] !== undefined ? alarmStates[r.id] : r.hasAlarm,
+        }));
+      }
+      
       setEditReminders(convertedReminders);
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Failed to load task');
+      const errorMessage = error?.response?.data?.message || error?.message || 'Unable to load task. Please try again.';
+      Alert.alert('Error Loading Task', errorMessage);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -224,7 +255,7 @@ export default function TaskDetailsScreen() {
 
   const handleSaveEdit = async () => {
     if (!editDescription.trim()) {
-      Alert.alert('Error', 'Task description cannot be empty');
+      Alert.alert('Validation Error', 'Please enter a task description before saving.');
       return;
     }
 
@@ -246,33 +277,54 @@ export default function TaskDetailsScreen() {
       }
 
       // Convert reminders to backend format
-      if (editReminders.length > 0) {
-        const reminderData = convertRemindersToBackend(editReminders, dueDateStr);
-        // Always set reminderDaysBefore - empty array if no valid reminders or no due date
-        updateData.reminderDaysBefore = (reminderData.reminderDaysBefore && reminderData.reminderDaysBefore.length > 0) 
-          ? reminderData.reminderDaysBefore 
-          : [];
-        // Set specificDayOfWeek if provided, otherwise null
-        updateData.specificDayOfWeek = reminderData.specificDayOfWeek !== undefined 
-          ? reminderData.specificDayOfWeek 
-          : null;
+      const reminderData = convertRemindersToBackend(editReminders, dueDateStr || undefined);
+      
+      // Always set reminderDaysBefore - clear if no due date or no valid reminders
+      if (dueDateStr && reminderData.reminderDaysBefore && reminderData.reminderDaysBefore.length > 0) {
+        updateData.reminderDaysBefore = reminderData.reminderDaysBefore;
       } else {
-        // If no reminders, clear them explicitly
+        // Clear daysBefore reminders if no due date or no valid reminders
         updateData.reminderDaysBefore = [];
-        updateData.specificDayOfWeek = null;
       }
       
-      // Always clear reminders if there's no due date (reminderDaysBefore requires a due date)
-      if (!dueDateStr) {
-        updateData.reminderDaysBefore = [];
-      }
+      // Always set specificDayOfWeek (weekly reminders don't require due date)
+      updateData.specificDayOfWeek = reminderData.specificDayOfWeek !== undefined 
+        ? reminderData.specificDayOfWeek 
+        : null;
 
-      await tasksService.update(taskId, updateData);
+      const updatedTask = await tasksService.update(taskId, updateData);
+      
+      // Separate EVERY_DAY reminders (client-side storage) from others
+      const everyDayReminders = editReminders.filter(r => r.timeframe === ReminderTimeframe.EVERY_DAY);
+      const otherReminders = editReminders.filter(r => r.timeframe !== ReminderTimeframe.EVERY_DAY);
+      
+      // Store EVERY_DAY reminders client-side
+      if (everyDayReminders.length > 0) {
+        await EveryDayRemindersStorage.setRemindersForTask(taskId, everyDayReminders);
+      } else {
+        await EveryDayRemindersStorage.removeRemindersForTask(taskId);
+      }
+      
       setIsEditing(false);
+      
+      // Update scheduled notifications (include all reminders)
+      if (editReminders.length > 0) {
+        await scheduleTaskReminders(
+          taskId,
+          updatedTask.description,
+          editReminders,
+          dueDateStr || null,
+        );
+      } else {
+        // Cancel all notifications if no reminders
+        await cancelAllTaskNotifications(taskId);
+      }
+      
       loadTaskData();
-      Alert.alert('Success', 'Task updated successfully');
+      Alert.alert('Success', 'Task has been updated.');
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Failed to update task');
+      const errorMessage = error?.response?.data?.message || error?.message || 'Unable to update task. Please try again.';
+      Alert.alert('Update Failed', errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -300,13 +352,14 @@ export default function TaskDetailsScreen() {
       await tasksService.update(taskId, { completed: !task.completed });
       loadTaskData();
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Failed to update task');
+      const errorMessage = error?.response?.data?.message || error?.message || 'Unable to toggle task completion. Please try again.';
+      Alert.alert('Update Failed', errorMessage);
     }
   };
 
   const handleAddStep = async () => {
     if (!newStepDescription.trim()) {
-      Alert.alert('Error', 'Please enter a step description');
+      Alert.alert('Validation Error', 'Please enter a step description before adding.');
       return;
     }
 
@@ -316,7 +369,8 @@ export default function TaskDetailsScreen() {
       setShowAddStepModal(false);
       loadTaskData();
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Failed to add step');
+      const errorMessage = error?.response?.data?.message || error?.message || 'Unable to add step. Please try again.';
+      Alert.alert('Add Step Failed', errorMessage);
     }
   };
 
@@ -325,7 +379,60 @@ export default function TaskDetailsScreen() {
       await stepsService.update(step.id, { completed: !step.completed });
       loadTaskData();
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Failed to update step');
+      const errorMessage = error?.response?.data?.message || error?.message || 'Unable to update step. Please try again.';
+      Alert.alert('Update Failed', errorMessage);
+    }
+  };
+
+  const handleToggleReminderAlarm = async (reminderId: string) => {
+    if (!task) return;
+
+    try {
+      // Get current alarm state from storage
+      const currentAlarmState = reminderAlarmStates[reminderId] !== undefined 
+        ? reminderAlarmStates[reminderId] 
+        : false;
+      const newAlarmState = !currentAlarmState;
+
+      // Save new alarm state to storage
+      await ReminderAlarmsStorage.setAlarmForReminder(taskId, reminderId, newAlarmState);
+
+      // Update local state immediately for instant visual feedback
+      setReminderAlarmStates(prev => ({
+        ...prev,
+        [reminderId]: newAlarmState,
+      }));
+
+      // Get all reminders to update notifications
+      const backendReminders = convertBackendToReminders(
+        task.reminderDaysBefore,
+        task.specificDayOfWeek,
+        task.dueDate || undefined,
+      );
+      const everyDayReminders = await EveryDayRemindersStorage.getRemindersForTask(taskId) || [];
+      const allReminders = [...backendReminders, ...everyDayReminders];
+
+      // Apply updated alarm states to all reminders
+      const updatedAlarmStates = { ...reminderAlarmStates, [reminderId]: newAlarmState };
+      const updatedReminders = allReminders.map((r) => ({
+        ...r,
+        hasAlarm: updatedAlarmStates[r.id] !== undefined ? updatedAlarmStates[r.id] : false,
+      }));
+
+      // Reschedule notifications with updated alarm settings
+      await scheduleTaskReminders(
+        taskId,
+        task.description,
+        updatedReminders,
+        task.dueDate || null,
+      );
+      
+      // No need to reload - state is already updated for immediate visual feedback
+    } catch (error: any) {
+      const errorMessage = error?.response?.data?.message || error?.message || 'Unable to update reminder alarm. Please try again.';
+      Alert.alert('Update Failed', errorMessage);
+      // Reload to restore correct state on error
+      loadTaskData();
     }
   };
 
@@ -343,7 +450,8 @@ export default function TaskDetailsScreen() {
               await stepsService.delete(step.id);
               loadTaskData();
             } catch (error: any) {
-              Alert.alert('Error', error.message || 'Failed to delete step');
+              const errorMessage = error?.response?.data?.message || error?.message || 'Unable to delete step. Please try again.';
+              Alert.alert('Delete Failed', errorMessage);
             }
           },
         },
@@ -450,17 +558,47 @@ export default function TaskDetailsScreen() {
               task.specificDayOfWeek,
               task.dueDate || undefined,
             );
-            if (displayReminders.length > 0) {
+            
+            // Add client-side stored EVERY_DAY reminders for display
+            let allDisplayReminders = [...displayReminders, ...displayEveryDayReminders];
+            
+            // Apply alarm states from state
+            allDisplayReminders = allDisplayReminders.map(r => ({
+              ...r,
+              hasAlarm: reminderAlarmStates[r.id] !== undefined ? reminderAlarmStates[r.id] : (r.hasAlarm || false),
+            }));
+            
+            if (allDisplayReminders.length > 0) {
               return (
                 <View style={styles.infoRow}>
                   <Text style={styles.infoLabel}>Reminders:</Text>
                   <View style={styles.remindersList}>
-                    {displayReminders.map((reminder) => (
+                    {allDisplayReminders.map((reminder) => (
                       <View key={reminder.id} style={styles.reminderDisplayItem}>
                         <Text style={styles.reminderDisplayText}>
                           {formatReminderDisplay(reminder)}
-                          {reminder.hasAlarm && ' 🔔'}
                         </Text>
+                        <TouchableOpacity
+                          style={[
+                            styles.alarmToggleButton,
+                            reminder.hasAlarm && styles.alarmToggleButtonActive
+                          ]}
+                          onPress={() => handleToggleReminderAlarm(reminder.id)}
+                          activeOpacity={0.7}
+                        >
+                          <Text style={[
+                            styles.alarmToggleIcon,
+                            reminder.hasAlarm && styles.alarmToggleIconActive
+                          ]}>
+                            {reminder.hasAlarm ? '🔔' : '🔕'}
+                          </Text>
+                          <Text style={[
+                            styles.alarmToggleText,
+                            reminder.hasAlarm && styles.alarmToggleTextActive
+                          ]}>
+                            {reminder.hasAlarm ? 'ON' : 'OFF'}
+                          </Text>
+                        </TouchableOpacity>
                       </View>
                     ))}
                   </View>
@@ -863,12 +1001,51 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   reminderDisplayItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: 6,
   },
   reminderDisplayText: {
     fontSize: 14,
     color: '#333',
     lineHeight: 20,
+    flex: 1,
+  },
+  alarmToggleButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 8,
+    paddingHorizontal: 12,
+    marginLeft: 8,
+    borderRadius: 8,
+    backgroundColor: '#f5f5f5',
+    borderWidth: 2,
+    borderColor: '#ddd',
+    minWidth: 70,
+    justifyContent: 'center',
+  },
+  alarmToggleButtonActive: {
+    backgroundColor: '#e3f2fd',
+    borderColor: '#2196F3',
+    borderWidth: 2,
+  },
+  alarmToggleIcon: {
+    fontSize: 20,
+    marginRight: 6,
+  },
+  alarmToggleIconActive: {
+    fontSize: 20,
+  },
+  alarmToggleText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#999',
+    textTransform: 'uppercase',
+  },
+  alarmToggleTextActive: {
+    color: '#2196F3',
+    fontWeight: '700',
   },
 });
 

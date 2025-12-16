@@ -40,7 +40,9 @@ export class AuthService {
    * Verify email with token
    */
   async verifyEmail(token: string): Promise<User> {
-    return apiClient.post<User>(`/auth/verify-email/${token}`);
+    // Encode token in path segment to handle special characters
+    const encodedToken = encodeURIComponent(token);
+    return apiClient.post<User>(`/auth/verify-email/${encodedToken}`);
   }
 
   /**

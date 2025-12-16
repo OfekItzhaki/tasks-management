@@ -49,7 +49,8 @@ export default function ListsScreen() {
       const data = await listsService.getAll();
       setLists(data);
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Failed to load lists');
+      const errorMessage = error?.response?.data?.message || error?.message || 'Unable to load lists. Please try again.';
+      Alert.alert('Error Loading Lists', errorMessage);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -79,7 +80,7 @@ export default function ListsScreen() {
     if (!editingList) return;
 
     if (!editListName.trim()) {
-      Alert.alert('Error', 'Please enter a list name');
+      Alert.alert('Validation Error', 'Please enter a list name before saving.');
       return;
     }
 
@@ -109,7 +110,7 @@ export default function ListsScreen() {
     }
 
     if (!newListName.trim()) {
-      Alert.alert('Error', 'Please enter a list name');
+      Alert.alert('Validation Error', 'Please enter a list name before saving.');
       return;
     }
 
@@ -127,7 +128,8 @@ export default function ListsScreen() {
       loadLists();
       Alert.alert('Success', 'List created successfully');
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Failed to create list');
+      const errorMessage = error?.response?.data?.message || error?.message || 'Unable to create list. Please try again.';
+      Alert.alert('Create List Failed', errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -147,7 +149,8 @@ export default function ListsScreen() {
               await listsService.delete(list.id);
               loadLists();
             } catch (error: any) {
-              Alert.alert('Error', error.message || 'Failed to delete list');
+              const errorMessage = error?.response?.data?.message || error?.message || 'Unable to delete list. Please try again.';
+              Alert.alert('Delete Failed', errorMessage);
             }
           },
         },

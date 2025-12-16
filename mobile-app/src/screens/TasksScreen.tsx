@@ -20,6 +20,8 @@ import { tasksService } from '../services/tasks.service';
 import { Task, CreateTaskDto, ReminderConfig, ReminderTimeframe, ReminderSpecificDate } from '../types';
 import ReminderConfigComponent from '../components/ReminderConfig';
 import DatePicker from '../components/DatePicker';
+import { scheduleTaskReminders, cancelAllTaskNotifications } from '../services/notifications.service';
+import { EveryDayRemindersStorage } from '../utils/storage';
 
 type TasksScreenRouteProp = RouteProp<RootStackParamList, 'Tasks'>;
 
@@ -58,7 +60,8 @@ export default function TasksScreen() {
       }));
       setAllTasks(normalizedTasks);
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Failed to load tasks');
+      const errorMessage = error?.response?.data?.message || error?.message || 'Unable to load tasks. Please try again.';
+      Alert.alert('Error Loading Tasks', errorMessage);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -126,7 +129,8 @@ export default function TasksScreen() {
       await tasksService.update(task.id, { completed: !currentCompleted });
       loadTasks(); // Reload tasks
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Failed to update task');
+      const errorMessage = error?.response?.data?.message || error?.message || 'Unable to update task. Please try again.';
+      Alert.alert('Update Failed', errorMessage);
     }
   };
 
@@ -141,27 +145,24 @@ export default function TasksScreen() {
       result.dueDate = new Date(dueDate).toISOString();
     }
 
-    // Process reminders
     const daysBefore: number[] = [];
     let dayOfWeek: number | undefined;
 
     reminders.forEach((reminder) => {
-      // For reminders with daysBefore (relative to due date) - this is the primary use case
-      if (reminder.daysBefore !== undefined && reminder.daysBefore > 0 && dueDate) {
-        daysBefore.push(reminder.daysBefore);
-      }
-
-      // For daily reminders - set to today's day of week (will remind on that day each week)
-      // Note: For true daily reminders, consider using a DAILY list type
+      // Note: EVERY_DAY reminders are NOT saved to backend (backend only supports 0-6 for weekly)
+      // They're handled client-side via notifications only
+      // Skip EVERY_DAY reminders for backend storage
       if (reminder.timeframe === ReminderTimeframe.EVERY_DAY) {
-        // Use current day of week (0 = Sunday, 1 = Monday, etc.)
-        // This will remind on this day each week
-        const today = new Date().getDay();
-        dayOfWeek = today;
-        // Also set reminderDaysBefore to [0] if there's a due date, to remind on the due date itself
+        return; // Skip - handled by notification system only
+      }
+      
+      // For reminders with daysBefore (relative to due date) - this is the primary use case
+      if (reminder.daysBefore !== undefined && reminder.daysBefore > 0) {
         if (dueDate) {
-          daysBefore.push(0);
+          daysBefore.push(reminder.daysBefore);
         }
+        // Note: daysBefore reminders require a due date, but we still want to save them
+        // if a due date is provided in the same request
       }
 
       // For weekly reminders
@@ -180,12 +181,17 @@ export default function TasksScreen() {
       }
     });
 
+    // Always set reminderDaysBefore if we have valid daysBefore values
     if (daysBefore.length > 0) {
       // Remove duplicates and sort descending
       result.reminderDaysBefore = [...new Set(daysBefore)].sort((a, b) => b - a);
+    } else {
+      // Set empty array if no daysBefore reminders
+      result.reminderDaysBefore = [];
     }
 
-    if (dayOfWeek !== undefined) {
+    // Set specificDayOfWeek (0-6 for weekly reminders only, backend doesn't support "every day")
+    if (dayOfWeek !== undefined && dayOfWeek >= 0 && dayOfWeek <= 6) {
       result.specificDayOfWeek = dayOfWeek;
     }
 
@@ -194,7 +200,7 @@ export default function TasksScreen() {
 
   const handleAddTask = async () => {
     if (!newTaskDescription.trim()) {
-      Alert.alert('Error', 'Please enter a task description');
+      Alert.alert('Validation Error', 'Please enter a task description before adding.');
       return;
     }
 
@@ -218,28 +224,58 @@ export default function TasksScreen() {
       // Convert reminders to backend format
       if (taskReminders.length > 0) {
         const reminderData = convertRemindersToBackend(taskReminders, dueDateStr);
-        if (reminderData.reminderDaysBefore && reminderData.reminderDaysBefore.length > 0) {
+        // Always set reminderDaysBefore - use the converted value or empty array
+        // Only set it if we actually have reminders to process
+        if (reminderData.reminderDaysBefore !== undefined) {
           taskData.reminderDaysBefore = reminderData.reminderDaysBefore;
         } else {
+          // If no reminderDaysBefore in result, set empty array to clear any existing reminders
           taskData.reminderDaysBefore = [];
         }
+        // Set specificDayOfWeek if provided
         if (reminderData.specificDayOfWeek !== undefined) {
           taskData.specificDayOfWeek = reminderData.specificDayOfWeek;
+        } else {
+          // Clear specificDayOfWeek if not in result
+          taskData.specificDayOfWeek = null;
         }
       } else {
         // Explicitly set empty arrays to prevent backend defaults
         taskData.reminderDaysBefore = [];
+        taskData.specificDayOfWeek = null;
       }
 
-      await tasksService.create(listId, taskData);
+      const createdTask = await tasksService.create(listId, taskData);
+      
+      // Separate EVERY_DAY reminders (client-side storage) from others
+      const everyDayReminders = taskReminders.filter(r => r.timeframe === ReminderTimeframe.EVERY_DAY);
+      const otherReminders = taskReminders.filter(r => r.timeframe !== ReminderTimeframe.EVERY_DAY);
+      
+      // Store EVERY_DAY reminders client-side
+      if (everyDayReminders.length > 0) {
+        await EveryDayRemindersStorage.setRemindersForTask(createdTask.id, everyDayReminders);
+      }
+      
       setNewTaskDescription('');
       setNewTaskDueDate('');
       setTaskReminders([]);
       setShowAddModal(false);
+      
+      // Schedule notifications for reminders (include all reminders)
+      if (taskReminders.length > 0) {
+        await scheduleTaskReminders(
+          createdTask.id,
+          createdTask.description,
+          taskReminders,
+          dueDateStr || null,
+        );
+      }
+      
       loadTasks();
-      Alert.alert('Success', 'Task added successfully');
+      Alert.alert('Success', 'Task has been added.');
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Failed to create task');
+      const errorMessage = error?.response?.data?.message || error?.message || 'Unable to create task. Please try again.';
+      Alert.alert('Create Task Failed', errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -256,10 +292,13 @@ export default function TasksScreen() {
           style: 'destructive',
           onPress: async () => {
             try {
+              // Cancel all notifications for this task
+              await cancelAllTaskNotifications(task.id);
               await tasksService.delete(task.id);
               loadTasks();
             } catch (error: any) {
-              Alert.alert('Error', error.message || 'Failed to delete task');
+              const errorMessage = error?.response?.data?.message || error?.message || 'Unable to delete task. Please try again.';
+              Alert.alert('Delete Failed', errorMessage);
             }
           },
         },

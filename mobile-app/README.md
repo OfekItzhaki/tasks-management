@@ -8,9 +8,11 @@ React Native mobile app built with Expo for managing to-do lists, tasks, and rem
 - 📋 To-Do Lists management (Daily, Weekly, Monthly, Yearly, Custom)
 - ✅ Tasks with completion tracking
 - 📝 Sub-tasks (Steps)
-- 🔔 Reminders notifications
+- 🔔 Reminders notifications (⚠️ See Note Below)
 - 👥 List sharing
 - 📱 Native iOS and Android support
+
+⚠️ **Notification Testing Note:** Android push notifications are **not supported in Expo Go**. To test notifications on Android, you'll need to build a development build or production build. See [PRODUCTION_BUILD.md](./PRODUCTION_BUILD.md) for details.
 
 ## Prerequisites
 
@@ -79,7 +81,7 @@ The app uses direct HTTP calls to your NestJS backend. All API services are in `
 - `lists.service.ts` - To-Do Lists
 - `tasks.service.ts` - Tasks
 - `steps.service.ts` - Sub-tasks
-- `reminders.service.ts` - Reminders
+- `notifications.service.ts` - Push notifications (handles reminders)
 - `sharing.service.ts` - List sharing
 
 ## Development
@@ -117,14 +119,32 @@ npx expo build:ios
 
 ## Next Steps
 
-- [ ] Add push notifications for reminders
-- [ ] Implement task creation/editing UI
-- [ ] Add step management UI
-- [ ] Implement list sharing UI
-- [ ] Add offline support
-- [ ] Improve error handling and loading states
-- [ ] Add pull-to-refresh
-- [ ] Implement search functionality
+### ✅ Completed
+- [x] Add push notifications for reminders (requires dev/prod build on Android)
+- [x] Implement task creation/editing UI
+- [x] Add step management UI (add, toggle, delete)
+- [x] Add pull-to-refresh (on ListsScreen and TasksScreen)
+- [x] Implement search functionality (on TasksScreen)
+- [x] Task sorting (by due date, completed, alphabetical)
+
+### 🔧 Remaining Improvements
+See [IMPROVEMENTS_CHECKLIST.md](./IMPROVEMENTS_CHECKLIST.md) for detailed list.
+
+**High Priority:**
+- [ ] Implement list sharing UI (backend API exists, needs UI)
+- [ ] Add step reordering UI (drag-and-drop or buttons)
+- [ ] Add pull-to-refresh on RemindersScreen
+- [ ] Email verification flow improvements (resend verification, better messaging)
+
+**Medium Priority:**
+- [ ] Step edit functionality (edit descriptions)
+- [ ] User profile editing
+- [ ] Better error handling and user feedback
+
+**Low Priority:**
+- [ ] Offline support
+- [ ] Advanced filters and views
+- [ ] Accessibility improvements
 
 ## Troubleshooting
 

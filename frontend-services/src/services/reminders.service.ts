@@ -13,8 +13,9 @@ export class RemindersService {
    * Get reminder notifications for a specific date
    */
   async getByDate(date: string): Promise<ReminderNotification[]> {
+    const encodedDate = encodeURIComponent(date);
     return apiClient.get<ReminderNotification[]>(
-      `/reminders/date?date=${date}`,
+      `/reminders/date?date=${encodedDate}`,
     );
   }
 
@@ -25,8 +26,10 @@ export class RemindersService {
     startDate: string,
     endDate: string,
   ): Promise<ReminderNotification[]> {
+    const encodedStartDate = encodeURIComponent(startDate);
+    const encodedEndDate = encodeURIComponent(endDate);
     return apiClient.get<ReminderNotification[]>(
-      `/reminders/range?startDate=${startDate}&endDate=${endDate}`,
+      `/reminders/range?startDate=${encodedStartDate}&endDate=${encodedEndDate}`,
     );
   }
 }

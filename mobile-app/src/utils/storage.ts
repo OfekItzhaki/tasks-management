@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { normalizeBooleans } from './normalize';
+import { ReminderConfig } from '../types';
 
 const TOKEN_KEY = '@tasks_management:token';
 const USER_KEY = '@tasks_management:user';
@@ -73,6 +74,116 @@ export const UserStorage = {
       await AsyncStorage.removeItem(USER_KEY);
     } catch (error) {
       console.error('Error removing user:', error);
+    }
+  },
+};
+
+/**
+ * Client-side storage for "every day" reminders
+ * Backend doesn't support EVERY_DAY reminders (only 0-6 for weekly),
+ * so we store them locally keyed by task ID
+ */
+const EVERY_DAY_REMINDERS_KEY = '@tasks_management:everyday_reminders';
+const REMINDER_ALARMS_KEY = '@tasks_management:reminder_alarms';
+
+export const EveryDayRemindersStorage = {
+  async getRemindersForTask(taskId: number): Promise<ReminderConfig[] | null> {
+    try {
+      const allRemindersJson = await AsyncStorage.getItem(EVERY_DAY_REMINDERS_KEY);
+      if (!allRemindersJson) {
+        return null;
+      }
+      const allReminders: Record<string, ReminderConfig[]> = JSON.parse(allRemindersJson);
+      return allReminders[taskId.toString()] || null;
+    } catch (error) {
+      console.error('Error getting every day reminders:', error);
+      return null;
+    }
+  },
+
+  async setRemindersForTask(taskId: number, reminders: ReminderConfig[]): Promise<void> {
+    try {
+      const allRemindersJson = await AsyncStorage.getItem(EVERY_DAY_REMINDERS_KEY);
+      const allReminders: Record<string, ReminderConfig[]> = allRemindersJson 
+        ? JSON.parse(allRemindersJson) 
+        : {};
+      
+      if (reminders.length > 0) {
+        allReminders[taskId.toString()] = reminders;
+      } else {
+        delete allReminders[taskId.toString()];
+      }
+      
+      await AsyncStorage.setItem(EVERY_DAY_REMINDERS_KEY, JSON.stringify(allReminders));
+    } catch (error) {
+      console.error('Error setting every day reminders:', error);
+    }
+  },
+
+  async removeRemindersForTask(taskId: number): Promise<void> {
+    try {
+      const allRemindersJson = await AsyncStorage.getItem(EVERY_DAY_REMINDERS_KEY);
+      if (!allRemindersJson) {
+        return;
+      }
+      const allReminders: Record<string, ReminderConfig[]> = JSON.parse(allRemindersJson);
+      delete allReminders[taskId.toString()];
+      await AsyncStorage.setItem(EVERY_DAY_REMINDERS_KEY, JSON.stringify(allReminders));
+    } catch (error) {
+      console.error('Error removing every day reminders:', error);
+    }
+  },
+};
+
+/**
+ * Storage for reminder alarm states (hasAlarm property)
+ * Since backend doesn't store alarm state, we persist it client-side
+ */
+export const ReminderAlarmsStorage = {
+  async getAlarmsForTask(taskId: number): Promise<Record<string, boolean> | null> {
+    try {
+      const allAlarmsJson = await AsyncStorage.getItem(REMINDER_ALARMS_KEY);
+      if (!allAlarmsJson) {
+        return null;
+      }
+      const allAlarms: Record<string, Record<string, boolean>> = JSON.parse(allAlarmsJson);
+      return allAlarms[taskId.toString()] || null;
+    } catch (error) {
+      console.error('Error getting reminder alarms:', error);
+      return null;
+    }
+  },
+
+  async setAlarmForReminder(taskId: number, reminderId: string, hasAlarm: boolean): Promise<void> {
+    try {
+      const allAlarmsJson = await AsyncStorage.getItem(REMINDER_ALARMS_KEY);
+      const allAlarms: Record<string, Record<string, boolean>> = allAlarmsJson 
+        ? JSON.parse(allAlarmsJson) 
+        : {};
+      
+      if (!allAlarms[taskId.toString()]) {
+        allAlarms[taskId.toString()] = {};
+      }
+      
+      allAlarms[taskId.toString()][reminderId] = hasAlarm;
+      
+      await AsyncStorage.setItem(REMINDER_ALARMS_KEY, JSON.stringify(allAlarms));
+    } catch (error) {
+      console.error('Error setting reminder alarm:', error);
+    }
+  },
+
+  async removeAlarmsForTask(taskId: number): Promise<void> {
+    try {
+      const allAlarmsJson = await AsyncStorage.getItem(REMINDER_ALARMS_KEY);
+      if (!allAlarmsJson) {
+        return;
+      }
+      const allAlarms: Record<string, Record<string, boolean>> = JSON.parse(allAlarmsJson);
+      delete allAlarms[taskId.toString()];
+      await AsyncStorage.setItem(REMINDER_ALARMS_KEY, JSON.stringify(allAlarms));
+    } catch (error) {
+      console.error('Error removing reminder alarms:', error);
     }
   },
 };

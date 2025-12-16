@@ -10,7 +10,6 @@ import LoginScreen from '../screens/LoginScreen';
 import ListsScreen from '../screens/ListsScreen';
 import TasksScreen from '../screens/TasksScreen';
 import TaskDetailsScreen from '../screens/TaskDetailsScreen';
-import RemindersScreen from '../screens/RemindersScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 
 export type RootStackParamList = {
@@ -22,7 +21,6 @@ export type RootStackParamList = {
 
 export type MainTabParamList = {
   Lists: undefined;
-  Reminders: undefined;
   Profile: undefined;
 };
 
@@ -36,11 +34,6 @@ function MainTabs() {
         name="Lists"
         component={ListsScreen}
         options={{ title: 'My Lists' }}
-      />
-      <Tab.Screen
-        name="Reminders"
-        component={RemindersScreen}
-        options={{ title: 'Reminders' }}
       />
       <Tab.Screen
         name="Profile"
