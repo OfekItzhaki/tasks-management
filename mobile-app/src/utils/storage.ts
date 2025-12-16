@@ -85,6 +85,7 @@ export const UserStorage = {
  */
 const EVERY_DAY_REMINDERS_KEY = '@tasks_management:everyday_reminders';
 const REMINDER_ALARMS_KEY = '@tasks_management:reminder_alarms';
+const REMINDER_TIMES_KEY = '@tasks_management:reminder_times';
 
 export const EveryDayRemindersStorage = {
   async getRemindersForTask(taskId: number): Promise<ReminderConfig[] | null> {
@@ -184,6 +185,79 @@ export const ReminderAlarmsStorage = {
       await AsyncStorage.setItem(REMINDER_ALARMS_KEY, JSON.stringify(allAlarms));
     } catch (error) {
       console.error('Error removing reminder alarms:', error);
+    }
+  },
+};
+
+/**
+ * Storage for reminder times
+ * Since backend doesn't store reminder times, we persist them client-side
+ * Keyed by taskId and reminderId
+ */
+export const ReminderTimesStorage = {
+  async getTimesForTask(taskId: number): Promise<Record<string, string> | null> {
+    try {
+      const allTimesJson = await AsyncStorage.getItem(REMINDER_TIMES_KEY);
+      if (!allTimesJson) {
+        return null;
+      }
+      const allTimes: Record<string, Record<string, string>> = JSON.parse(allTimesJson);
+      return allTimes[taskId.toString()] || null;
+    } catch (error) {
+      console.error('Error getting reminder times:', error);
+      return null;
+    }
+  },
+
+  async setTimeForReminder(taskId: number, reminderId: string, time: string): Promise<void> {
+    try {
+      const allTimesJson = await AsyncStorage.getItem(REMINDER_TIMES_KEY);
+      const allTimes: Record<string, Record<string, string>> = allTimesJson 
+        ? JSON.parse(allTimesJson) 
+        : {};
+      
+      if (!allTimes[taskId.toString()]) {
+        allTimes[taskId.toString()] = {};
+      }
+      
+      allTimes[taskId.toString()][reminderId] = time;
+      
+      await AsyncStorage.setItem(REMINDER_TIMES_KEY, JSON.stringify(allTimes));
+    } catch (error) {
+      console.error('Error setting reminder time:', error);
+    }
+  },
+
+  async setTimesForTask(taskId: number, times: Record<string, string>): Promise<void> {
+    try {
+      const allTimesJson = await AsyncStorage.getItem(REMINDER_TIMES_KEY);
+      const allTimes: Record<string, Record<string, string>> = allTimesJson 
+        ? JSON.parse(allTimesJson) 
+        : {};
+      
+      if (Object.keys(times).length > 0) {
+        allTimes[taskId.toString()] = times;
+      } else {
+        delete allTimes[taskId.toString()];
+      }
+      
+      await AsyncStorage.setItem(REMINDER_TIMES_KEY, JSON.stringify(allTimes));
+    } catch (error) {
+      console.error('Error setting reminder times:', error);
+    }
+  },
+
+  async removeTimesForTask(taskId: number): Promise<void> {
+    try {
+      const allTimesJson = await AsyncStorage.getItem(REMINDER_TIMES_KEY);
+      if (!allTimesJson) {
+        return;
+      }
+      const allTimes: Record<string, Record<string, string>> = JSON.parse(allTimesJson);
+      delete allTimes[taskId.toString()];
+      await AsyncStorage.setItem(REMINDER_TIMES_KEY, JSON.stringify(allTimes));
+    } catch (error) {
+      console.error('Error removing reminder times:', error);
     }
   },
 };

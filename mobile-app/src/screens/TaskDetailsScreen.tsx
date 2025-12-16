@@ -20,7 +20,7 @@ import { Task, Step, UpdateTaskDto, CreateStepDto, ReminderConfig, ReminderTimef
 import ReminderConfigComponent from '../components/ReminderConfig';
 import DatePicker from '../components/DatePicker';
 import { scheduleTaskReminders, cancelAllTaskNotifications } from '../services/notifications.service';
-import { EveryDayRemindersStorage, ReminderAlarmsStorage } from '../utils/storage';
+import { EveryDayRemindersStorage, ReminderAlarmsStorage, ReminderTimesStorage } from '../utils/storage';
 
 type TaskDetailsRouteProp = RouteProp<RootStackParamList, 'TaskDetails'>;
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -278,10 +278,16 @@ export default function TaskDetailsScreen() {
       const alarmStates = await ReminderAlarmsStorage.getAlarmsForTask(taskId);
       setReminderAlarmStates(alarmStates || {});
       
-      if (alarmStates) {
+      // Load saved times for all reminders
+      const savedTimes = await ReminderTimesStorage.getTimesForTask(taskId);
+      
+      // Apply alarm states and saved times to all reminders
+      if (alarmStates || savedTimes) {
         convertedReminders = convertedReminders.map(r => ({
           ...r,
-          hasAlarm: alarmStates[r.id] !== undefined ? alarmStates[r.id] : r.hasAlarm,
+          hasAlarm: alarmStates?.[r.id] !== undefined ? alarmStates[r.id] : r.hasAlarm,
+          // Use saved time if available, otherwise keep the default/current time
+          time: savedTimes?.[r.id] || r.time || '09:00',
         }));
       }
       
@@ -372,6 +378,21 @@ export default function TaskDetailsScreen() {
         await EveryDayRemindersStorage.setRemindersForTask(taskId, everyDayReminders);
       } else {
         await EveryDayRemindersStorage.removeRemindersForTask(taskId);
+      }
+      
+      // Store reminder times for all reminders (backend doesn't store times)
+      const reminderTimes: Record<string, string> = {};
+      editReminders.forEach(reminder => {
+        if (reminder.time && reminder.time !== '09:00') {
+          // Only store if time is different from default
+          reminderTimes[reminder.id] = reminder.time;
+        }
+      });
+      
+      if (Object.keys(reminderTimes).length > 0) {
+        await ReminderTimesStorage.setTimesForTask(taskId, reminderTimes);
+      } else {
+        await ReminderTimesStorage.removeTimesForTask(taskId);
       }
       
       setIsEditing(false);

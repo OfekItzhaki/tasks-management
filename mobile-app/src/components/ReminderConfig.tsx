@@ -41,21 +41,50 @@ export default function ReminderConfigComponent({
   };
 
   const saveReminder = (reminder: ReminderConfig) => {
+    console.log('saveReminder called with:', {
+      reminder,
+      reminderTime: reminder.time,
+      editingReminderId: editingReminder?.id,
+      currentReminders: reminders.map(r => ({ id: r.id, time: r.time })),
+    });
+    
     if (editingReminder) {
       // Check if this reminder already exists in the list
       const existingIndex = reminders.findIndex((r) => r.id === editingReminder.id);
       if (existingIndex >= 0) {
-        // Update existing
-        const updated = reminders.map((r) =>
-          r.id === editingReminder.id ? reminder : r,
-        );
+        // Update existing - ensure we preserve all properties including time
+        const updated = reminders.map((r) => {
+          if (r.id === editingReminder.id) {
+            // Create a new reminder object with all properties from the saved reminder
+            // This ensures time and all other properties are properly updated
+            const updatedReminder: ReminderConfig = {
+              id: reminder.id,
+              timeframe: reminder.timeframe,
+              time: reminder.time || '09:00', // Explicitly ensure time is set
+              specificDate: reminder.specificDate,
+              customDate: reminder.customDate,
+              dayOfWeek: reminder.dayOfWeek,
+              daysBefore: reminder.daysBefore,
+              hasAlarm: reminder.hasAlarm,
+            };
+            console.log('Updating reminder:', {
+              old: { id: r.id, time: r.time },
+              new: { id: updatedReminder.id, time: updatedReminder.time },
+            });
+            return updatedReminder;
+          }
+          return r;
+        });
+        console.log('Updated reminders list:', updated.map(r => ({ id: r.id, time: r.time, timeframe: r.timeframe })));
         onRemindersChange(updated);
       } else {
         // Add new (editingReminder was set but reminder doesn't exist in list yet)
+        console.log('Adding new reminder (editingReminder exists but not in list)');
         onRemindersChange([...reminders, reminder]);
       }
     } else {
       // Add new
+      console.log('Adding new reminder');
       onRemindersChange([...reminders, reminder]);
     }
     setEditingReminder(null);
@@ -223,7 +252,15 @@ function ReminderEditor({
   specificDates,
   dayNames,
 }: ReminderEditorProps) {
-  const [config, setConfig] = useState<ReminderConfig>({ ...reminder });
+  // Initialize config with reminder, ensuring time is properly formatted
+  const initialTime = reminder.time || '09:00';
+  // Convert HH:MM to HHMM for easier editing (remove colon)
+  const timeForInput = initialTime.replace(':', '');
+  
+  const [config, setConfig] = useState<ReminderConfig>({ 
+    ...reminder,
+    time: timeForInput, // Store as HHMM for easier editing
+  });
 
   const handleTimeframeChange = (timeframe: ReminderTimeframe) => {
     setConfig({
@@ -236,21 +273,66 @@ function ReminderEditor({
     });
   };
 
-  const handleTimeChange = (time: string) => {
-    // Validate HH:MM format
-    if (/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(time)) {
-      setConfig({ ...config, time });
-    } else if (time.length <= 5) {
-      // Allow partial input
-      setConfig({ ...config, time });
+  const handleTimeChange = (input: string) => {
+    // Remove any non-numeric characters (in case user pastes something with colons)
+    const numbersOnly = input.replace(/\D/g, '');
+    
+    // Limit to 4 digits (HHMM)
+    const limited = numbersOnly.slice(0, 4);
+    
+    // Only auto-format when user has entered exactly 4 digits (complete time)
+    // This allows easy editing without the colon interfering
+    let formatted = limited;
+    if (limited.length === 4) {
+      // Auto-format to HH:MM only when complete
+      formatted = limited.slice(0, 2) + ':' + limited.slice(2);
+    } else if (limited.length > 0) {
+      // While typing, keep as numbers only (no colon) for easier editing
+      formatted = limited;
     }
+    
+    // Update the config with the formatted time
+    setConfig({ ...config, time: formatted });
   };
 
   const handleSave = () => {
     // Ensure time is valid (default to 09:00 if not set)
-    let timeToUse = config.time;
-    if (!timeToUse || !/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(timeToUse)) {
+    let timeToUse = config.time || '';
+    
+    // Remove any existing colons and get just the numbers
+    const numbersOnly = timeToUse.replace(/\D/g, '');
+    
+    // Convert to HH:MM format
+    if (numbersOnly.length === 0) {
+      // No time entered, use default
       timeToUse = '09:00';
+    } else if (numbersOnly.length === 1) {
+      // Single digit - pad and format (e.g., "9" -> "09:00")
+      timeToUse = '0' + numbersOnly + ':00';
+    } else if (numbersOnly.length === 2) {
+      // Two digits - assume hours, add minutes (e.g., "09" -> "09:00")
+      timeToUse = numbersOnly + ':00';
+    } else if (numbersOnly.length === 3) {
+      // Three digits - pad first digit (e.g., "930" -> "09:30")
+      timeToUse = '0' + numbersOnly.slice(0, 1) + ':' + numbersOnly.slice(1);
+    } else if (numbersOnly.length === 4) {
+      // Four digits - format as HH:MM (e.g., "0930" -> "09:30")
+      timeToUse = numbersOnly.slice(0, 2) + ':' + numbersOnly.slice(2);
+    }
+    
+    // Validate HH:MM format and fix invalid times
+    const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
+    if (!timeRegex.test(timeToUse)) {
+      // If invalid, try to fix it
+      const [hours, minutes] = timeToUse.split(':');
+      const h = parseInt(hours || '9', 10);
+      const m = parseInt(minutes || '0', 10);
+      
+      // Clamp hours to 0-23 and minutes to 0-59
+      const validHours = Math.max(0, Math.min(23, h));
+      const validMinutes = Math.max(0, Math.min(59, m));
+      
+      timeToUse = `${validHours.toString().padStart(2, '0')}:${validMinutes.toString().padStart(2, '0')}`;
     }
     
     // Validate EVERY_WEEK reminders have dayOfWeek set
@@ -262,10 +344,19 @@ function ReminderEditor({
     // For SPECIFIC_DATE with CUSTOM_DATE, customDate is optional (user might use daysBefore instead)
     // For SPECIFIC_DATE with other options (START_OF_WEEK, etc.), no customDate needed
     
-    onSave({
+    // Save with the properly formatted time
+    const reminderToSave = {
       ...config,
       time: timeToUse,
+    };
+    
+    console.log('Saving reminder with time:', {
+      originalTime: config.time,
+      formattedTime: timeToUse,
+      fullReminder: reminderToSave,
     });
+    
+    onSave(reminderToSave);
   };
 
   return (
@@ -435,15 +526,18 @@ function ReminderEditor({
           )}
 
           {/* Time Input */}
-          <Text style={styles.label}>Time (HH:MM):</Text>
+          <Text style={styles.label}>Time (HHMM):</Text>
           <TextInput
             style={styles.input}
-            placeholder="09:00"
+            placeholder="0900"
             value={config.time}
             onChangeText={handleTimeChange}
             keyboardType="numeric"
             maxLength={5}
           />
+          <Text style={styles.helperText}>
+            Enter time as 4 digits (e.g., 0900 for 9:00 AM, 1430 for 2:30 PM). Colon will be added automatically.
+          </Text>
 
           {/* Alarm Toggle */}
           <View style={styles.alarmOption}>

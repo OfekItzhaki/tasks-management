@@ -21,7 +21,7 @@ import { Task, CreateTaskDto, ReminderConfig, ReminderTimeframe, ReminderSpecifi
 import ReminderConfigComponent from '../components/ReminderConfig';
 import DatePicker from '../components/DatePicker';
 import { scheduleTaskReminders, cancelAllTaskNotifications } from '../services/notifications.service';
-import { EveryDayRemindersStorage } from '../utils/storage';
+import { EveryDayRemindersStorage, ReminderTimesStorage } from '../utils/storage';
 
 type TasksScreenRouteProp = RouteProp<RootStackParamList, 'Tasks'>;
 
@@ -254,6 +254,19 @@ export default function TasksScreen() {
       // Store EVERY_DAY reminders client-side
       if (everyDayReminders.length > 0) {
         await EveryDayRemindersStorage.setRemindersForTask(createdTask.id, everyDayReminders);
+      }
+      
+      // Store reminder times for all reminders (backend doesn't store times)
+      const reminderTimes: Record<string, string> = {};
+      taskReminders.forEach(reminder => {
+        if (reminder.time && reminder.time !== '09:00') {
+          // Only store if time is different from default
+          reminderTimes[reminder.id] = reminder.time;
+        }
+      });
+      
+      if (Object.keys(reminderTimes).length > 0) {
+        await ReminderTimesStorage.setTimesForTask(createdTask.id, reminderTimes);
       }
       
       setNewTaskDescription('');

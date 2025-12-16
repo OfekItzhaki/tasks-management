@@ -1,4 +1,5 @@
 import * as Notifications from 'expo-notifications';
+import { Platform } from 'react-native';
 import { ReminderConfig, ReminderTimeframe, ReminderSpecificDate } from '../types';
 import Constants from 'expo-constants';
 
@@ -16,6 +17,26 @@ function isExpoGo(): boolean {
   }
 }
 
+// Configure notification channel for Android (required for scheduled notifications)
+async function setupNotificationChannel() {
+  if (isExpoGo()) {
+    return;
+  }
+
+  try {
+    await Notifications.setNotificationChannelAsync('default', {
+      name: 'Task Reminders',
+      description: 'Notifications for task reminders',
+      importance: Notifications.AndroidImportance.HIGH,
+      sound: true,
+      vibrationPattern: [0, 250, 250, 250],
+      enableVibrate: true,
+    });
+  } catch (error) {
+    console.error('Error setting up notification channel:', error);
+  }
+}
+
 // Configure how notifications are handled when app is in foreground
 // Only configure if not in Expo Go (where notifications don't work)
 if (!isExpoGo()) {
@@ -27,6 +48,9 @@ if (!isExpoGo()) {
         shouldSetBadge: true,
       }),
     });
+    
+    // Setup notification channel for Android
+    setupNotificationChannel();
   } catch (error) {
     // Silently fail if notifications aren't available
   }
@@ -45,21 +69,34 @@ export interface ScheduledNotification {
 export async function requestNotificationPermissions(): Promise<boolean> {
   // Skip in Expo Go
   if (isExpoGo()) {
+    console.log('Skipping notification permissions - running in Expo Go');
     return false;
   }
 
   try {
+    // Setup notification channel first (Android requirement)
+    await setupNotificationChannel();
+    
     const { status: existingStatus } = await Notifications.getPermissionsAsync();
     let finalStatus = existingStatus;
     
     if (existingStatus !== 'granted') {
-      const { status } = await Notifications.requestPermissionsAsync();
+      const { status } = await Notifications.requestPermissionsAsync({
+        ios: {
+          allowAlert: true,
+          allowBadge: true,
+          allowSound: true,
+          allowAnnouncements: false,
+        },
+      });
       finalStatus = status;
     }
     
-    return finalStatus === 'granted';
+    const granted = finalStatus === 'granted';
+    console.log(`Notification permissions: ${granted ? 'GRANTED' : 'DENIED'} (status: ${finalStatus})`);
+    return granted;
   } catch (error) {
-    // Silently fail if notifications aren't available
+    console.error('Error requesting notification permissions:', error);
     return false;
   }
 }
@@ -92,20 +129,28 @@ export async function scheduleReminderNotification(
 
     // For recurring daily reminders, use daily trigger
     if (reminder.timeframe === ReminderTimeframe.EVERY_DAY) {
+      // Ensure notification channel is set up
+      await setupNotificationChannel();
+      
       trigger = {
         hour: hours,
         minute: minutes,
         repeats: true,
       } as Notifications.DailyTriggerInput;
+      console.log(`Scheduling daily reminder at ${hours}:${minutes.toString().padStart(2, '0')} (repeats: true)`);
     } 
     // For recurring weekly reminders, use weekly trigger
     else if (reminder.timeframe === ReminderTimeframe.EVERY_WEEK && reminder.dayOfWeek !== undefined) {
+      // Ensure notification channel is set up
+      await setupNotificationChannel();
+      
       trigger = {
         weekday: reminder.dayOfWeek + 1, // expo-notifications uses 1-7 (Sunday = 1)
         hour: hours,
         minute: minutes,
         repeats: true,
       } as Notifications.WeeklyTriggerInput;
+      console.log(`Scheduling weekly reminder: weekday ${reminder.dayOfWeek + 1} at ${hours}:${minutes.toString().padStart(2, '0')} (repeats: true)`);
     } 
     // For other reminders, calculate the date first
     else {
@@ -124,6 +169,9 @@ export async function scheduleReminderNotification(
       };
     }
 
+    // Ensure notification channel is set up before scheduling
+    await setupNotificationChannel();
+    
     const notificationId = await Notifications.scheduleNotificationAsync({
       content: {
         title: `Reminder: ${taskDescription}`,
@@ -133,10 +181,14 @@ export async function scheduleReminderNotification(
           taskId,
           reminderId: reminder.id,
         },
+        // Android requires channelId in content
+        ...(Platform.OS === 'android' && { channelId: 'default' }),
       },
       trigger,
     });
 
+    console.log(`Scheduled notification ${notificationId} for task ${taskId}, reminder ${reminder.id} (${reminder.timeframe})`);
+    
     return notificationId;
   } catch (error) {
     console.error('Error scheduling notification:', error);
@@ -337,5 +389,90 @@ export async function scheduleTaskReminders(
 export async function getAllScheduledNotifications(): Promise<
   Notifications.NotificationRequest[]
 > {
-  return await Notifications.getAllScheduledNotificationsAsync();
+  if (isExpoGo()) {
+    return [];
+  }
+  try {
+    return await Notifications.getAllScheduledNotificationsAsync();
+  } catch (error) {
+    console.error('Error getting scheduled notifications:', error);
+    return [];
+  }
+}
+
+/**
+ * Reschedule all reminders for all tasks (call on app startup)
+ * This ensures notifications are scheduled even after app restart
+ */
+export async function rescheduleAllReminders(): Promise<void> {
+  // Skip in Expo Go
+  if (isExpoGo()) {
+    console.log('Skipping reminder rescheduling - running in Expo Go');
+    return;
+  }
+
+  try {
+    // Import here to avoid circular dependencies
+    const { tasksService } = await import('./tasks.service');
+    const { EveryDayRemindersStorage } = await import('../utils/storage');
+    const { ReminderTimeframe } = await import('../types');
+
+    // Get all tasks
+    const allTasks = await tasksService.getAll();
+    console.log(`Rescheduling reminders for ${allTasks.length} tasks`);
+
+    let scheduledCount = 0;
+
+    for (const task of allTasks) {
+      if (!task.dueDate && !task.specificDayOfWeek) {
+        // Skip tasks without due date or weekly reminder
+        continue;
+      }
+
+      // Convert backend reminders to ReminderConfig format
+      const reminders: ReminderConfig[] = [];
+
+      // Add backend reminders (daysBefore and weekly)
+      if (task.reminderDaysBefore && task.reminderDaysBefore.length > 0 && task.dueDate) {
+        task.reminderDaysBefore.forEach((days) => {
+          reminders.push({
+            id: `days-before-${days}`,
+            timeframe: ReminderTimeframe.SPECIFIC_DATE,
+            time: '09:00',
+            daysBefore: days,
+          });
+        });
+      }
+
+      if (task.specificDayOfWeek !== null && task.specificDayOfWeek !== undefined) {
+        reminders.push({
+          id: `day-of-week-${task.specificDayOfWeek}`,
+          timeframe: ReminderTimeframe.EVERY_WEEK,
+          time: '09:00',
+          dayOfWeek: task.specificDayOfWeek,
+        });
+      }
+
+      // Add client-side EVERY_DAY reminders
+      const everyDayReminders = await EveryDayRemindersStorage.getRemindersForTask(task.id);
+      if (everyDayReminders && everyDayReminders.length > 0) {
+        reminders.push(...everyDayReminders);
+      }
+
+      // Schedule all reminders for this task
+      if (reminders.length > 0) {
+        await scheduleTaskReminders(
+          task.id,
+          task.description,
+          reminders,
+          task.dueDate || null,
+        );
+        scheduledCount += reminders.length;
+      }
+    }
+
+    console.log(`Rescheduled ${scheduledCount} reminders across ${allTasks.length} tasks`);
+  } catch (error) {
+    console.error('Error rescheduling reminders:', error);
+  }
 }
