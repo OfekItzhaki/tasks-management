@@ -5,7 +5,6 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")  // For migrations
 }
 
 model User {
@@ -70,6 +69,7 @@ model Task {
 model Step {
   id          Int       @id @default(autoincrement())
   createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
   description String
   completed   Boolean   @default(false)
   taskId      Int
