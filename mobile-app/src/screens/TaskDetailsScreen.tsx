@@ -296,11 +296,21 @@ export default function TaskDetailsScreen() {
       }
       
       // Store reminder times for all reminders (backend doesn't store times)
+      // Use normalized IDs that will match after reload from backend
       const reminderTimes: Record<string, string> = {};
       editReminders.forEach(reminder => {
-        if (reminder.time && reminder.time !== '09:00') {
-          // Only store if time is different from default
-          reminderTimes[reminder.id] = reminder.time;
+        if (reminder.time) {
+          // Generate normalized ID based on reminder properties (same as convertBackendToReminders)
+          let normalizedId = reminder.id;
+          if (reminder.daysBefore !== undefined && reminder.daysBefore > 0) {
+            normalizedId = `days-before-${reminder.daysBefore}`;
+          } else if (reminder.timeframe === ReminderTimeframe.EVERY_WEEK && reminder.dayOfWeek !== undefined) {
+            normalizedId = `day-of-week-${reminder.dayOfWeek}`;
+          } else if (reminder.timeframe === ReminderTimeframe.EVERY_DAY) {
+            normalizedId = reminder.id; // Keep the original ID for EVERY_DAY reminders
+          }
+          // Store the time with normalized ID
+          reminderTimes[normalizedId] = reminder.time;
         }
       });
       
@@ -574,8 +584,8 @@ export default function TaskDetailsScreen() {
               )}
             </View>
 
-          {/* Display Reminders */}
-          {(() => {
+          {/* Display Reminders - only show when NOT editing (editing uses ReminderConfigComponent) */}
+          {!isEditing && (() => {
             const displayReminders = convertBackendToReminders(
               task.reminderDaysBefore,
               task.specificDayOfWeek,
@@ -585,11 +595,16 @@ export default function TaskDetailsScreen() {
             // Add client-side stored EVERY_DAY reminders for display
             let allDisplayReminders = [...displayReminders, ...displayEveryDayReminders];
             
-            // Apply alarm states from state
-            allDisplayReminders = allDisplayReminders.map(r => ({
-              ...r,
-              hasAlarm: reminderAlarmStates[r.id] !== undefined ? reminderAlarmStates[r.id] : (r.hasAlarm || false),
-            }));
+            // Apply alarm states and saved times from state
+            allDisplayReminders = allDisplayReminders.map(r => {
+              // Find matching reminder in editReminders to get the correct time
+              const matchingReminder = editReminders.find(er => er.id === r.id);
+              return {
+                ...r,
+                hasAlarm: reminderAlarmStates[r.id] !== undefined ? reminderAlarmStates[r.id] : (r.hasAlarm || false),
+                time: matchingReminder?.time || r.time || '09:00',
+              };
+            });
             
             if (allDisplayReminders.length > 0) {
               return (
