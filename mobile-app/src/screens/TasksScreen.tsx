@@ -56,8 +56,13 @@ export default function TasksScreen() {
       }));
       setAllTasks(normalizedTasks);
     } catch (error: any) {
-      const errorMessage = error?.response?.data?.message || error?.message || 'Unable to load tasks. Please try again.';
-      Alert.alert('Error Loading Tasks', errorMessage);
+      // Silently ignore auth errors - the navigation will handle redirect to login
+      const isAuthError = error?.response?.status === 401 || 
+                          error?.message?.toLowerCase().includes('unauthorized');
+      if (!isAuthError) {
+        const errorMessage = error?.response?.data?.message || error?.message || 'Unable to load tasks. Please try again.';
+        Alert.alert('Error Loading Tasks', errorMessage);
+      }
     } finally {
       setLoading(false);
       setRefreshing(false);

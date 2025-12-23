@@ -203,8 +203,13 @@ export default function TaskDetailsScreen() {
       
       setEditReminders(convertedReminders);
     } catch (error: any) {
-      const errorMessage = error?.response?.data?.message || error?.message || 'Unable to load task. Please try again.';
-      Alert.alert('Error Loading Task', errorMessage);
+      // Silently ignore auth errors - the navigation will handle redirect to login
+      const isAuthError = error?.response?.status === 401 || 
+                          error?.message?.toLowerCase().includes('unauthorized');
+      if (!isAuthError) {
+        const errorMessage = error?.response?.data?.message || error?.message || 'Unable to load task. Please try again.';
+        Alert.alert('Error Loading Task', errorMessage);
+      }
     } finally {
       setLoading(false);
       setRefreshing(false);

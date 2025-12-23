@@ -17,13 +17,27 @@ export default function App() {
         if (hasToken) {
           // Reschedule all reminders on app startup
           // This ensures notifications persist after app restart
-          await rescheduleAllReminders();
+          try {
+            await rescheduleAllReminders();
+          } catch (error: any) {
+            // Silently ignore auth errors - background task shouldn't show alerts
+            const isAuthError = error?.response?.status === 401 || 
+                                error?.message?.toLowerCase().includes('unauthorized');
+            if (!isAuthError) {
+              throw error; // Re-throw non-auth errors
+            }
+          }
         }
       }
     };
 
     initializeNotifications().catch((error) => {
-      console.error('Error initializing notifications:', error);
+      // Silently ignore auth errors during startup - user will login if needed
+      const isAuthError = error?.response?.status === 401 || 
+                          error?.message?.toLowerCase().includes('unauthorized');
+      if (!isAuthError) {
+        console.error('Error initializing notifications:', error);
+      }
     });
   }, []);
 
