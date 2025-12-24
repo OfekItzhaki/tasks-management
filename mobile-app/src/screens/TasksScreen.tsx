@@ -261,6 +261,16 @@ export default function TasksScreen() {
     );
   };
 
+  const handleToggleTask = async (task: Task) => {
+    try {
+      await tasksService.update(task.id, { completed: !task.completed });
+      loadTasks();
+    } catch (error: any) {
+      const errorMessage = error?.response?.data?.message || error?.message || 'Unable to update task. Please try again.';
+      Alert.alert('Update Failed', errorMessage);
+    }
+  };
+
   if (loading) {
     return (
       <View style={styles.center}>
@@ -318,22 +328,31 @@ export default function TasksScreen() {
             new Date(item.dueDate).toDateString() !== new Date().toDateString();
 
           return (
-            <TouchableOpacity
+            <View
               style={[
                 styles.taskItem,
                 isCompleted && styles.taskItemCompleted,
                 isOverdue && styles.taskItemOverdue,
               ]}
-              onPress={() => {
-                // Navigate to task details on tap
-                navigation.navigate('TaskDetails', { taskId: item.id });
-              }}
-              onLongPress={() => handleDeleteTask(item)}
             >
-              <View style={styles.taskContent}>
-                <View style={styles.taskCheckbox}>
-                  {isCompleted && <Text style={styles.checkmark}>✓</Text>}
-                </View>
+              {/* Tappable checkbox for quick completion toggle */}
+              <TouchableOpacity
+                style={[
+                  styles.taskCheckbox,
+                  isCompleted && styles.taskCheckboxCompleted,
+                ]}
+                onPress={() => handleToggleTask(item)}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              >
+                {isCompleted && <Text style={styles.checkmark}>✓</Text>}
+              </TouchableOpacity>
+              
+              {/* Tappable content area for navigation to details */}
+              <TouchableOpacity
+                style={styles.taskContent}
+                onPress={() => navigation.navigate('TaskDetails', { taskId: item.id })}
+                onLongPress={() => handleDeleteTask(item)}
+              >
                 <View style={styles.taskTextContainer}>
                   <Text
                     style={[
@@ -354,8 +373,8 @@ export default function TasksScreen() {
                     </Text>
                   )}
                 </View>
-              </View>
-            </TouchableOpacity>
+              </TouchableOpacity>
+            </View>
           );
         }}
         ListEmptyComponent={
@@ -603,6 +622,8 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   taskItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: '#fff',
     padding: 15,
     marginHorizontal: 10,
@@ -623,23 +644,26 @@ const styles = StyleSheet.create({
     borderLeftColor: '#f44336',
   },
   taskContent: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'flex-start',
   },
   taskCheckbox: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     borderWidth: 2,
     borderColor: '#007AFF',
     marginRight: 12,
-    marginTop: 2,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff',
+  },
+  taskCheckboxCompleted: {
+    backgroundColor: '#007AFF',
+    borderColor: '#007AFF',
   },
   checkmark: {
-    color: '#007AFF',
+    color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
   },
