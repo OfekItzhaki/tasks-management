@@ -379,14 +379,22 @@ export default function TaskDetailsScreen() {
       return;
     }
 
+    // Store description before clearing (in case of async issues)
+    const description = newStepDescription.trim();
+    
+    // Close modal and clear input immediately for responsive UX
+    setShowAddStepModal(false);
+    setNewStepDescription('');
+
     try {
-      await stepsService.create(taskId, { description: newStepDescription.trim() });
-      setNewStepDescription('');
-      setShowAddStepModal(false);
+      await stepsService.create(taskId, { description });
+      // Refresh steps list after successful creation
       loadTaskData();
     } catch (error: any) {
       const errorMessage = error?.response?.data?.message || error?.message || 'Unable to add step. Please try again.';
       Alert.alert('Add Step Failed', errorMessage);
+      // Reload to ensure UI is in sync
+      loadTaskData();
     }
   };
 
