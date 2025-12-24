@@ -28,7 +28,7 @@ async function setupNotificationChannel() {
       name: 'Task Reminders',
       description: 'Notifications for task reminders',
       importance: Notifications.AndroidImportance.HIGH,
-      sound: true,
+      sound: 'default', // Use string instead of boolean for Android compatibility
       vibrationPattern: [0, 250, 250, 250],
       enableVibrate: true,
     });
@@ -176,7 +176,7 @@ export async function scheduleReminderNotification(
       content: {
         title: `Reminder: ${taskDescription}`,
         body: formatNotificationBody(reminder, dueDate),
-        sound: reminder.hasAlarm === true, // Play sound only if alarm is enabled
+        sound: reminder.hasAlarm === true ? 'default' : undefined, // Use string for Android compatibility
         data: {
           taskId,
           reminderId: reminder.id,
