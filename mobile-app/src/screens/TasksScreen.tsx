@@ -510,7 +510,7 @@ const styles = StyleSheet.create({
   header: {
     backgroundColor: '#fff',
     padding: 20,
-    paddingTop: Platform.OS === 'ios' ? 60 : 20,
+    paddingTop: Platform.OS === 'ios' ? 60 : 45, // Account for status bar
     borderBottomWidth: 1,
     borderBottomColor: '#e0e0e0',
   },

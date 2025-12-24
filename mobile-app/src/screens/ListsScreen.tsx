@@ -357,7 +357,7 @@ const styles = StyleSheet.create({
   header: {
     backgroundColor: '#fff',
     padding: 20,
-    paddingTop: Platform.OS === 'ios' ? 60 : 20,
+    paddingTop: Platform.OS === 'ios' ? 60 : 45, // Account for status bar
     borderBottomWidth: 1,
     borderBottomColor: '#e0e0e0',
   },
@@ -436,7 +436,7 @@ const styles = StyleSheet.create({
   fab: {
     position: 'absolute',
     right: 20,
-    bottom: 20,
+    bottom: 70, // Above the tab bar
     width: 56,
     height: 56,
     borderRadius: 28,

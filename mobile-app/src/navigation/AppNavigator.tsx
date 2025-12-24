@@ -29,7 +29,11 @@ const Tab = createBottomTabNavigator<MainTabParamList>();
 
 function MainTabs() {
   return (
-    <Tab.Navigator>
+    <Tab.Navigator
+      screenOptions={{
+        headerShown: false, // Screens have their own custom headers
+      }}
+    >
       <Tab.Screen
         name="Lists"
         component={ListsScreen}
@@ -64,12 +68,12 @@ export default function AppNavigator() {
             <Stack.Screen
               name="Tasks"
               component={TasksScreen}
-              options={{ headerShown: true }}
+              options={{ headerShown: false }}
             />
             <Stack.Screen
               name="TaskDetails"
               component={TaskDetailsScreen}
-              options={{ headerShown: true, title: 'Task Details' }}
+              options={{ headerShown: false }}
             />
           </>
         ) : (
