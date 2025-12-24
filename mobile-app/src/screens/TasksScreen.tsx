@@ -262,10 +262,25 @@ export default function TasksScreen() {
   };
 
   const handleToggleTask = async (task: Task) => {
+    const newCompletedState = !task.completed;
+    
+    // Optimistic update - update UI immediately for instant feedback
+    setAllTasks(prevTasks => 
+      prevTasks.map(t => 
+        t.id === task.id ? { ...t, completed: newCompletedState } : t
+      )
+    );
+
     try {
-      await tasksService.update(task.id, { completed: !task.completed });
-      loadTasks();
+      await tasksService.update(task.id, { completed: newCompletedState });
+      // No need to reload - we already updated the state
     } catch (error: any) {
+      // Revert on error
+      setAllTasks(prevTasks => 
+        prevTasks.map(t => 
+          t.id === task.id ? { ...t, completed: task.completed } : t
+        )
+      );
       const errorMessage = error?.response?.data?.message || error?.message || 'Unable to update task. Please try again.';
       Alert.alert('Update Failed', errorMessage);
     }
