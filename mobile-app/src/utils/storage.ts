@@ -147,8 +147,19 @@ export const ReminderAlarmsStorage = {
       if (!allAlarmsJson) {
         return null;
       }
-      const allAlarms: Record<string, Record<string, boolean>> = JSON.parse(allAlarmsJson);
-      return allAlarms[taskId.toString()] || null;
+      const allAlarms: Record<string, Record<string, any>> = JSON.parse(allAlarmsJson);
+      const taskAlarms = allAlarms[taskId.toString()];
+      if (!taskAlarms) {
+        return null;
+      }
+      // Normalize boolean values to ensure they're actual booleans, not strings
+      const normalized: Record<string, boolean> = {};
+      for (const key in taskAlarms) {
+        const value = taskAlarms[key];
+        // Convert any value to a proper boolean
+        normalized[key] = value === true || value === 'true' || value === 1;
+      }
+      return normalized;
     } catch (error) {
       console.error('Error getting reminder alarms:', error);
       return null;

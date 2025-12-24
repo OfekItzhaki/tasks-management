@@ -3,43 +3,67 @@ import { Platform } from 'react-native';
 import { ReminderConfig, ReminderTimeframe, ReminderSpecificDate } from '../types';
 import Constants from 'expo-constants';
 
+// Track if notification handler has been configured
+let notificationHandlerConfigured = false;
+
 /**
  * Check if we're running in Expo Go (where notifications don't work)
+ * Made extra safe to never throw
  */
 function isExpoGo(): boolean {
   try {
-    // In Expo Go, appOwnership is 'expo' or 'guest'
-    // In standalone builds, it's 'standalone' or undefined
-    return Constants.appOwnership === 'expo' || Constants.appOwnership === 'guest';
+    // Check multiple ways to detect Expo Go
+    const appOwnership = Constants?.appOwnership;
+    if (appOwnership === 'expo' || appOwnership === 'guest') {
+      return true;
+    }
+    // Also check executionEnvironment for newer Expo versions
+    const exEnv = (Constants as any)?.executionEnvironment;
+    if (exEnv === 'storeClient' || exEnv === 'standalone') {
+      return false; // Production build
+    }
+    // Default to true (Expo Go) to be safe
+    return appOwnership !== 'standalone';
   } catch {
-    // If Constants isn't available, assume Expo Go to be safe
+    // If anything fails, assume Expo Go to be safe
     return true;
   }
 }
 
-// Configure notification channel for Android (required for scheduled notifications)
-async function setupNotificationChannel() {
+/**
+ * Configure notification channel for Android (required for scheduled notifications)
+ * Deferred to be called explicitly, not at module load
+ */
+async function setupNotificationChannel(): Promise<void> {
   if (isExpoGo()) {
     return;
   }
 
   try {
-    await Notifications.setNotificationChannelAsync('default', {
-      name: 'Task Reminders',
-      description: 'Notifications for task reminders',
-      importance: Notifications.AndroidImportance.HIGH,
-      sound: 'default', // Use string instead of boolean for Android compatibility
-      vibrationPattern: [0, 250, 250, 250],
-      enableVibrate: true,
-    });
+    if (Platform.OS === 'android') {
+      await Notifications.setNotificationChannelAsync('default', {
+        name: 'Task Reminders',
+        description: 'Notifications for task reminders',
+        importance: Notifications.AndroidImportance.HIGH,
+        sound: 'default', // Use string instead of boolean for Android compatibility
+        vibrationPattern: [0, 250, 250, 250],
+        enableVibrate: true,
+      });
+    }
   } catch (error) {
     console.error('Error setting up notification channel:', error);
   }
 }
 
-// Configure how notifications are handled when app is in foreground
-// Only configure if not in Expo Go (where notifications don't work)
-if (!isExpoGo()) {
+/**
+ * Configure notification handler - called lazily, not at module load
+ * This prevents issues with module-level code execution in Expo Go
+ */
+async function ensureNotificationHandlerConfigured(): Promise<void> {
+  if (notificationHandlerConfigured || isExpoGo()) {
+    return;
+  }
+
   try {
     Notifications.setNotificationHandler({
       handleNotification: async () => ({
@@ -49,12 +73,15 @@ if (!isExpoGo()) {
       }),
     });
     
-    // Setup notification channel for Android
-    setupNotificationChannel();
+    await setupNotificationChannel();
+    notificationHandlerConfigured = true;
   } catch (error) {
-    // Silently fail if notifications aren't available
+    console.error('Error configuring notification handler:', error);
   }
 }
+
+// NOTE: We no longer run notification setup at module load time
+// It will be initialized lazily when requestNotificationPermissions is called
 
 export interface ScheduledNotification {
   identifier: string;
@@ -74,8 +101,8 @@ export async function requestNotificationPermissions(): Promise<boolean> {
   }
 
   try {
-    // Setup notification channel first (Android requirement)
-    await setupNotificationChannel();
+    // Initialize notification handler and channel (deferred from module load)
+    await ensureNotificationHandlerConfigured();
     
     const { status: existingStatus } = await Notifications.getPermissionsAsync();
     let finalStatus = existingStatus;
