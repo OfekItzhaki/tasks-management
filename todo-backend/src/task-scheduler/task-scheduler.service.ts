@@ -46,10 +46,11 @@ export class TaskSchedulerService {
   }
 
   /**
-   * Runs every minute to check for completed tasks that need to be archived
+   * Runs every 5 minutes to check for completed tasks that need to be archived
    * (moved from CUSTOM lists to the Finished Tasks list)
+   * Note: Using 5-minute interval to reduce database load while still being timely
    */
-  @Cron(CronExpression.EVERY_MINUTE)
+  @Cron(CronExpression.EVERY_5_MINUTES)
   async archiveCompletedTasks() {
     const archiveThreshold = new Date();
     archiveThreshold.setMinutes(archiveThreshold.getMinutes() - this.ARCHIVE_DELAY_MINUTES);
