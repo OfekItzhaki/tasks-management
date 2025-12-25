@@ -17,7 +17,10 @@ export default function LoginScreen() {
   const [name, setName] = useState('');
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
+<<<<<<< HEAD
   const [showPassword, setShowPassword] = useState(false);
+=======
+>>>>>>> main
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -103,6 +106,7 @@ export default function LoginScreen() {
         autoCorrect={false}
       />
 
+<<<<<<< HEAD
       <View style={styles.passwordContainer}>
         <TextInput
           style={styles.passwordInput}
@@ -119,6 +123,15 @@ export default function LoginScreen() {
           <Text style={styles.eyeIcon}>{showPassword ? '🙈' : '👁'}</Text>
         </TouchableOpacity>
       </View>
+=======
+      <TextInput
+        style={styles.input}
+        placeholder="Password"
+        value={password}
+        onChangeText={setPassword}
+        secureTextEntry
+      />
+>>>>>>> main
 
       {loading ? (
         <ActivityIndicator size="large" color="#007AFF" />
@@ -168,6 +181,7 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     fontSize: 16,
   },
+<<<<<<< HEAD
   passwordContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -189,6 +203,8 @@ const styles = StyleSheet.create({
   eyeIcon: {
     fontSize: 20,
   },
+=======
+>>>>>>> main
   button: {
     backgroundColor: '#007AFF',
     padding: 15,

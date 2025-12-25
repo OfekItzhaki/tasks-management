@@ -25,7 +25,10 @@ import { TaskSchedulerModule } from './task-scheduler/task-scheduler.module';
     ListSharesModule,
     MeModule,
     RemindersModule,
+<<<<<<< HEAD
     TaskSchedulerModule,
+=======
+>>>>>>> main
   ],
   controllers: [AppController],
   providers: [AppService],

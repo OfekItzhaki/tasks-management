@@ -1,6 +1,10 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { normalizeBooleans } from './normalize';
+<<<<<<< HEAD
 import { ReminderConfig, User } from '../types';
+=======
+import { ReminderConfig } from '../types';
+>>>>>>> main
 
 const TOKEN_KEY = '@tasks_management:token';
 const USER_KEY = '@tasks_management:user';
@@ -44,7 +48,11 @@ export const TokenStorage = {
  * User storage utilities
  */
 export const UserStorage = {
+<<<<<<< HEAD
   async getUser(): Promise<User | null> {
+=======
+  async getUser(): Promise<any | null> {
+>>>>>>> main
     try {
       const userJson = await AsyncStorage.getItem(USER_KEY);
       if (!userJson) {
@@ -52,14 +60,22 @@ export const UserStorage = {
       }
       const user = JSON.parse(userJson);
       // Normalize boolean fields to ensure they're actual booleans
+<<<<<<< HEAD
       return normalizeBooleans(user) as User;
+=======
+      return normalizeBooleans(user);
+>>>>>>> main
     } catch (error) {
       console.error('Error getting user:', error);
       return null;
     }
   },
 
+<<<<<<< HEAD
   async setUser(user: User): Promise<void> {
+=======
+  async setUser(user: any): Promise<void> {
+>>>>>>> main
     try {
       // Ensure we're storing proper types - normalize before storing
       const normalizedUser = normalizeBooleans(user);
@@ -147,6 +163,7 @@ export const ReminderAlarmsStorage = {
       if (!allAlarmsJson) {
         return null;
       }
+<<<<<<< HEAD
       const allAlarms: Record<string, Record<string, any>> = JSON.parse(allAlarmsJson);
       const taskAlarms = allAlarms[taskId.toString()];
       if (!taskAlarms) {
@@ -160,6 +177,10 @@ export const ReminderAlarmsStorage = {
         normalized[key] = value === true || value === 'true' || value === 1;
       }
       return normalized;
+=======
+      const allAlarms: Record<string, Record<string, boolean>> = JSON.parse(allAlarmsJson);
+      return allAlarms[taskId.toString()] || null;
+>>>>>>> main
     } catch (error) {
       console.error('Error getting reminder alarms:', error);
       return null;

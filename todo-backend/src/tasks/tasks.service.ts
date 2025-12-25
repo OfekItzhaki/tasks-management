@@ -61,7 +61,7 @@ export class TasksService {
         dueDate: createTaskDto.dueDate,
         specificDayOfWeek: createTaskDto.specificDayOfWeek,
         reminderDaysBefore:
-          createTaskDto.reminderDaysBefore ?? [1],
+          createTaskDto.reminderDaysBefore ?? [],
         completed: createTaskDto.completed ?? false,
         todoListId,
       },

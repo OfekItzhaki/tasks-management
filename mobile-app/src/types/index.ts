@@ -8,7 +8,10 @@ export enum ListType {
   MONTHLY = 'MONTHLY',
   YEARLY = 'YEARLY',
   CUSTOM = 'CUSTOM',
+<<<<<<< HEAD
   FINISHED = 'FINISHED', // System list for archived completed tasks
+=======
+>>>>>>> main
 }
 
 export interface User {
@@ -27,7 +30,10 @@ export interface ToDoList {
   type: ListType;
   ownerId: number;
   order: number;
+<<<<<<< HEAD
   isSystem: boolean; // System lists (like "Finished Tasks") cannot be deleted
+=======
+>>>>>>> main
   createdAt: string;
   updatedAt: string;
 }
@@ -36,10 +42,14 @@ export interface Task {
   id: number;
   description: string;
   completed: boolean;
+<<<<<<< HEAD
   completedAt: string | null; // When the task was marked complete
   completionCount: number; // How many times this repeating task has been completed
   todoListId: number;
   originalListId: number | null; // Original list when archived (for restore)
+=======
+  todoListId: number;
+>>>>>>> main
   order: number;
   dueDate: string | null;
   reminderDaysBefore: number[];

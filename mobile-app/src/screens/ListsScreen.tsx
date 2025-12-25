@@ -46,6 +46,7 @@ export default function ListsScreen() {
 
   const loadLists = async () => {
     try {
+<<<<<<< HEAD
       console.log('Loading lists...');
       const data = await listsService.getAll();
       console.log('Lists loaded:', data);
@@ -60,6 +61,13 @@ export default function ListsScreen() {
         const errorMessage = error?.response?.data?.message || error?.message || 'Unable to load lists. Please try again.';
         Alert.alert('Error Loading Lists', errorMessage);
       }
+=======
+      const data = await listsService.getAll();
+      setLists(data);
+    } catch (error: any) {
+      const errorMessage = error?.response?.data?.message || error?.message || 'Unable to load lists. Please try again.';
+      Alert.alert('Error Loading Lists', errorMessage);
+>>>>>>> main
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -75,7 +83,10 @@ export default function ListsScreen() {
     navigation.navigate('Tasks', {
       listId: list.id,
       listName: list.name,
+<<<<<<< HEAD
       listType: list.type,
+=======
+>>>>>>> main
     });
   };
 
@@ -178,8 +189,11 @@ export default function ListsScreen() {
         return '#FF9800';
       case ListType.YEARLY:
         return '#9C27B0';
+<<<<<<< HEAD
       case ListType.FINISHED:
         return '#607D8B'; // Gray-blue for finished tasks
+=======
+>>>>>>> main
       default:
         return '#757575';
     }
@@ -219,6 +233,7 @@ export default function ListsScreen() {
             style={styles.listItem}
             onPress={() => handleListPress(item)}
             onLongPress={() => {
+<<<<<<< HEAD
               // System lists (like Finished Tasks) cannot be edited or deleted
               if (item.isSystem) {
                 Alert.alert(
@@ -228,6 +243,8 @@ export default function ListsScreen() {
                 );
                 return;
               }
+=======
+>>>>>>> main
               Alert.alert(
                 item.name,
                 'Choose an action',
@@ -369,7 +386,11 @@ const styles = StyleSheet.create({
   header: {
     backgroundColor: '#fff',
     padding: 20,
+<<<<<<< HEAD
     paddingTop: Platform.OS === 'ios' ? 60 : 45, // Account for status bar
+=======
+    paddingTop: Platform.OS === 'ios' ? 60 : 20,
+>>>>>>> main
     borderBottomWidth: 1,
     borderBottomColor: '#e0e0e0',
   },
@@ -448,7 +469,11 @@ const styles = StyleSheet.create({
   fab: {
     position: 'absolute',
     right: 20,
+<<<<<<< HEAD
     bottom: 70, // Above the tab bar
+=======
+    bottom: 20,
+>>>>>>> main
     width: 56,
     height: 56,
     borderRadius: 28,
