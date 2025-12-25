@@ -10,9 +10,9 @@
  * - Mac/Linux: ifconfig or ip addr
  */
 export const API_CONFIG = {
+  // Set EXPO_PUBLIC_API_URL in .env file (copy from .env.example)
   // For physical devices, use your computer's IP address
-  // Change this to match your network (check with: ipconfig)
-  baseURL: process.env.EXPO_PUBLIC_API_URL || 'http://192.168.68.55:3000',
+  baseURL: process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000',
 };
 
 export const getApiUrl = (endpoint: string): string => {
