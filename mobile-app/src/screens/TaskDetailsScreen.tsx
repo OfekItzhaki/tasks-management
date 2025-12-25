@@ -10,6 +10,10 @@ import {
   TextInput,
   Modal,
   RefreshControl,
+<<<<<<< HEAD
+  Platform,
+=======
+>>>>>>> main
 } from 'react-native';
 import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -21,6 +25,10 @@ import ReminderConfigComponent from '../components/ReminderConfig';
 import DatePicker from '../components/DatePicker';
 import { scheduleTaskReminders, cancelAllTaskNotifications } from '../services/notifications.service';
 import { EveryDayRemindersStorage, ReminderAlarmsStorage, ReminderTimesStorage } from '../utils/storage';
+<<<<<<< HEAD
+import { convertRemindersToBackend, formatDate } from '../utils/helpers';
+=======
+>>>>>>> main
 
 type TaskDetailsRouteProp = RouteProp<RootStackParamList, 'TaskDetails'>;
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -137,6 +145,8 @@ export default function TaskDetailsScreen() {
     return reminders;
   };
 
+<<<<<<< HEAD
+=======
   // Convert ReminderConfig format to backend format (reused from TasksScreen)
   const convertRemindersToBackend = (
     reminders: ReminderConfig[],
@@ -228,6 +238,7 @@ export default function TaskDetailsScreen() {
     return result;
   };
 
+>>>>>>> main
   const loadTaskData = async () => {
     try {
       const [taskData, stepsData] = await Promise.all([
@@ -293,8 +304,18 @@ export default function TaskDetailsScreen() {
       
       setEditReminders(convertedReminders);
     } catch (error: any) {
+<<<<<<< HEAD
+      // Silently ignore auth errors - the navigation will handle redirect to login
+      const isAuthError = error?.response?.status === 401 || 
+                          error?.message?.toLowerCase().includes('unauthorized');
+      if (!isAuthError) {
+        const errorMessage = error?.response?.data?.message || error?.message || 'Unable to load task. Please try again.';
+        Alert.alert('Error Loading Task', errorMessage);
+      }
+=======
       const errorMessage = error?.response?.data?.message || error?.message || 'Unable to load task. Please try again.';
       Alert.alert('Error Loading Task', errorMessage);
+>>>>>>> main
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -381,11 +402,29 @@ export default function TaskDetailsScreen() {
       }
       
       // Store reminder times for all reminders (backend doesn't store times)
+<<<<<<< HEAD
+      // Use normalized IDs that will match after reload from backend
+      const reminderTimes: Record<string, string> = {};
+      editReminders.forEach(reminder => {
+        if (reminder.time) {
+          // Generate normalized ID based on reminder properties (same as convertBackendToReminders)
+          let normalizedId = reminder.id;
+          if (reminder.daysBefore !== undefined && reminder.daysBefore > 0) {
+            normalizedId = `days-before-${reminder.daysBefore}`;
+          } else if (reminder.timeframe === ReminderTimeframe.EVERY_WEEK && reminder.dayOfWeek !== undefined) {
+            normalizedId = `day-of-week-${reminder.dayOfWeek}`;
+          } else if (reminder.timeframe === ReminderTimeframe.EVERY_DAY) {
+            normalizedId = reminder.id; // Keep the original ID for EVERY_DAY reminders
+          }
+          // Store the time with normalized ID
+          reminderTimes[normalizedId] = reminder.time;
+=======
       const reminderTimes: Record<string, string> = {};
       editReminders.forEach(reminder => {
         if (reminder.time && reminder.time !== '09:00') {
           // Only store if time is different from default
           reminderTimes[reminder.id] = reminder.time;
+>>>>>>> main
         }
       });
       
@@ -576,6 +615,8 @@ export default function TaskDetailsScreen() {
     );
   };
 
+<<<<<<< HEAD
+=======
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     const today = new Date();
@@ -600,6 +641,7 @@ export default function TaskDetailsScreen() {
     }
   };
 
+>>>>>>> main
   if (loading) {
     return (
       <View style={styles.center}>
@@ -623,6 +665,21 @@ export default function TaskDetailsScreen() {
 
   return (
     <View style={styles.container}>
+<<<<<<< HEAD
+      {/* Screen Header */}
+      <View style={styles.screenHeader}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Text style={styles.backButtonText}>← Back</Text>
+        </TouchableOpacity>
+        <Text style={styles.screenTitle}>Task Details</Text>
+        <View style={styles.headerSpacer} />
+      </View>
+
+=======
+>>>>>>> main
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
@@ -651,6 +708,15 @@ export default function TaskDetailsScreen() {
                   {task.description}
                 </Text>
               )}
+<<<<<<< HEAD
+              {/* Show completion count for repeating tasks */}
+              {!isEditing && task.completionCount > 0 && (
+                <Text style={styles.completionCountBadge}>
+                  🔄 Completed {task.completionCount} time{task.completionCount !== 1 ? 's' : ''}
+                </Text>
+              )}
+=======
+>>>>>>> main
             </View>
           </View>
 
@@ -683,8 +749,13 @@ export default function TaskDetailsScreen() {
               )}
             </View>
 
+<<<<<<< HEAD
+          {/* Display Reminders - only show when NOT editing (editing uses ReminderConfigComponent) */}
+          {!isEditing && (() => {
+=======
           {/* Display Reminders */}
           {(() => {
+>>>>>>> main
             const displayReminders = convertBackendToReminders(
               task.reminderDaysBefore,
               task.specificDayOfWeek,
@@ -694,11 +765,24 @@ export default function TaskDetailsScreen() {
             // Add client-side stored EVERY_DAY reminders for display
             let allDisplayReminders = [...displayReminders, ...displayEveryDayReminders];
             
+<<<<<<< HEAD
+            // Apply alarm states and saved times from state
+            allDisplayReminders = allDisplayReminders.map(r => {
+              // Find matching reminder in editReminders to get the correct time
+              const matchingReminder = editReminders.find(er => er.id === r.id);
+              return {
+                ...r,
+                hasAlarm: reminderAlarmStates[r.id] !== undefined ? reminderAlarmStates[r.id] : (r.hasAlarm || false),
+                time: matchingReminder?.time || r.time || '09:00',
+              };
+            });
+=======
             // Apply alarm states from state
             allDisplayReminders = allDisplayReminders.map(r => ({
               ...r,
               hasAlarm: reminderAlarmStates[r.id] !== undefined ? reminderAlarmStates[r.id] : (r.hasAlarm || false),
             }));
+>>>>>>> main
             
             if (allDisplayReminders.length > 0) {
               return (
@@ -936,6 +1020,35 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f5f5f5',
   },
+<<<<<<< HEAD
+  screenHeader: {
+    backgroundColor: '#fff',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 15,
+    paddingTop: Platform.OS === 'ios' ? 60 : 45, // Account for status bar
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+  },
+  backButton: {
+    padding: 5,
+  },
+  backButtonText: {
+    fontSize: 16,
+    color: '#007AFF',
+    fontWeight: '600',
+  },
+  screenTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  headerSpacer: {
+    width: 60, // Balance the back button width
+  },
+=======
+>>>>>>> main
   center: {
     flex: 1,
     justifyContent: 'center',
@@ -987,6 +1100,20 @@ const styles = StyleSheet.create({
     textDecorationLine: 'line-through',
     color: '#999',
   },
+<<<<<<< HEAD
+  completionCountBadge: {
+    fontSize: 13,
+    color: '#4CAF50',
+    fontWeight: '500',
+    backgroundColor: '#E8F5E9',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    marginTop: 8,
+    alignSelf: 'flex-start',
+  },
+=======
+>>>>>>> main
   editButton: {
     marginTop: 12,
     paddingVertical: 8,

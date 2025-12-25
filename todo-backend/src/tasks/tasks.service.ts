@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
@@ -122,7 +122,19 @@ export class TasksService {
   }
 
   async update(id: number, updateTaskDto: UpdateTaskDto, ownerId: number) {
-    await this.findTaskForUser(id, ownerId);
+    const existingTask = await this.findTaskForUser(id, ownerId);
+
+    // Track completedAt timestamp
+    let completedAt: Date | null | undefined = undefined;
+    if (updateTaskDto.completed !== undefined) {
+      if (updateTaskDto.completed && !existingTask.completed) {
+        // Task is being marked as completed
+        completedAt = new Date();
+      } else if (!updateTaskDto.completed && existingTask.completed) {
+        // Task is being unmarked as completed
+        completedAt = null;
+      }
+    }
 
     return this.prisma.task.update({
       where: { id },
@@ -132,6 +144,7 @@ export class TasksService {
         specificDayOfWeek: updateTaskDto.specificDayOfWeek,
         reminderDaysBefore: updateTaskDto.reminderDaysBefore,
         completed: updateTaskDto.completed,
+        ...(completedAt !== undefined && { completedAt }),
       },
     });
   }
@@ -340,5 +353,76 @@ export class TasksService {
     });
 
     return tasksWithReminders;
+  }
+
+  /**
+   * Restore an archived task back to its original list
+   */
+  async restore(id: number, ownerId: number) {
+    const task = await this.findTaskForUser(id, ownerId);
+    
+    // Check if task is in a FINISHED list
+    if (task.todoList.type !== ListType.FINISHED) {
+      throw new BadRequestException('Only archived tasks can be restored');
+    }
+
+    // Check if original list still exists
+    if (!task.originalListId) {
+      throw new BadRequestException('Original list information not available');
+    }
+
+    const originalList = await this.prisma.toDoList.findFirst({
+      where: {
+        id: task.originalListId,
+        ownerId,
+        deletedAt: null,
+      },
+    });
+
+    if (!originalList) {
+      throw new BadRequestException('Original list no longer exists');
+    }
+
+    // Restore task to original list
+    return this.prisma.task.update({
+      where: { id },
+      data: {
+        todoListId: task.originalListId,
+        originalListId: null,
+        completed: false,
+        completedAt: null,
+      },
+      include: {
+        steps: {
+          where: { deletedAt: null },
+          orderBy: { order: 'asc' },
+        },
+        todoList: true,
+      },
+    });
+  }
+
+  /**
+   * Permanently delete an archived task (hard delete)
+   */
+  async permanentDelete(id: number, ownerId: number) {
+    const task = await this.findTaskForUser(id, ownerId);
+    
+    // Only allow permanent deletion of archived tasks
+    if (task.todoList.type !== ListType.FINISHED) {
+      throw new BadRequestException('Only archived tasks can be permanently deleted. Use regular delete for active tasks.');
+    }
+
+    // Delete all steps first
+    await this.prisma.step.deleteMany({
+      where: { taskId: id },
+    });
+
+    // Then delete the task
+    await this.prisma.task.delete({
+      where: { id },
+    });
+
+    return { message: 'Task permanently deleted' };
   }
 }

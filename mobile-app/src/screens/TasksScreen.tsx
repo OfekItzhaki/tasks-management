@@ -237,12 +237,12 @@ export default function TasksScreen() {
           taskData.specificDayOfWeek = reminderData.specificDayOfWeek;
         } else {
           // Clear specificDayOfWeek if not in result
-          taskData.specificDayOfWeek = undefined;
+          taskData.specificDayOfWeek = null;
         }
       } else {
         // Explicitly set empty arrays to prevent backend defaults
         taskData.reminderDaysBefore = [];
-        taskData.specificDayOfWeek = undefined;
+        taskData.specificDayOfWeek = null;
       }
 
       const createdTask = await tasksService.create(listId, taskData);

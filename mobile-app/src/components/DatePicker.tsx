@@ -69,8 +69,8 @@ export default function DatePicker({
 
   const renderCalendar = () => {
     const today = new Date();
-    const currentYear = selectedDate?.getFullYear() || today.getFullYear();
-    const currentMonth = selectedDate?.getMonth() || today.getMonth();
+    const currentYear = selectedDate?.getFullYear() ?? today.getFullYear();
+    const currentMonth = selectedDate?.getMonth() ?? today.getMonth();
     const month = currentMonth + 1;
 
     const daysInMonth = getDaysInMonth(currentYear, month);
