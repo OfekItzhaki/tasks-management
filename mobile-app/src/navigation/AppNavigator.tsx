@@ -17,7 +17,7 @@ import { ListType } from '../types';
 export type RootStackParamList = {
   Auth: undefined;
   Main: undefined;
-  Tasks: { listId: number; listName: string; listType?: ListType };
+  Tasks: { listId: number; listName: string; listType: ListType };
   TaskDetails: { taskId: number };
 };
 

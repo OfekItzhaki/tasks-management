@@ -130,36 +130,5 @@ export class TasksService {
     }
   }
 }
->>>>>>> main
-
-  /**
-   * Restore a soft-deleted task
-   */
-  async restore(id: number): Promise<Task> {
-    try {
-      const response = await apiClient.patch<Task>(`/tasks/${id}/restore`);
-      return response.data;
-    } catch (error) {
-      if (error instanceof ApiError) {
-        throw error;
-      }
-      throw new ApiError(0, 'Failed to restore task');
-    }
-  }
-
-  /**
-   * Permanently delete a task
-   */
-  async permanentDelete(id: number): Promise<void> {
-    try {
-      await apiClient.delete(`/tasks/${id}/permanent`);
-    } catch (error) {
-      if (error instanceof ApiError) {
-        throw error;
-      }
-      throw new ApiError(0, 'Failed to permanently delete task');
-    }
-  }
-}
 
 export const tasksService = new TasksService();

@@ -44,7 +44,6 @@ export interface Task {
   dueDate: string | null;
   reminderDaysBefore: number[];
   specificDayOfWeek: number | null;
-  completionCount: number;
   createdAt: string;
   updatedAt: string;
   todoList?: ToDoList;
@@ -163,8 +162,3 @@ export interface TaskReminderConfig {
   reminders: ReminderConfig[];
   dueDate?: string; // ISO date string
 }
-
-
-
-
-
