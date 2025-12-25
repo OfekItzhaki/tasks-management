@@ -43,6 +43,11 @@ export default function TasksScreen() {
   const [showSortMenu, setShowSortMenu] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false);
+
+  useEffect(() => {
+    loadTasks();
+  }, [listId]);
+
   const [allTasks, setAllTasks] = useState<Task[]>([]);
 
   const loadTasks = async () => {
@@ -232,12 +237,12 @@ export default function TasksScreen() {
           taskData.specificDayOfWeek = reminderData.specificDayOfWeek;
         } else {
           // Clear specificDayOfWeek if not in result
-          taskData.specificDayOfWeek = null;
+          taskData.specificDayOfWeek = undefined;
         }
       } else {
         // Explicitly set empty arrays to prevent backend defaults
         taskData.reminderDaysBefore = [];
-        taskData.specificDayOfWeek = null;
+        taskData.specificDayOfWeek = undefined;
       }
 
       const createdTask = await tasksService.create(listId, taskData);

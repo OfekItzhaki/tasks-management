@@ -27,11 +27,6 @@ export default function DatePicker({
   const [selectedDate, setSelectedDate] = useState<Date | null>(
     value ? new Date(value) : null,
   );
-  // Separate state for the displayed month in the calendar (independent of selected date)
-  const [displayMonth, setDisplayMonth] = useState<Date>(() => {
-    if (value) return new Date(value);
-    return new Date();
-  });
 
   const formatDate = (date: Date): string => {
     const year = date.getFullYear();
@@ -74,9 +69,8 @@ export default function DatePicker({
 
   const renderCalendar = () => {
     const today = new Date();
-    // Use displayMonth for calendar navigation (not selectedDate)
-    const currentYear = displayMonth.getFullYear();
-    const currentMonth = displayMonth.getMonth();
+    const currentYear = selectedDate?.getFullYear() || today.getFullYear();
+    const currentMonth = selectedDate?.getMonth() || today.getMonth();
     const month = currentMonth + 1;
 
     const daysInMonth = getDaysInMonth(currentYear, month);
@@ -147,7 +141,8 @@ export default function DatePicker({
       if (minimumDate && lastDayOfTarget < minimumDate) return;
       if (maximumDate && firstDayOfTarget > maximumDate) return;
 
-      setDisplayMonth(firstDayOfTarget);
+      // Update selectedDate to navigate to the new month
+      setSelectedDate(firstDayOfTarget);
     };
 
     return (
@@ -250,17 +245,11 @@ export default function DatePicker({
     );
   };
 
-  const openPicker = () => {
-    // Reset display month to selected date's month, or current month if no selection
-    setDisplayMonth(selectedDate ? new Date(selectedDate) : new Date());
-    setShowPicker(true);
-  };
-
   return (
     <View>
       <TouchableOpacity
         style={styles.input}
-        onPress={openPicker}
+        onPress={() => setShowPicker(true)}
       >
         <Text
           style={[
