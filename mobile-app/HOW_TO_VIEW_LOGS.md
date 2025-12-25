@@ -66,6 +66,3 @@ useEffect(() => {
 ```
 
 If you see "TEST LOG" in the Metro terminal, logs are working!
-
-
-

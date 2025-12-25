@@ -8,6 +8,7 @@ export enum ListType {
   MONTHLY = 'MONTHLY',
   YEARLY = 'YEARLY',
   CUSTOM = 'CUSTOM',
+  FINISHED = 'FINISHED',
 }
 
 export interface User {
@@ -26,6 +27,7 @@ export interface ToDoList {
   type: ListType;
   ownerId: number;
   order: number;
+  isSystem?: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -39,6 +41,7 @@ export interface Task {
   dueDate: string | null;
   reminderDaysBefore: number[];
   specificDayOfWeek: number | null;
+  completionCount: number;
   createdAt: string;
   updatedAt: string;
   todoList?: ToDoList;

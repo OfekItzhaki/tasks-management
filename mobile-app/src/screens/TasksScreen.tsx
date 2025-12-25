@@ -140,7 +140,6 @@ export default function TasksScreen() {
     }
   };
 
-  // Convert reminder configs to backend format
   const handleAddTask = async () => {
     if (!newTaskDescription.trim()) {
       Alert.alert('Validation Error', 'Please enter a task description before adding.');
@@ -866,5 +865,3 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 });
-
-

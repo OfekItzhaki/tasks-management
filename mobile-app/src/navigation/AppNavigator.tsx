@@ -12,10 +12,12 @@ import TasksScreen from '../screens/TasksScreen';
 import TaskDetailsScreen from '../screens/TaskDetailsScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 
+import { ListType } from '../types';
+
 export type RootStackParamList = {
   Auth: undefined;
   Main: undefined;
-  Tasks: { listId: number; listName: string };
+  Tasks: { listId: number; listName: string; listType?: ListType };
   TaskDetails: { taskId: number };
 };
 
@@ -92,4 +94,3 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
 });
-

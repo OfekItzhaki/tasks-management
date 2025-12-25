@@ -706,7 +706,7 @@ export default function TaskDetailsScreen() {
           ) : (
             steps.map((step) => {
               const stepCompleted = Boolean(step.completed);
-              const isEditing = editingStepId === step.id;
+              const isEditingStep = editingStepId === step.id;
               
               return (
                 <View
@@ -723,7 +723,7 @@ export default function TaskDetailsScreen() {
                     {stepCompleted && <Text style={styles.checkmark}>✓</Text>}
                   </TouchableOpacity>
                   
-                  {isEditing ? (
+                  {isEditingStep ? (
                     <View style={styles.stepEditContainer}>
                       <TextInput
                         style={styles.stepEditInput}
@@ -1281,4 +1281,3 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
 });
-

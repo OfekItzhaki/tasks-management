@@ -102,5 +102,3 @@ const createApiClient = (): AxiosInstance => {
 };
 
 export const apiClient = createApiClient();
-
-
