@@ -32,8 +32,11 @@ export default function TasksScreen() {
   const navigation = useNavigation<NavigationProp>();
   const { listId, listName, listType } = route.params;
   
-  // Check if this is a repeating list (shows completion count)
-  const isRepeatingList = [ListType.DAILY, ListType.WEEKLY, ListType.MONTHLY, ListType.YEARLY].includes(listType as ListType);
+  // Helper to check if a task has repeating reminders (based on task properties, not list type)
+  const isRepeatingTask = (task: Task): boolean => {
+    // Task has weekly reminder if specificDayOfWeek is set
+    return task.specificDayOfWeek !== null && task.specificDayOfWeek !== undefined;
+  };
   // Check if this is the archived list
   const isArchivedList = listType === ListType.FINISHED;
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -85,8 +88,6 @@ export default function TasksScreen() {
 
   const applySorting = (tasksToSort: Task[]) => {
     const sorted = [...tasksToSort];
-
-    console.log('Sorting tasks by:', sortBy, 'Count:', sorted.length);
 
     switch (sortBy) {
       case 'dueDate':
@@ -437,7 +438,7 @@ export default function TasksScreen() {
                         Due: {formatDate(item.dueDate)}
                       </Text>
                     )}
-                    {isRepeatingList && completionCount > 0 && (
+                    {isRepeatingTask(item) && completionCount > 0 && (
                       <Text style={styles.completionCount}>
                         🔄 {completionCount}x completed
                       </Text>

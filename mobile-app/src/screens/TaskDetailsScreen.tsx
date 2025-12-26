@@ -15,7 +15,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { tasksService } from '../services/tasks.service';
 import { stepsService } from '../services/steps.service';
-import { Task, Step, UpdateTaskDto, ReminderConfig, ReminderTimeframe, ReminderSpecificDate, ListType } from '../types';
+import { Task, Step, UpdateTaskDto, ReminderConfig, ReminderTimeframe, ReminderSpecificDate } from '../types';
 import ReminderConfigComponent from '../components/ReminderConfig';
 import DatePicker from '../components/DatePicker';
 import { scheduleTaskReminders, cancelAllTaskNotifications } from '../services/notifications.service';
@@ -514,13 +514,12 @@ export default function TaskDetailsScreen() {
   const totalSteps = steps.length;
   const stepsProgress = totalSteps > 0 ? (completedSteps / totalSteps) * 100 : 0;
   
-  // Check if task is in a repeating list
-  const isRepeatingList = task.todoList && [
-    ListType.DAILY,
-    ListType.WEEKLY,
-    ListType.MONTHLY,
-    ListType.YEARLY
-  ].includes(task.todoList.type as ListType);
+  // Check if task has repeating reminders (based on task properties, not list type)
+  // A task is repeating if it has weekly reminders (specificDayOfWeek) or daily reminders (client-side)
+  const isRepeatingTask = (
+    (task.specificDayOfWeek !== null && task.specificDayOfWeek !== undefined) ||
+    displayEveryDayReminders.length > 0
+  );
 
   return (
     <View style={styles.container}>
@@ -566,7 +565,7 @@ export default function TaskDetailsScreen() {
                 </Text>
               )}
               {/* Show completion count for repeating tasks */}
-              {!isEditing && isRepeatingList && task.completionCount > 0 && (
+              {!isEditing && isRepeatingTask && task.completionCount > 0 && (
                 <Text style={styles.completionCountBadge}>
                   🔄 Completed {task.completionCount} time{task.completionCount !== 1 ? 's' : ''}
                 </Text>
