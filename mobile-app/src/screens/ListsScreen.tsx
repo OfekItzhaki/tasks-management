@@ -211,6 +211,7 @@ export default function ListsScreen() {
       <FlatList
         data={lists}
         keyExtractor={(item) => item.id.toString()}
+        showsVerticalScrollIndicator={true}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
