@@ -13,6 +13,7 @@ import {
   ReminderSpecificDate,
 } from '../types';
 import ReminderEditor from './ReminderEditor';
+import { formatReminderDisplay } from '../utils/helpers';
 
 interface ReminderConfigProps {
   reminders: ReminderConfig[];
@@ -35,15 +36,6 @@ const SPECIFIC_DATES = [
   { value: ReminderSpecificDate.CUSTOM_DATE, label: 'Custom Date' },
 ];
 
-const DAY_NAMES = [
-  'Sunday',
-  'Monday',
-  'Tuesday',
-  'Wednesday',
-  'Thursday',
-  'Friday',
-  'Saturday',
-];
 
 export default function ReminderConfigComponent({
   reminders,
@@ -122,47 +114,6 @@ export default function ReminderConfigComponent({
     setShowTimeframePicker(true);
   };
 
-  const formatReminder = (reminder: ReminderConfig): string => {
-    const timeStr = reminder.time || '09:00';
-    let description = '';
-
-    switch (reminder.timeframe) {
-      case ReminderTimeframe.SPECIFIC_DATE:
-        if (reminder.specificDate === ReminderSpecificDate.START_OF_WEEK) {
-          description = `Every Monday at ${timeStr}`;
-        } else if (reminder.specificDate === ReminderSpecificDate.START_OF_MONTH) {
-          description = `1st of every month at ${timeStr}`;
-        } else if (reminder.specificDate === ReminderSpecificDate.START_OF_YEAR) {
-          description = `Jan 1st every year at ${timeStr}`;
-        } else if (reminder.customDate) {
-          const date = new Date(reminder.customDate);
-          description = `${date.toLocaleDateString()} at ${timeStr}`;
-        } else {
-          description = `Specific date at ${timeStr}`;
-        }
-        break;
-      case ReminderTimeframe.EVERY_DAY:
-        description = `Every day at ${timeStr}`;
-        break;
-      case ReminderTimeframe.EVERY_WEEK:
-        const dayName = reminder.dayOfWeek !== undefined ? DAY_NAMES[reminder.dayOfWeek] : 'Monday';
-        description = `Every ${dayName} at ${timeStr}`;
-        break;
-      case ReminderTimeframe.EVERY_MONTH:
-        description = `1st of every month at ${timeStr}`;
-        break;
-      case ReminderTimeframe.EVERY_YEAR:
-        description = `Same date every year at ${timeStr}`;
-        break;
-    }
-
-    if (reminder.daysBefore !== undefined) {
-      description = `${reminder.daysBefore} day(s) before due date at ${timeStr}`;
-    }
-
-    return description;
-  };
-
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -183,7 +134,7 @@ export default function ReminderConfigComponent({
             <View key={reminder.id} style={styles.reminderItem}>
               <View style={styles.reminderContent}>
                 <View style={styles.reminderTextRow}>
-                  <Text style={styles.reminderText}>{formatReminder(reminder)}</Text>
+                  <Text style={styles.reminderText}>{formatReminderDisplay(reminder)}</Text>
                   <Text style={styles.alarmIndicator}>
                     {reminder.hasAlarm ? '🔔' : '🔕'}
                   </Text>

@@ -20,3 +20,4 @@ services:
         generateValue: true  # Auto-generate a secure value
       - key: PORT
         value: 3000
+

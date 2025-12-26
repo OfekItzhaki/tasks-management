@@ -20,7 +20,7 @@ import ReminderConfigComponent from '../components/ReminderConfig';
 import DatePicker from '../components/DatePicker';
 import { scheduleTaskReminders, cancelAllTaskNotifications } from '../services/notifications.service';
 import { EveryDayRemindersStorage, ReminderAlarmsStorage, ReminderTimesStorage } from '../utils/storage';
-import { convertRemindersToBackend, formatDate } from '../utils/helpers';
+import { convertRemindersToBackend, formatDate, formatReminderDisplay } from '../utils/helpers';
 import { styles } from './styles/TaskDetailsScreen.styles';
 
 type TaskDetailsRouteProp = RouteProp<RootStackParamList, 'TaskDetails'>;
@@ -55,49 +55,6 @@ export default function TaskDetailsScreen() {
     loadTaskData();
   }, [taskId]);
 
-  // Format reminder for display
-  const formatReminderDisplay = (reminder: ReminderConfig): string => {
-    const timeStr = reminder.time || '09:00';
-    let description = '';
-
-    if (reminder.daysBefore !== undefined && reminder.daysBefore > 0) {
-      description = `${reminder.daysBefore} day(s) before due date at ${timeStr}`;
-      return description;
-    }
-
-    switch (reminder.timeframe) {
-      case ReminderTimeframe.SPECIFIC_DATE:
-        if (reminder.specificDate === ReminderSpecificDate.START_OF_WEEK) {
-          description = `Every Monday at ${timeStr}`;
-        } else if (reminder.specificDate === ReminderSpecificDate.START_OF_MONTH) {
-          description = `1st of every month at ${timeStr}`;
-        } else if (reminder.specificDate === ReminderSpecificDate.START_OF_YEAR) {
-          description = `Jan 1st every year at ${timeStr}`;
-        } else if (reminder.customDate) {
-          const date = new Date(reminder.customDate);
-          description = `${date.toLocaleDateString()} at ${timeStr}`;
-        } else {
-          description = `Specific date at ${timeStr}`;
-        }
-        break;
-      case ReminderTimeframe.EVERY_DAY:
-        description = `Every day at ${timeStr}`;
-        break;
-      case ReminderTimeframe.EVERY_WEEK:
-        const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-        const dayName = reminder.dayOfWeek !== undefined ? dayNames[reminder.dayOfWeek] : 'Monday';
-        description = `Every ${dayName} at ${timeStr}`;
-        break;
-      case ReminderTimeframe.EVERY_MONTH:
-        description = `1st of every month at ${timeStr}`;
-        break;
-      case ReminderTimeframe.EVERY_YEAR:
-        description = `Same date every year at ${timeStr}`;
-        break;
-    }
-
-    return description;
-  };
 
   // Convert backend format to ReminderConfig format
   const convertBackendToReminders = (
