@@ -15,7 +15,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { tasksService } from '../services/tasks.service';
 import { stepsService } from '../services/steps.service';
-import { Task, Step, UpdateTaskDto, ReminderConfig, ReminderTimeframe, ReminderSpecificDate } from '../types';
+import { Task, Step, UpdateTaskDto, ReminderConfig, ReminderTimeframe, ReminderSpecificDate, ListType } from '../types';
 import ReminderConfigComponent from '../components/ReminderConfig';
 import DatePicker from '../components/DatePicker';
 import { scheduleTaskReminders, cancelAllTaskNotifications } from '../services/notifications.service';
@@ -478,6 +478,14 @@ export default function TaskDetailsScreen() {
   const completedSteps = steps.filter((s) => s.completed).length;
   const totalSteps = steps.length;
   const stepsProgress = totalSteps > 0 ? (completedSteps / totalSteps) * 100 : 0;
+  
+  // Check if task is in a repeating list
+  const isRepeatingList = task.todoList && [
+    ListType.DAILY,
+    ListType.WEEKLY,
+    ListType.MONTHLY,
+    ListType.YEARLY
+  ].includes(task.todoList.type as ListType);
 
   return (
     <View style={styles.container}>
@@ -497,6 +505,7 @@ export default function TaskDetailsScreen() {
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        showsVerticalScrollIndicator={true}
       >
         {/* Task Header */}
         <View style={styles.header}>
@@ -522,7 +531,7 @@ export default function TaskDetailsScreen() {
                 </Text>
               )}
               {/* Show completion count for repeating tasks */}
-              {!isEditing && task.completionCount > 0 && (
+              {!isEditing && isRepeatingList && task.completionCount > 0 && (
                 <Text style={styles.completionCountBadge}>
                   🔄 Completed {task.completionCount} time{task.completionCount !== 1 ? 's' : ''}
                 </Text>
