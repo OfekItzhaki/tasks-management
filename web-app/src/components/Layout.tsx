@@ -1,9 +1,8 @@
-import { Outlet, Link, useLocation } from 'react-router-dom';
+import { Outlet, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 export default function Layout() {
   const { user, logout } = useAuth();
-  const location = useLocation();
 
   const handleLogout = async () => {
     await logout();
