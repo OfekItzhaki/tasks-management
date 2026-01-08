@@ -1,10 +1,10 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { PrismaService } from '../prisma/prisma.service';
 import { ListType } from '@prisma/client';
 
 @Injectable()
-export class TaskSchedulerService {
+export class TaskSchedulerService implements OnModuleInit {
   private readonly logger = new Logger(TaskSchedulerService.name);
   
   // Archive delay in minutes - how long to wait after task completion before moving to Finished list
@@ -14,6 +14,12 @@ export class TaskSchedulerService {
   private readonly FINISHED_LIST_NAME = 'Finished Tasks';
 
   constructor(private prisma: PrismaService) {}
+
+  async onModuleInit() {
+    // Check and reset daily tasks on startup (in case server was down at midnight)
+    this.logger.log('Checking if daily tasks need to be reset...');
+    await this.checkAndResetDailyTasksIfNeeded();
+  }
 
   /**
    * Get or create the system "Finished Tasks" list for a user
@@ -110,22 +116,23 @@ export class TaskSchedulerService {
 
   /**
    * Runs at midnight every day to reset DAILY tasks
+   * Also checks on app startup and can be called manually
    */
   @Cron('0 0 * * *') // Every day at midnight
   async resetDailyTasks() {
-    // First, increment completion count for all completed daily tasks
-    await this.prisma.$executeRaw`
-      UPDATE "Task" 
-      SET "completionCount" = "completionCount" + 1
-      WHERE "completed" = true 
-      AND "deletedAt" IS NULL
-      AND "todoListId" IN (
-        SELECT "id" FROM "ToDoList" 
-        WHERE "type" = 'DAILY' AND "deletedAt" IS NULL
-      )
-    `;
+    await this.resetDailyTasksInternal();
+  }
 
-    const result = await this.prisma.task.updateMany({
+  /**
+   * Check if daily tasks need to be reset (if completedAt is from a previous day)
+   * This ensures tasks reset even if cron job didn't run
+   */
+  async checkAndResetDailyTasksIfNeeded() {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // Find completed daily tasks that were completed before today
+    const tasksToReset = await this.prisma.task.findMany({
       where: {
         completed: true,
         deletedAt: null,
@@ -133,6 +140,59 @@ export class TaskSchedulerService {
           type: ListType.DAILY,
           deletedAt: null,
         },
+        OR: [
+          { completedAt: { lt: today } },
+          { completedAt: null }, // Also reset if completedAt is null but task is marked completed
+        ],
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    if (tasksToReset.length > 0) {
+      this.logger.log(`Found ${tasksToReset.length} daily tasks that need reset (completed before today)`);
+      await this.resetDailyTasksInternal();
+    }
+  }
+
+  /**
+   * Internal method to reset daily tasks - can be called manually or by cron
+   */
+  async resetDailyTasksInternal() {
+    // Get all completed daily tasks first
+    const completedDailyTasks = await this.prisma.task.findMany({
+      where: {
+        completed: true,
+        deletedAt: null,
+        todoList: {
+          type: ListType.DAILY,
+          deletedAt: null,
+        },
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    if (completedDailyTasks.length === 0) {
+      this.logger.log('No daily tasks to reset');
+      return;
+    }
+
+    const taskIds = completedDailyTasks.map(t => t.id);
+
+    // First, increment completion count for all completed daily tasks
+    await this.prisma.$executeRaw`
+      UPDATE "Task" 
+      SET "completionCount" = "completionCount" + 1
+      WHERE "id" = ANY(${taskIds}::int[])
+    `;
+
+    // Reset tasks
+    const result = await this.prisma.task.updateMany({
+      where: {
+        id: { in: taskIds },
       },
       data: {
         completed: false,
@@ -144,23 +204,21 @@ export class TaskSchedulerService {
       this.logger.log(`Reset ${result.count} daily tasks (completion counts incremented)`);
     }
 
-    // Also reset steps for these tasks
-    await this.prisma.step.updateMany({
+    // Reset steps for these specific tasks (more reliable than nested relation query)
+    const stepResult = await this.prisma.step.updateMany({
       where: {
         completed: true,
         deletedAt: null,
-        task: {
-          deletedAt: null,
-          todoList: {
-            type: ListType.DAILY,
-            deletedAt: null,
-          },
-        },
+        taskId: { in: taskIds },
       },
       data: {
         completed: false,
       },
     });
+
+    if (stepResult.count > 0) {
+      this.logger.log(`Reset ${stepResult.count} steps in daily tasks`);
+    }
   }
 
   /**

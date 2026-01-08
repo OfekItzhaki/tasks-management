@@ -1,12 +1,17 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Inject, forwardRef } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { ListType } from '../todo-lists/dto/create-todo-list.dto';
+import { TaskSchedulerService } from '../task-scheduler/task-scheduler.service';
 
 @Injectable()
 export class TasksService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    @Inject(forwardRef(() => TaskSchedulerService))
+    private taskScheduler: TaskSchedulerService,
+  ) {}
 
   private async ensureListAccess(todoListId: number, userId: number) {
     // Check if user owns the list OR has shared access to it
@@ -83,6 +88,17 @@ export class TasksService {
   }
 
   async findAll(userId: number, todoListId?: number) {
+    // If loading from a daily list, check if tasks need to be reset
+    if (todoListId) {
+      const list = await this.prisma.toDoList.findFirst({
+        where: { id: todoListId, deletedAt: null },
+      });
+      if (list?.type === ListType.DAILY) {
+        // Check and reset daily tasks if needed (in case cron didn't run)
+        await this.taskScheduler.checkAndResetDailyTasksIfNeeded();
+      }
+    }
+
     const where: any = {
       deletedAt: null,
       todoList: {
