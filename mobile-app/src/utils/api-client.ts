@@ -1,6 +1,6 @@
 import axios, { AxiosInstance, AxiosError } from 'axios';
 import { getApiUrl } from '../config/api';
-import { TokenStorage } from './storage';
+import { TokenStorage, UserStorage } from './storage';
 import { normalizeBooleans } from './normalize';
 
 /**
@@ -26,6 +26,7 @@ const createApiClient = (): AxiosInstance => {
     headers: {
       'Content-Type': 'application/json',
     },
+    timeout: 30000, // 30 seconds timeout
   });
 
   // Request interceptor: Add auth token
@@ -51,10 +52,19 @@ const createApiClient = (): AxiosInstance => {
       }
       return response;
     },
-    (error: AxiosError) => {
+    async (error: AxiosError) => {
       if (error.response) {
         const statusCode = error.response.status;
         const serverMessage = (error.response.data as any)?.message;
+        
+        // Handle 401 Unauthorized - clear auth and redirect to login
+        if (statusCode === 401) {
+          // Clear token and user storage
+          await TokenStorage.removeToken();
+          await UserStorage.removeUser();
+          // The AuthContext will detect the user is null and redirect to login
+          console.log('Unauthorized - cleared token and user storage');
+        }
         
         // Provide user-friendly messages for common HTTP errors
         let message: string;
@@ -63,7 +73,7 @@ const createApiClient = (): AxiosInstance => {
             message = serverMessage || 'Invalid request. Please check your input.';
             break;
           case 401:
-            message = serverMessage || 'Invalid credentials. Please try again.';
+            message = serverMessage || 'Session expired. Please log in again.';
             break;
           case 403:
             message = 'You do not have permission to perform this action.';
@@ -87,13 +97,20 @@ const createApiClient = (): AxiosInstance => {
         }
         throw new ApiError(statusCode, message, error.response.data);
       } else if (error.request) {
+        // Check if it's a timeout error
+        if (error.code === 'ECONNABORTED' || error.message?.includes('timeout')) {
+          throw new ApiError(
+            0,
+            'Request is taking too long. The server may be slow or unavailable. Please try again later.',
+          );
+        }
         // Network error - server not reachable
         throw new ApiError(
           0, 
-          'Unable to connect to server. Please check your internet connection and try again.',
+          'Unable to connect to server. Please check your internet connection and try again later.',
         );
       } else {
-        throw new ApiError(0, 'Something went wrong. Please try again.');
+        throw new ApiError(0, 'Something went wrong. Please try again later.');
       }
     },
   );
