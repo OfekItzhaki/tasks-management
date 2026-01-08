@@ -57,8 +57,14 @@ export default function ListsScreen() {
       const isAuthError = error?.response?.status === 401 || 
                           error?.message?.toLowerCase()?.includes('unauthorized');
       if (!isAuthError) {
-        const errorMessage = error?.response?.data?.message || error?.message || 'Unable to load lists. Please try again.';
-        Alert.alert('Error Loading Lists', errorMessage);
+        const errorMessage = error?.message || error?.response?.data?.message || 'Unable to load lists.';
+        const isTimeout = errorMessage.toLowerCase().includes('too long') || 
+                         errorMessage.toLowerCase().includes('timeout') ||
+                         error?.code === 'ECONNABORTED';
+        const finalMessage = isTimeout 
+          ? 'Loading lists is taking too long. Please try again later.'
+          : errorMessage + ' Please try again later.';
+        Alert.alert('Error Loading Lists', finalMessage);
       }
     } finally {
       setLoading(false);

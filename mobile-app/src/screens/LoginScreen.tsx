@@ -31,11 +31,24 @@ export default function LoginScreen() {
       // Navigation will be handled by AppNavigator via AuthContext
     } catch (error: any) {
       const errorMessage = error.message || 'Invalid credentials';
-      // Use different title based on error type (network vs auth)
-      const isNetworkError = error.statusCode === 0 || errorMessage.toLowerCase().includes('connect');
+      // Check for timeout or slow connection
+      const isTimeout = errorMessage.toLowerCase().includes('too long') || 
+                       errorMessage.toLowerCase().includes('timeout') ||
+                       error?.code === 'ECONNABORTED';
+      const isNetworkError = error.statusCode === 0 || 
+                            errorMessage.toLowerCase().includes('connect') ||
+                            isTimeout;
+      
+      let finalMessage = errorMessage;
+      if (isTimeout) {
+        finalMessage = 'Login is taking too long. Please try again later.';
+      } else if (isNetworkError && !isTimeout) {
+        finalMessage = errorMessage + ' Please try again later.';
+      }
+      
       Alert.alert(
         isNetworkError ? 'Connection Error' : 'Login Failed',
-        errorMessage,
+        finalMessage,
         [{ text: 'OK', style: 'default' }],
         { cancelable: true },
       );
@@ -58,11 +71,24 @@ export default function LoginScreen() {
       setPassword('');
     } catch (error: any) {
       const errorMessage = error.message || 'Could not create account';
-      // Use different title based on error type (network vs other)
-      const isNetworkError = error.statusCode === 0 || errorMessage.toLowerCase().includes('connect');
+      // Check for timeout or slow connection
+      const isTimeout = errorMessage.toLowerCase().includes('too long') || 
+                       errorMessage.toLowerCase().includes('timeout') ||
+                       error?.code === 'ECONNABORTED';
+      const isNetworkError = error.statusCode === 0 || 
+                            errorMessage.toLowerCase().includes('connect') ||
+                            isTimeout;
+      
+      let finalMessage = errorMessage;
+      if (isTimeout) {
+        finalMessage = 'Registration is taking too long. Please try again later.';
+      } else if (isNetworkError && !isTimeout) {
+        finalMessage = errorMessage + ' Please try again later.';
+      }
+      
       Alert.alert(
         isNetworkError ? 'Connection Error' : 'Registration Failed',
-        errorMessage,
+        finalMessage,
         [{ text: 'OK', style: 'default' }],
         { cancelable: true },
       );

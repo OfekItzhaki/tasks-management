@@ -67,8 +67,14 @@ export default function TasksScreen() {
       const isAuthError = error?.response?.status === 401 || 
                           error?.message?.toLowerCase()?.includes('unauthorized');
       if (!isAuthError) {
-        const errorMessage = error?.response?.data?.message || error?.message || 'Unable to load tasks. Please try again.';
-        Alert.alert('Error Loading Tasks', errorMessage);
+        const errorMessage = error?.message || error?.response?.data?.message || 'Unable to load tasks.';
+        const isTimeout = errorMessage.toLowerCase().includes('too long') || 
+                         errorMessage.toLowerCase().includes('timeout') ||
+                         error?.code === 'ECONNABORTED';
+        const finalMessage = isTimeout 
+          ? 'Loading tasks is taking too long. Please try again later.'
+          : errorMessage + ' Please try again later.';
+        Alert.alert('Error Loading Tasks', finalMessage);
       }
     } finally {
       setLoading(false);
