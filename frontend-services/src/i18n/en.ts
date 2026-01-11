@@ -103,6 +103,12 @@ export default {
     yes: 'Yes',
     no: 'No',
     memberSince: 'Member Since',
+    about: 'About',
+    version: 'Version',
+    credits: 'Credits',
+    creditsValue: 'Tasks Management team',
+    sourceCode: 'Source code',
+    openRepo: 'Open repo',
   },
 } as const;
 
