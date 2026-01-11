@@ -1,42 +1,30 @@
-import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { listsService } from '../services/lists.service';
 import { ToDoList, ApiError } from '@tasks-management/frontend-services';
+import { formatApiError } from '../utils/formatApiError';
 
 export default function ListsPage() {
-  const [lists, setLists] = useState<ToDoList[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const {
+    data: lists = [],
+    isLoading,
+    isError,
+    error,
+  } = useQuery<ToDoList[], ApiError>({
+    queryKey: ['lists'],
+    queryFn: () => listsService.getAllLists(),
+  });
 
-  useEffect(() => {
-    loadLists();
-  }, []);
-
-  const loadLists = async () => {
-    try {
-      setLoading(true);
-      const data = await listsService.getAllLists();
-      setLists(data);
-      setError('');
-    } catch (err: unknown) {
-      const error = err as ApiError;
-      const errorMessage = Array.isArray(error.message)
-        ? error.message.join(', ')
-        : error.message || 'Failed to load lists';
-      setError(errorMessage);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (loading) {
+  if (isLoading) {
     return <div className="text-center py-8">Loading lists...</div>;
   }
 
-  if (error) {
+  if (isError) {
     return (
       <div className="rounded-md bg-red-50 p-4">
-        <div className="text-sm text-red-800">{error}</div>
+        <div className="text-sm text-red-800">
+          {formatApiError(error, 'Failed to load lists')}
+        </div>
       </div>
     );
   }

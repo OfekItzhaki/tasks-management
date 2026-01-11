@@ -1,47 +1,35 @@
-import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useParams, Link } from 'react-router-dom';
 import { tasksService } from '../services/tasks.service';
 import { Task, ApiError } from '@tasks-management/frontend-services';
+import { formatApiError } from '../utils/formatApiError';
 
 export default function TasksPage() {
   const { listId } = useParams<{ listId: string }>();
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
 
-  useEffect(() => {
-    if (listId) {
-      loadTasks();
-    }
-  }, [listId]);
+  const numericListId = listId ? Number(listId) : null;
 
-  const loadTasks = async () => {
-    if (!listId) return;
+  const {
+    data: tasks = [],
+    isLoading,
+    isError,
+    error,
+  } = useQuery<Task[], ApiError>({
+    queryKey: ['tasks', numericListId],
+    enabled: typeof numericListId === 'number' && !Number.isNaN(numericListId),
+    queryFn: () => tasksService.getTasksByList(numericListId as number),
+  });
 
-    try {
-      setLoading(true);
-      const data = await tasksService.getTasksByList(parseInt(listId));
-      setTasks(data);
-      setError('');
-    } catch (err: unknown) {
-      const error = err as ApiError;
-      const errorMessage = Array.isArray(error.message)
-        ? error.message.join(', ')
-        : error.message || 'Failed to load tasks';
-      setError(errorMessage);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (loading) {
+  if (isLoading) {
     return <div className="text-center py-8">Loading tasks...</div>;
   }
 
-  if (error) {
+  if (isError) {
     return (
       <div className="rounded-md bg-red-50 p-4">
-        <div className="text-sm text-red-800">{error}</div>
+        <div className="text-sm text-red-800">
+          {formatApiError(error, 'Failed to load tasks')}
+        </div>
       </div>
     );
   }

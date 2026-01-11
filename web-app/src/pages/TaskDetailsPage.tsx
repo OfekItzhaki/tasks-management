@@ -1,47 +1,35 @@
-import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useParams, Link } from 'react-router-dom';
 import { tasksService } from '../services/tasks.service';
 import { Task, ApiError } from '@tasks-management/frontend-services';
+import { formatApiError } from '../utils/formatApiError';
 
 export default function TaskDetailsPage() {
   const { taskId } = useParams<{ taskId: string }>();
-  const [task, setTask] = useState<Task | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
 
-  useEffect(() => {
-    if (taskId) {
-      loadTask();
-    }
-  }, [taskId]);
+  const numericTaskId = taskId ? Number(taskId) : null;
 
-  const loadTask = async () => {
-    if (!taskId) return;
+  const {
+    data: task,
+    isLoading,
+    isError,
+    error,
+  } = useQuery<Task, ApiError>({
+    queryKey: ['task', numericTaskId],
+    enabled: typeof numericTaskId === 'number' && !Number.isNaN(numericTaskId),
+    queryFn: () => tasksService.getTaskById(numericTaskId as number),
+  });
 
-    try {
-      setLoading(true);
-      const data = await tasksService.getTaskById(parseInt(taskId));
-      setTask(data);
-      setError('');
-    } catch (err: unknown) {
-      const error = err as ApiError;
-      const errorMessage = Array.isArray(error.message)
-        ? error.message.join(', ')
-        : error.message || 'Failed to load task';
-      setError(errorMessage);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (loading) {
+  if (isLoading) {
     return <div className="text-center py-8">Loading task...</div>;
   }
 
-  if (error || !task) {
+  if (isError || !task) {
     return (
       <div className="rounded-md bg-red-50 p-4">
-        <div className="text-sm text-red-800">{error || 'Task not found'}</div>
+        <div className="text-sm text-red-800">
+          {isError ? formatApiError(error, 'Failed to load task') : 'Task not found'}
+        </div>
         <Link
           to="/lists"
           className="mt-4 inline-block text-indigo-600 hover:text-indigo-700 text-sm font-medium"
