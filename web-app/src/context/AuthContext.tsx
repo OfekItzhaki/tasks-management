@@ -22,7 +22,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
         const currentUser = await authService.getCurrentUser();
         setUser(currentUser);
-      } catch (error) {
+      } catch {
         // User is not authenticated
         setUser(null);
       } finally {

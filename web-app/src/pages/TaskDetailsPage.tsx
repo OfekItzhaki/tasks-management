@@ -267,6 +267,56 @@ export default function TaskDetailsPage() {
     },
   });
 
+  const safeTaskId =
+    typeof numericTaskId === 'number' && !Number.isNaN(numericTaskId)
+      ? numericTaskId
+      : null;
+
+  const restoreTaskMutation = useMutation<Task, ApiError, { id: number }>({
+    mutationFn: ({ id }) => tasksService.restoreTask(id),
+    onError: (err) => {
+      toast.error(formatApiError(err, t('tasks.restoreFailed')));
+    },
+    onSuccess: async (restored) => {
+      toast.success(t('tasks.restored'));
+
+      if (typeof safeTaskId === 'number') {
+        await queryClient.invalidateQueries({ queryKey: ['task', safeTaskId] });
+      }
+      if (typeof restored.todoListId === 'number') {
+        await queryClient.invalidateQueries({
+          queryKey: ['tasks', restored.todoListId],
+        });
+      } else {
+        await queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      }
+
+      // Navigate to the list the task returned to.
+      if (typeof restored.todoListId === 'number') {
+        navigate(`/lists/${restored.todoListId}/tasks`);
+      } else {
+        navigate('/lists');
+      }
+    },
+  });
+
+  const permanentDeleteTaskMutation = useMutation<Task, ApiError, { id: number }>({
+    mutationFn: ({ id }) => tasksService.permanentDeleteTask(id),
+    onError: (err) => {
+      toast.error(formatApiError(err, t('tasks.deleteForeverFailed')));
+    },
+    onSuccess: async () => {
+      toast.success(t('tasks.deletedForever'));
+
+      if (typeof safeTaskId === 'number') {
+        await queryClient.invalidateQueries({ queryKey: ['task', safeTaskId] });
+      }
+      await queryClient.invalidateQueries({ queryKey: ['tasks'] });
+
+      navigate('/lists');
+    },
+  });
+
   if (isLoading) {
     return (
       <div>
@@ -320,35 +370,6 @@ export default function TaskDetailsPage() {
   }
 
   const isArchivedTask = task.todoList?.type === ListType.FINISHED;
-
-  const restoreTaskMutation = useMutation<Task, ApiError, { id: number }>({
-    mutationFn: ({ id }) => tasksService.restoreTask(id),
-    onError: (err) => {
-      toast.error(formatApiError(err, t('tasks.restoreFailed')));
-    },
-    onSuccess: async (restored) => {
-      toast.success(t('tasks.restored'));
-      await queryClient.invalidateQueries({ queryKey: ['task', task.id] });
-      // Navigate to the list the task returned to.
-      if (typeof restored.todoListId === 'number') {
-        navigate(`/lists/${restored.todoListId}/tasks`);
-      } else {
-        navigate('/lists');
-      }
-    },
-  });
-
-  const permanentDeleteTaskMutation = useMutation<Task, ApiError, { id: number }>({
-    mutationFn: ({ id }) => tasksService.permanentDeleteTask(id),
-    onError: (err) => {
-      toast.error(formatApiError(err, t('tasks.deleteForeverFailed')));
-    },
-    onSuccess: async () => {
-      toast.success(t('tasks.deletedForever'));
-      await queryClient.invalidateQueries({ queryKey: ['task', task.id] });
-      navigate('/lists');
-    },
-  });
 
   return (
     <div>
