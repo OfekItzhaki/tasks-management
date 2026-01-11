@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 import { tasksService } from '../services/tasks.service';
 import { stepsService } from '../services/steps.service';
 import FloatingActionButton from '../components/FloatingActionButton';
+import { useTranslation } from 'react-i18next';
 import {
   Task,
   ApiError,
@@ -16,6 +17,7 @@ import {
 import { formatApiError } from '../utils/formatApiError';
 
 export default function TaskDetailsPage() {
+  const { t } = useTranslation();
   const { taskId } = useParams<{ taskId: string }>();
   const queryClient = useQueryClient();
 
@@ -93,7 +95,7 @@ export default function TaskDetailsPage() {
       if (typeof ctx?.todoListId === 'number' && ctx?.previousTasks) {
         queryClient.setQueryData(['tasks', ctx.todoListId], ctx.previousTasks);
       }
-      toast.error(formatApiError(err, 'Failed to update task'));
+      toast.error(formatApiError(err, t('taskDetails.updateTaskFailed')));
     },
     onSettled: async (_data, _err, vars) => {
       await queryClient.invalidateQueries({ queryKey: ['task', vars.id] });
@@ -145,7 +147,7 @@ export default function TaskDetailsPage() {
       if (ctx?.previousTasks) {
         queryClient.setQueryData(['tasks', vars.task.todoListId], ctx.previousTasks);
       }
-      toast.error(formatApiError(err, 'Failed to update step'));
+      toast.error(formatApiError(err, t('taskDetails.updateStepFailed')));
     },
     onSettled: async (_data, _err, vars) => {
       await invalidateTask(vars.task);
@@ -191,12 +193,12 @@ export default function TaskDetailsPage() {
       if (ctx?.previousTask) {
         queryClient.setQueryData(['task', vars.task.id], ctx.previousTask);
       }
-      toast.error(formatApiError(err, 'Failed to add step'));
+      toast.error(formatApiError(err, t('taskDetails.addStepFailed')));
     },
     onSuccess: (_created, vars) => {
       setNewStepDescription('');
       setShowAddStep(false);
-      toast.success('Step added');
+      toast.success(t('taskDetails.stepAdded'));
       // ensure list view reflects steps count if needed
       queryClient.invalidateQueries({ queryKey: ['tasks', vars.task.todoListId] });
     },
@@ -230,10 +232,10 @@ export default function TaskDetailsPage() {
       if (ctx?.previousTask) {
         queryClient.setQueryData(['task', vars.task.id], ctx.previousTask);
       }
-      toast.error(formatApiError(err, 'Failed to delete step'));
+      toast.error(formatApiError(err, t('taskDetails.deleteStepFailed')));
     },
     onSuccess: () => {
-      toast.success('Step deleted');
+      toast.success(t('taskDetails.stepDeleted'));
     },
     onSettled: async (_data, _err, vars) => {
       await invalidateTask(vars.task);
@@ -241,20 +243,22 @@ export default function TaskDetailsPage() {
   });
 
   if (isLoading) {
-    return <div className="text-center py-8">Loading task...</div>;
+    return <div className="text-center py-8">{t('common.loading')}</div>;
   }
 
   if (isError || !task) {
     return (
       <div className="rounded-md bg-red-50 p-4">
         <div className="text-sm text-red-800">
-          {isError ? formatApiError(error, 'Failed to load task') : 'Task not found'}
+          {isError
+            ? formatApiError(error, t('taskDetails.loadFailed'))
+            : t('taskDetails.notFound')}
         </div>
         <Link
           to="/lists"
           className="mt-4 inline-block text-indigo-600 hover:text-indigo-700 text-sm font-medium"
         >
-          ← Back to Lists
+          {t('tasks.backToLists')}
         </Link>
       </div>
     );
@@ -267,7 +271,7 @@ export default function TaskDetailsPage() {
           to={task.todoListId ? `/lists/${task.todoListId}/tasks` : '/lists'}
           className="text-indigo-600 hover:text-indigo-700 text-sm font-medium"
         >
-          ← Back to Tasks
+          {t('taskDetails.backToTasks')}
         </Link>
       </div>
 
@@ -304,7 +308,7 @@ export default function TaskDetailsPage() {
                         },
                         {
                           onSuccess: () => {
-                            toast.success('Task updated');
+                            toast.success(t('taskDetails.taskUpdated'));
                             setIsEditingTask(false);
                           },
                         },
@@ -312,7 +316,7 @@ export default function TaskDetailsPage() {
                     }}
                     className="inline-flex justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Save
+                    {t('common.save')}
                   </button>
                   <button
                     type="button"
@@ -322,14 +326,14 @@ export default function TaskDetailsPage() {
                     }}
                     className="inline-flex justify-center rounded-md bg-gray-100 px-3 py-2 text-sm font-medium text-gray-900 hover:bg-gray-200"
                   >
-                    Cancel
+                    {t('common.cancel')}
                   </button>
                 </div>
               </div>
             ) : (
               <h1
                 className="text-2xl font-bold text-gray-900 cursor-text"
-                title="Click to edit"
+                title={t('taskDetails.clickToEdit')}
                 onClick={() => {
                   setIsEditingTask(true);
                   setTaskDescriptionDraft(task.description);
@@ -352,7 +356,9 @@ export default function TaskDetailsPage() {
 
         <div className="mt-6">
           <div className="flex items-center justify-between gap-3 mb-3">
-            <h2 className="text-lg font-semibold text-gray-900">Steps</h2>
+            <h2 className="text-lg font-semibold text-gray-900">
+              {t('taskDetails.stepsTitle')}
+            </h2>
           </div>
 
           {showAddStep && (
@@ -370,13 +376,13 @@ export default function TaskDetailsPage() {
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-12 sm:items-end">
                 <div className="sm:col-span-10">
                   <label className="block text-sm font-medium text-gray-700">
-                    Description
+                    {t('taskDetails.form.descriptionLabel')}
                   </label>
                   <input
                     value={newStepDescription}
                     onChange={(e) => setNewStepDescription(e.target.value)}
                     className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                    placeholder="e.g. Call the supplier"
+                    placeholder={t('taskDetails.form.descriptionPlaceholder')}
                   />
                 </div>
                 <div className="sm:col-span-2 flex gap-2">
@@ -385,7 +391,9 @@ export default function TaskDetailsPage() {
                     disabled={createStepMutation.isPending || !newStepDescription.trim()}
                     className="inline-flex flex-1 justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {createStepMutation.isPending ? 'Adding...' : 'Create'}
+                    {createStepMutation.isPending
+                      ? t('common.loading')
+                      : t('common.create')}
                   </button>
                   <button
                     type="button"
@@ -395,7 +403,7 @@ export default function TaskDetailsPage() {
                     }}
                     className="inline-flex justify-center rounded-md bg-gray-100 px-3 py-2 text-sm font-medium text-gray-900 hover:bg-gray-200"
                   >
-                    Cancel
+                    {t('common.cancel')}
                   </button>
                 </div>
               </div>
@@ -435,7 +443,7 @@ export default function TaskDetailsPage() {
                             ? 'line-through text-gray-500 truncate'
                             : 'text-gray-900 truncate'
                         }
-                        title="Click to edit"
+                        title={t('taskDetails.clickToEdit')}
                         onClick={() => {
                           setEditingStepId(step.id);
                           setStepDescriptionDraft(step.description);
@@ -460,7 +468,7 @@ export default function TaskDetailsPage() {
                             },
                             {
                               onSuccess: () => {
-                                toast.success('Step updated');
+                                toast.success(t('taskDetails.stepUpdated'));
                                 setEditingStepId(null);
                                 setStepDescriptionDraft('');
                               },
@@ -469,7 +477,7 @@ export default function TaskDetailsPage() {
                         }}
                         className="inline-flex justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        Save
+                        {t('common.save')}
                       </button>
                       <button
                         type="button"
@@ -479,7 +487,7 @@ export default function TaskDetailsPage() {
                         }}
                         className="inline-flex justify-center rounded-md bg-gray-200 px-3 py-2 text-sm font-medium text-gray-900 hover:bg-gray-300"
                       >
-                        Cancel
+                        {t('common.cancel')}
                       </button>
                     </div>
                   ) : (
@@ -487,25 +495,30 @@ export default function TaskDetailsPage() {
                       type="button"
                       disabled={deleteStepMutation.isPending}
                       onClick={() => {
-                        const ok = window.confirm(`Delete step "${step.description}"?`);
+                        const ok = window.confirm(
+                          t('taskDetails.deleteStepConfirm', { description: step.description }),
+                        );
                         if (!ok) return;
                         deleteStepMutation.mutate({ task, id: step.id });
                       }}
                       className="inline-flex justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      Delete
+                      {t('common.delete')}
                     </button>
                   )}
                 </li>
               ))}
             </ul>
           ) : (
-            <p className="text-sm text-gray-500">No steps yet.</p>
+            <p className="text-sm text-gray-500">{t('taskDetails.noSteps')}</p>
           )}
         </div>
       </div>
 
-      <FloatingActionButton ariaLabel="Add step" onClick={() => setShowAddStep(true)} />
+      <FloatingActionButton
+        ariaLabel={t('taskDetails.addStepFab')}
+        onClick={() => setShowAddStep(true)}
+      />
     </div>
   );
 }

@@ -27,6 +27,8 @@
     "title": "רשימות",
     "empty": "לא נמצאו רשימות. צור את הרשימה הראשונה שלך!",
     "createFab": "צור רשימה חדשה",
+    "loadFailed": "טעינת הרשימות נכשלה",
+    "createFailed": "יצירת הרשימה נכשלה",
     "form": {
       "nameLabel": "שם",
       "typeLabel": "סוג",
@@ -42,6 +44,14 @@
     "deleteListConfirm": "למחוק את הרשימה \"{{name}}\"? פעולה זו תמחק את כל המשימות ברשימה.",
     "createFab": "צור משימה חדשה",
     "empty": "לא נמצאו משימות.",
+    "loadFailed": "טעינת המשימות נכשלה",
+    "createFailed": "יצירת המשימה נכשלה",
+    "deleteFailed": "מחיקת המשימה נכשלה",
+    "taskDeleted": "המשימה נמחקה",
+    "listUpdated": "הרשימה עודכנה",
+    "listUpdateFailed": "עדכון הרשימה נכשל",
+    "listDeleted": "הרשימה נמחקה",
+    "listDeleteFailed": "מחיקת הרשימה נכשלה",
     "form": {
       "descriptionLabel": "תיאור",
       "descriptionPlaceholder": "לדוגמה: לקנות חלב"
@@ -51,6 +61,13 @@
   "taskDetails": {
     "backToTasks": "← חזרה למשימות",
     "clickToEdit": "לחץ כדי לערוך",
+    "loadFailed": "טעינת המשימה נכשלה",
+    "notFound": "המשימה לא נמצאה",
+    "updateTaskFailed": "עדכון המשימה נכשל",
+    "updateStepFailed": "עדכון השלב נכשל",
+    "addStepFailed": "הוספת השלב נכשלה",
+    "deleteStepFailed": "מחיקת השלב נכשלה",
+    "deleteStepConfirm": "למחוק את השלב \"{{description}}\"?",
     "taskUpdated": "המשימה עודכנה",
     "stepUpdated": "השלב עודכן",
     "stepAdded": "השלב נוסף",

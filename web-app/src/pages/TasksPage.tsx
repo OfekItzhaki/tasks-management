@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 import { tasksService } from '../services/tasks.service';
 import { listsService } from '../services/lists.service';
 import FloatingActionButton from '../components/FloatingActionButton';
+import { useTranslation } from 'react-i18next';
 import {
   Task,
   ApiError,
@@ -17,6 +18,7 @@ import { formatApiError } from '../utils/formatApiError';
 type ListWithSystemFlag = ToDoList & { isSystem?: boolean };
 
 export default function TasksPage() {
+  const { t } = useTranslation();
   const { listId } = useParams<{ listId: string }>();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -85,7 +87,7 @@ export default function TasksPage() {
       if (ctx?.previousLists) {
         queryClient.setQueryData(['lists'], ctx.previousLists);
       }
-      toast.error(formatApiError(err, 'Failed to update list'));
+      toast.error(formatApiError(err, t('tasks.listUpdateFailed')));
     },
     onSettled: async (_data, _err, vars) => {
       await queryClient.invalidateQueries({ queryKey: ['list', vars.id] });
@@ -112,14 +114,14 @@ export default function TasksPage() {
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['lists'] });
-      toast.success('List deleted');
+      toast.success(t('tasks.listDeleted'));
       navigate('/lists');
     },
     onError: (err, _vars, ctx) => {
       if (ctx?.previousLists) {
         queryClient.setQueryData(['lists'], ctx.previousLists);
       }
-      toast.error(formatApiError(err, 'Failed to delete list'));
+      toast.error(formatApiError(err, t('tasks.listDeleteFailed')));
     },
   });
 
@@ -163,7 +165,7 @@ export default function TasksPage() {
       if (numericListId && ctx?.previousTasks) {
         queryClient.setQueryData(['tasks', numericListId], ctx.previousTasks);
       }
-      toast.error(formatApiError(err, 'Failed to create task'));
+      toast.error(formatApiError(err, t('tasks.createFailed')));
     },
     onSuccess: () => {
       setNewTaskDescription('');
@@ -199,10 +201,10 @@ export default function TasksPage() {
       if (numericListId && ctx?.previousTasks) {
         queryClient.setQueryData(['tasks', numericListId], ctx.previousTasks);
       }
-      toast.error(formatApiError(err, 'Failed to delete task'));
+      toast.error(formatApiError(err, t('tasks.deleteFailed')));
     },
     onSuccess: () => {
-      toast.success('Task deleted');
+      toast.success(t('tasks.taskDeleted'));
     },
     onSettled: async () => {
       if (numericListId) {
@@ -212,14 +214,14 @@ export default function TasksPage() {
   });
 
   if (isLoading) {
-    return <div className="text-center py-8">Loading tasks...</div>;
+    return <div className="text-center py-8">{t('common.loading')}</div>;
   }
 
   if (isError) {
     return (
       <div className="rounded-md bg-red-50 p-4">
         <div className="text-sm text-red-800">
-          {formatApiError(error, 'Failed to load tasks')}
+          {formatApiError(error, t('tasks.loadFailed'))}
         </div>
       </div>
     );
@@ -232,7 +234,7 @@ export default function TasksPage() {
           to="/lists"
           className="text-indigo-600 hover:text-indigo-700 text-sm font-medium"
         >
-          ← Back to Lists
+          {t('tasks.backToLists')}
         </Link>
       </div>
 
@@ -257,7 +259,7 @@ export default function TasksPage() {
                       { id: list.id, data: { name: listNameDraft.trim() } },
                       {
                         onSuccess: () => {
-                          toast.success('List updated');
+                          toast.success(t('tasks.listUpdated'));
                           setIsEditingListName(false);
                         },
                       },
@@ -265,7 +267,7 @@ export default function TasksPage() {
                   }}
                   className="inline-flex justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Save
+                  {t('common.save')}
                 </button>
                 <button
                   type="button"
@@ -275,14 +277,14 @@ export default function TasksPage() {
                   }}
                   className="inline-flex justify-center rounded-md bg-gray-100 px-3 py-2 text-sm font-medium text-gray-900 hover:bg-gray-200"
                 >
-                  Cancel
+                  {t('common.cancel')}
                 </button>
               </div>
             </div>
           ) : (
             <h1
               className="text-2xl font-bold text-gray-900 truncate cursor-text"
-              title="Click to rename"
+              title={t('tasks.renameTitle')}
               onClick={() => {
                 if (!list) return;
                 if (list.isSystem) return;
@@ -290,7 +292,7 @@ export default function TasksPage() {
                 setListNameDraft(list.name);
               }}
             >
-              {list?.name ?? 'Tasks'}
+              {list?.name ?? t('tasks.defaultTitle')}
             </h1>
           )}
         </div>
@@ -302,14 +304,14 @@ export default function TasksPage() {
               disabled={deleteListMutation.isPending}
               onClick={() => {
                 const ok = window.confirm(
-                  `Delete list "${list.name}"? This will delete all tasks in this list.`,
+                  t('tasks.deleteListConfirm', { name: list.name }),
                 );
                 if (!ok) return;
                 deleteListMutation.mutate({ id: list.id });
               }}
               className="inline-flex justify-center rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Delete list
+              {t('tasks.deleteList')}
             </button>
           )}
         </div>
@@ -327,13 +329,13 @@ export default function TasksPage() {
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-12 sm:items-end">
             <div className="sm:col-span-10">
               <label className="block text-sm font-medium text-gray-700">
-                Description
+                {t('tasks.form.descriptionLabel')}
               </label>
               <input
                 value={newTaskDescription}
                 onChange={(e) => setNewTaskDescription(e.target.value)}
                 className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder="e.g. Buy milk"
+                placeholder={t('tasks.form.descriptionPlaceholder')}
               />
             </div>
             <div className="sm:col-span-2 flex gap-2">
@@ -346,7 +348,7 @@ export default function TasksPage() {
                 }
                 className="inline-flex flex-1 justify-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {createTaskMutation.isPending ? 'Adding...' : 'Create'}
+                {createTaskMutation.isPending ? t('common.loading') : t('common.create')}
               </button>
               <button
                 type="button"
@@ -356,7 +358,7 @@ export default function TasksPage() {
                 }}
                 className="inline-flex justify-center rounded-md bg-gray-100 px-4 py-2 text-sm font-medium text-gray-900 hover:bg-gray-200"
               >
-                Cancel
+                {t('common.cancel')}
               </button>
             </div>
           </div>
@@ -406,14 +408,16 @@ export default function TasksPage() {
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation();
-                    const ok = window.confirm(`Delete task "${task.description}"?`);
+                    const ok = window.confirm(
+                      t('tasks.deleteTaskConfirm', { description: task.description }),
+                    );
                     if (!ok) return;
                     deleteTaskMutation.mutate({ id: task.id });
                   }}
                   disabled={deleteTaskMutation.isPending}
                   className="inline-flex justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Delete
+                  {t('common.delete')}
                 </button>
               </div>
             </div>
@@ -423,12 +427,12 @@ export default function TasksPage() {
 
       {tasks.length === 0 && (
         <div className="text-center py-12">
-          <p className="text-gray-500">No tasks found.</p>
+          <p className="text-gray-500">{t('tasks.empty')}</p>
         </div>
       )}
 
       <FloatingActionButton
-        ariaLabel="Create new task"
+        ariaLabel={t('tasks.createFab')}
         disabled={!numericListId}
         onClick={() => setShowCreate(true)}
       />

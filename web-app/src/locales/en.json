@@ -27,6 +27,8 @@
     "title": "Todo Lists",
     "empty": "No lists found. Create your first list!",
     "createFab": "Create new list",
+    "loadFailed": "Failed to load lists",
+    "createFailed": "Failed to create list",
     "form": {
       "nameLabel": "Name",
       "typeLabel": "Type",
@@ -42,6 +44,14 @@
     "deleteListConfirm": "Delete list \"{{name}}\"? This will delete all tasks in this list.",
     "createFab": "Create new task",
     "empty": "No tasks found.",
+    "loadFailed": "Failed to load tasks",
+    "createFailed": "Failed to create task",
+    "deleteFailed": "Failed to delete task",
+    "taskDeleted": "Task deleted",
+    "listUpdated": "List updated",
+    "listUpdateFailed": "Failed to update list",
+    "listDeleted": "List deleted",
+    "listDeleteFailed": "Failed to delete list",
     "form": {
       "descriptionLabel": "Description",
       "descriptionPlaceholder": "e.g. Buy milk"
@@ -51,6 +61,13 @@
   "taskDetails": {
     "backToTasks": "← Back to Tasks",
     "clickToEdit": "Click to edit",
+    "loadFailed": "Failed to load task",
+    "notFound": "Task not found",
+    "updateTaskFailed": "Failed to update task",
+    "updateStepFailed": "Failed to update step",
+    "addStepFailed": "Failed to add step",
+    "deleteStepFailed": "Failed to delete step",
+    "deleteStepConfirm": "Delete step \"{{description}}\"?",
     "taskUpdated": "Task updated",
     "stepUpdated": "Step updated",
     "stepAdded": "Step added",

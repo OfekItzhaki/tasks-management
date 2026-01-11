@@ -6,8 +6,10 @@ import { listsService } from '../services/lists.service';
 import { ToDoList, ApiError, ListType } from '@tasks-management/frontend-services';
 import { formatApiError } from '../utils/formatApiError';
 import FloatingActionButton from '../components/FloatingActionButton';
+import { useTranslation } from 'react-i18next';
 
 export default function ListsPage() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [showCreate, setShowCreate] = useState(false);
   const [newListName, setNewListName] = useState('');
@@ -68,7 +70,7 @@ export default function ListsPage() {
       if (ctx?.previousLists) {
         queryClient.setQueryData(['lists'], ctx.previousLists);
       }
-      toast.error(formatApiError(err, 'Failed to create list'));
+      toast.error(formatApiError(err, t('lists.createFailed')));
     },
     onSuccess: () => {
       setNewListName('');
@@ -80,14 +82,14 @@ export default function ListsPage() {
   });
 
   if (isLoading) {
-    return <div className="text-center py-8">Loading lists...</div>;
+    return <div className="text-center py-8">{t('common.loading')}</div>;
   }
 
   if (isError) {
     return (
       <div className="rounded-md bg-red-50 p-4">
         <div className="text-sm text-red-800">
-          {formatApiError(error, 'Failed to load lists')}
+          {formatApiError(error, t('lists.loadFailed'))}
         </div>
       </div>
     );
@@ -96,7 +98,7 @@ export default function ListsPage() {
   return (
     <div>
       <div className="flex justify-between items-center mb-6 gap-3">
-        <h1 className="text-2xl font-bold text-gray-900">Todo Lists</h1>
+        <h1 className="text-2xl font-bold text-gray-900">{t('lists.title')}</h1>
       </div>
 
       {showCreate && (
@@ -114,18 +116,18 @@ export default function ListsPage() {
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-12 sm:items-end">
             <div className="sm:col-span-7">
               <label className="block text-sm font-medium text-gray-700">
-                Name
+                {t('lists.form.nameLabel')}
               </label>
               <input
                 value={newListName}
                 onChange={(e) => setNewListName(e.target.value)}
                 className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder="e.g. Groceries"
+                placeholder={t('lists.form.namePlaceholder')}
               />
             </div>
             <div className="sm:col-span-3">
               <label className="block text-sm font-medium text-gray-700">
-                Type
+                {t('lists.form.typeLabel')}
               </label>
               <select
                 value={newListType}
@@ -145,7 +147,7 @@ export default function ListsPage() {
                 disabled={createListMutation.isPending || !newListName.trim()}
                 className="inline-flex flex-1 justify-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {createListMutation.isPending ? 'Creating...' : 'Create'}
+                {createListMutation.isPending ? t('common.loading') : t('common.create')}
               </button>
               <button
                 type="button"
@@ -156,12 +158,12 @@ export default function ListsPage() {
                 }}
                 className="inline-flex justify-center rounded-md bg-gray-100 px-4 py-2 text-sm font-medium text-gray-900 hover:bg-gray-200"
               >
-                Cancel
+                {t('common.cancel')}
               </button>
             </div>
           </div>
           <p className="mt-2 text-xs text-gray-500">
-            Tip: system “Finished” list is managed automatically.
+            {t('lists.form.tip')}
           </p>
         </form>
       )}
@@ -180,12 +182,12 @@ export default function ListsPage() {
 
       {lists.length === 0 && (
         <div className="text-center py-12">
-          <p className="text-gray-500">No lists found. Create your first list!</p>
+          <p className="text-gray-500">{t('lists.empty')}</p>
         </div>
       )}
 
       <FloatingActionButton
-        ariaLabel="Create new list"
+        ariaLabel={t('lists.createFab')}
         onClick={() => setShowCreate(true)}
       />
     </div>
