@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import { listsService } from '../services/lists.service';
 import { ToDoList, ApiError, ListType } from '@tasks-management/frontend-services';
 import { formatApiError } from '../utils/formatApiError';
@@ -37,6 +38,9 @@ export default function ListsPage() {
     onSuccess: async () => {
       setNewListName('');
       await queryClient.invalidateQueries({ queryKey: ['lists'] });
+    },
+    onError: (err) => {
+      toast.error(formatApiError(err, 'Failed to create list'));
     },
   });
 

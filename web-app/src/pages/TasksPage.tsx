@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import { tasksService } from '../services/tasks.service';
 import { Task, ApiError, CreateTaskDto } from '@tasks-management/frontend-services';
 import { formatApiError } from '../utils/formatApiError';
@@ -29,6 +30,9 @@ export default function TasksPage() {
     onSuccess: async () => {
       setNewTaskDescription('');
       await queryClient.invalidateQueries({ queryKey: ['tasks', numericListId] });
+    },
+    onError: (err) => {
+      toast.error(formatApiError(err, 'Failed to create task'));
     },
   });
 
