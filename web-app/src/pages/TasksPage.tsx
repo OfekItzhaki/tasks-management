@@ -228,22 +228,30 @@ export default function TasksPage() {
           : undefined;
       const previousTask = queryClient.getQueryData<Task>(['task', id]);
 
+      const now = new Date().toISOString();
+
+      // Apply optimistic update immediately for snappy checkbox UX.
+      // (We still cancel in-flight queries afterwards to avoid stale overwrites.)
       if (typeof numericListId === 'number') {
-        await queryClient.cancelQueries({ queryKey: ['tasks', numericListId] });
         queryClient.setQueryData<Task[]>(['tasks', numericListId], (old = []) =>
-          old.map((t) =>
-            t.id === id ? { ...t, ...data, updatedAt: new Date().toISOString() } : t,
-          ),
+          old.map((t) => (t.id === id ? { ...t, ...data, updatedAt: now } : t)),
         );
       }
 
       if (previousTask) {
-        await queryClient.cancelQueries({ queryKey: ['task', id] });
         queryClient.setQueryData<Task>(['task', id], {
           ...previousTask,
           ...data,
-          updatedAt: new Date().toISOString(),
+          updatedAt: now,
         });
+      }
+
+      if (typeof numericListId === 'number') {
+        await queryClient.cancelQueries({ queryKey: ['tasks', numericListId] });
+      }
+
+      if (previousTask) {
+        await queryClient.cancelQueries({ queryKey: ['task', id] });
       }
 
       return { previousTasks, previousTask };
