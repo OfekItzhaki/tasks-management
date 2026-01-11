@@ -10,11 +10,10 @@
     "format": "prettier --write \"src/**/*.{ts,tsx,css,json}\""
   },
   "dependencies": {
+    "@tasks-management/frontend-services": "file:../frontend-services",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-router-dom": "^6.28.0",
-    "@tasks-management/frontend-services": "file:../frontend-services",
-    "axios": "^1.7.9"
+    "react-router-dom": "^6.28.0"
   },
   "devDependencies": {
     "@types/react": "^19.0.0",
