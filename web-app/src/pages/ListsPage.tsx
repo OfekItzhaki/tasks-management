@@ -1,10 +1,23 @@
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { listsService } from '../services/lists.service';
-import { ToDoList, ApiError } from '@tasks-management/frontend-services';
+import { ToDoList, ApiError, ListType } from '@tasks-management/frontend-services';
 import { formatApiError } from '../utils/formatApiError';
 
 export default function ListsPage() {
+  const queryClient = useQueryClient();
+  const [newListName, setNewListName] = useState('');
+  const [newListType, setNewListType] = useState<ListType>(ListType.CUSTOM);
+
+  const listTypeOptions = useMemo(
+    () =>
+      (Object.values(ListType) as ListType[]).filter(
+        (t) => t !== ListType.FINISHED,
+      ),
+    [],
+  );
+
   const {
     data: lists = [],
     isLoading,
@@ -13,6 +26,18 @@ export default function ListsPage() {
   } = useQuery<ToDoList[], ApiError>({
     queryKey: ['lists'],
     queryFn: () => listsService.getAllLists(),
+  });
+
+  const createListMutation = useMutation<
+    ToDoList,
+    ApiError,
+    { name: string; type: ListType }
+  >({
+    mutationFn: (data) => listsService.createList(data),
+    onSuccess: async () => {
+      setNewListName('');
+      await queryClient.invalidateQueries({ queryKey: ['lists'] });
+    },
   });
 
   if (isLoading) {
@@ -34,6 +59,56 @@ export default function ListsPage() {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Todo Lists</h1>
       </div>
+
+      <form
+        className="bg-white rounded-lg shadow p-4 mb-6 flex flex-col gap-3 sm:flex-row sm:items-end"
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (!newListName.trim()) return;
+          createListMutation.mutate({ name: newListName.trim(), type: newListType });
+        }}
+      >
+        <div className="flex-1">
+          <label className="block text-sm font-medium text-gray-700">
+            List name
+          </label>
+          <input
+            value={newListName}
+            onChange={(e) => setNewListName(e.target.value)}
+            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            placeholder="e.g. Groceries"
+          />
+        </div>
+        <div className="sm:w-48">
+          <label className="block text-sm font-medium text-gray-700">Type</label>
+          <select
+            value={newListType}
+            onChange={(e) => setNewListType(e.target.value as ListType)}
+            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+          >
+            {listTypeOptions.map((t) => (
+              <option key={t} value={t}>
+                {t}
+              </option>
+            ))}
+          </select>
+        </div>
+        <button
+          type="submit"
+          disabled={createListMutation.isPending || !newListName.trim()}
+          className="inline-flex justify-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {createListMutation.isPending ? 'Creating...' : 'Create list'}
+        </button>
+      </form>
+
+      {createListMutation.isError && (
+        <div className="rounded-md bg-red-50 p-4 mb-6">
+          <div className="text-sm text-red-800">
+            {formatApiError(createListMutation.error, 'Failed to create list')}
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {lists.map((list) => (
