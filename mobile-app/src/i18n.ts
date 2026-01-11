@@ -2,16 +2,13 @@ import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import * as Localization from 'expo-localization';
 
-import en from './locales/en.json';
-import he from './locales/he.json';
+import {
+  resources,
+  normalizeLanguage,
+} from '@tasks-management/frontend-services/i18n';
 
-const resources = {
-  en: { translation: en },
-  he: { translation: he },
-} as const;
-
-const deviceLanguage = Localization.getLocales()?.[0]?.languageCode ?? 'en';
-const initialLanguage = deviceLanguage.startsWith('he') ? 'he' : 'en';
+const deviceLanguage = Localization.getLocales()?.[0]?.languageTag ?? 'en';
+const initialLanguage = normalizeLanguage(deviceLanguage);
 
 void i18n.use(initReactI18next).init({
   resources,
