@@ -181,9 +181,6 @@ export default function TasksPage() {
               {list?.name ?? 'Tasks'}
             </h1>
           )}
-          {list?.type && (
-            <p className="mt-1 text-sm text-gray-500">Type: {list.type}</p>
-          )}
         </div>
 
         <div className="flex items-center gap-2">
