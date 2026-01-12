@@ -4,6 +4,7 @@ import { AuthProvider } from './src/context/AuthContext';
 import AppNavigator from './src/navigation/AppNavigator';
 import { requestNotificationPermissions, rescheduleAllReminders } from './src/services/notifications.service';
 import { TokenStorage } from './src/utils/storage';
+import './src/i18n';
 
 export default function App() {
   useEffect(() => {

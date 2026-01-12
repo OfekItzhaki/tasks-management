@@ -1,4 +1,51 @@
-import { ReminderConfig, ReminderTimeframe } from '../types';
+import { ReminderConfig, ReminderTimeframe, ReminderSpecificDate } from '../types';
+
+export const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+/**
+ * Format a reminder configuration for display
+ */
+export const formatReminderDisplay = (reminder: ReminderConfig): string => {
+  const timeStr = reminder.time || '09:00';
+  let description = '';
+
+  // Check daysBefore first as it overrides other formats
+  if (reminder.daysBefore !== undefined && reminder.daysBefore > 0) {
+    return `${reminder.daysBefore} day(s) before due date at ${timeStr}`;
+  }
+
+  switch (reminder.timeframe) {
+    case ReminderTimeframe.SPECIFIC_DATE:
+      if (reminder.specificDate === ReminderSpecificDate.START_OF_WEEK) {
+        description = `Every Monday at ${timeStr}`;
+      } else if (reminder.specificDate === ReminderSpecificDate.START_OF_MONTH) {
+        description = `1st of every month at ${timeStr}`;
+      } else if (reminder.specificDate === ReminderSpecificDate.START_OF_YEAR) {
+        description = `Jan 1st every year at ${timeStr}`;
+      } else if (reminder.customDate) {
+        const date = new Date(reminder.customDate);
+        description = `${date.toLocaleDateString()} at ${timeStr}`;
+      } else {
+        description = `Specific date at ${timeStr}`;
+      }
+      break;
+    case ReminderTimeframe.EVERY_DAY:
+      description = `Every day at ${timeStr}`;
+      break;
+    case ReminderTimeframe.EVERY_WEEK:
+      const dayName = reminder.dayOfWeek !== undefined ? DAY_NAMES[reminder.dayOfWeek] : 'Monday';
+      description = `Every ${dayName} at ${timeStr}`;
+      break;
+    case ReminderTimeframe.EVERY_MONTH:
+      description = `1st of every month at ${timeStr}`;
+      break;
+    case ReminderTimeframe.EVERY_YEAR:
+      description = `Same date every year at ${timeStr}`;
+      break;
+  }
+
+  return description;
+};
 
 /**
  * Convert reminder configurations to backend format

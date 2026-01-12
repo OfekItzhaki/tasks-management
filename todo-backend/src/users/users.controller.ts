@@ -54,7 +54,10 @@ class UsersController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Get user by ID' })
   @ApiResponse({ status: 200, description: 'Returns user data' })
-  @ApiResponse({ status: 403, description: 'Forbidden - can only access own profile' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - can only access own profile',
+  })
   @ApiResponse({ status: 404, description: 'User not found' })
   async getUser(
     @Param('id', ParseIntPipe) id: number,
@@ -68,7 +71,10 @@ class UsersController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Update user profile' })
   @ApiResponse({ status: 200, description: 'User updated successfully' })
-  @ApiResponse({ status: 403, description: 'Forbidden - can only update own profile' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - can only update own profile',
+  })
   async updateUser(
     @Param('id', ParseIntPipe) id: number,
     @Body() data: UpdateUserDto,
@@ -82,7 +88,10 @@ class UsersController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Soft delete user account' })
   @ApiResponse({ status: 200, description: 'User deleted successfully' })
-  @ApiResponse({ status: 403, description: 'Forbidden - can only delete own account' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - can only delete own account',
+  })
   async deleteUser(
     @Param('id', ParseIntPipe) id: number,
     @CurrentUser() user: CurrentUserPayload,

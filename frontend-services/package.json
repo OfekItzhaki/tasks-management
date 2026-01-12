@@ -1,11 +1,23 @@
 {
   "name": "@tasks-management/frontend-services",
   "version": "1.0.0",
+  "type": "module",
   "description": "Front-end services for Tasks Management API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./i18n": {
+      "types": "./dist/i18n/index.d.ts",
+      "default": "./dist/i18n/index.js"
+    }
+  },
   "scripts": {
     "build": "tsc",
+    "prepare": "npm run build",
     "watch": "tsc --watch"
   },
   "keywords": ["tasks", "todo", "api", "client"],

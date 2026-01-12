@@ -137,7 +137,10 @@ export class TasksController {
   @Delete(':id/permanent')
   @ApiOperation({ summary: 'Permanently delete archived task' })
   @ApiResponse({ status: 200, description: 'Task permanently deleted' })
-  @ApiResponse({ status: 400, description: 'Task cannot be permanently deleted' })
+  @ApiResponse({
+    status: 400,
+    description: 'Task cannot be permanently deleted',
+  })
   @ApiResponse({ status: 404, description: 'Task not found' })
   permanentDelete(
     @Param('id', ParseIntPipe) id: number,

@@ -1,8 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { ListType } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateToDoListDto } from './dto/create-todo-list.dto';
 import { UpdateToDoListDto } from './dto/update-todo-list.dto';
-import { ListType } from './dto/create-todo-list.dto';
 
 @Injectable()
 export class TodoListsService {
@@ -12,7 +12,9 @@ export class TodoListsService {
     return this.prisma.toDoList.create({
       data: {
         name: createToDoListDto.name,
-        type: createToDoListDto.type || ListType.CUSTOM,
+        // List "type" is an internal scheduling/system detail.
+        // User-created lists are always CUSTOM.
+        type: ListType.CUSTOM,
         ownerId,
       },
     });
@@ -87,7 +89,7 @@ export class TodoListsService {
       where: { id },
       data: {
         name: updateToDoListDto.name ?? list.name,
-        type: updateToDoListDto.type ?? list.type,
+        // Type is not user-editable.
       },
     });
   }

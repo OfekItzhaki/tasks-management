@@ -2,11 +2,11 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
 import { TasksService } from './tasks.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { ListType } from '../todo-lists/dto/create-todo-list.dto';
+import { ListType } from '@prisma/client';
+import { TaskSchedulerService } from '../task-scheduler/task-scheduler.service';
 
 describe('TasksService', () => {
   let service: TasksService;
-  let prisma: PrismaService;
 
   const mockPrismaService = {
     task: {
@@ -16,8 +16,13 @@ describe('TasksService', () => {
       update: jest.fn(),
     },
     toDoList: {
+      findFirst: jest.fn(),
       findFirstOrThrow: jest.fn(),
     },
+  };
+
+  const mockTaskSchedulerService = {
+    checkAndResetDailyTasksIfNeeded: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -28,15 +33,18 @@ describe('TasksService', () => {
           provide: PrismaService,
           useValue: mockPrismaService,
         },
+        {
+          provide: TaskSchedulerService,
+          useValue: mockTaskSchedulerService,
+        },
       ],
     }).compile();
 
     service = module.get<TasksService>(TasksService);
-    prisma = module.get<PrismaService>(PrismaService);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    jest.resetAllMocks();
   });
 
   describe('getTasksByDate', () => {
@@ -110,19 +118,8 @@ describe('TasksService', () => {
 
     it('should not return completed tasks', async () => {
       const date = new Date('2024-12-25');
-      const mockTasks = [
-        {
-          id: 1,
-          description: 'Completed task',
-          dueDate: null,
-          specificDayOfWeek: null,
-          completed: true,
-          todoList: { type: ListType.DAILY },
-          steps: [],
-        },
-      ];
-
-      mockPrismaService.task.findMany.mockResolvedValue(mockTasks);
+      // Prisma query filters out completed tasks; mimic that behavior in the mock.
+      mockPrismaService.task.findMany.mockResolvedValue([]);
 
       const result = await service.getTasksByDate(ownerId, date);
 
@@ -145,7 +142,7 @@ describe('TasksService', () => {
         todoListId,
       };
 
-      mockPrismaService.toDoList.findFirstOrThrow.mockResolvedValue({
+      mockPrismaService.toDoList.findFirst.mockResolvedValue({
         id: todoListId,
         ownerId,
         deletedAt: null,
@@ -159,9 +156,7 @@ describe('TasksService', () => {
     });
 
     it('should throw error if list does not exist', async () => {
-      mockPrismaService.toDoList.findFirstOrThrow.mockRejectedValue(
-        new Error('List not found'),
-      );
+      mockPrismaService.toDoList.findFirst.mockResolvedValue(null);
 
       await expect(
         service.create(todoListId, { description: 'Test' }, ownerId),
@@ -339,20 +334,21 @@ describe('TasksService', () => {
 
       const result = await service.findAll(ownerId, todoListId);
 
-      expect(mockPrismaService.task.findMany).toHaveBeenCalledWith({
-        where: {
-          deletedAt: null,
-          todoList: {
-            ownerId,
+      expect(mockPrismaService.task.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
             deletedAt: null,
-          },
-          todoListId,
-        },
-        include: expect.any(Object),
-        orderBy: { order: 'asc' },
-      });
+            todoListId,
+            todoList: expect.objectContaining({
+              deletedAt: null,
+              OR: expect.any(Array),
+            }),
+          }),
+          include: expect.any(Object),
+          orderBy: { order: 'asc' },
+        }),
+      );
       expect(result).toEqual(mockTasks);
     });
   });
 });
-

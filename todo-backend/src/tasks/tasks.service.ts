@@ -1,12 +1,23 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  Inject,
+  forwardRef,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
-import { ListType } from '../todo-lists/dto/create-todo-list.dto';
+import { ListType, Prisma } from '@prisma/client';
+import { TaskSchedulerService } from '../task-scheduler/task-scheduler.service';
 
 @Injectable()
 export class TasksService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    @Inject(forwardRef(() => TaskSchedulerService))
+    private taskScheduler: TaskSchedulerService,
+  ) {}
 
   private async ensureListAccess(todoListId: number, userId: number) {
     // Check if user owns the list OR has shared access to it
@@ -74,8 +85,7 @@ export class TasksService {
         description: createTaskDto.description,
         dueDate: createTaskDto.dueDate,
         specificDayOfWeek: createTaskDto.specificDayOfWeek,
-        reminderDaysBefore:
-          createTaskDto.reminderDaysBefore ?? [],
+        reminderDaysBefore: createTaskDto.reminderDaysBefore ?? [],
         completed: createTaskDto.completed ?? false,
         todoListId,
       },
@@ -83,7 +93,18 @@ export class TasksService {
   }
 
   async findAll(userId: number, todoListId?: number) {
-    const where: any = {
+    // If loading from a daily list, check if tasks need to be reset
+    if (todoListId) {
+      const list = await this.prisma.toDoList.findFirst({
+        where: { id: todoListId, deletedAt: null },
+      });
+      if (list?.type === ListType.DAILY) {
+        // Check and reset daily tasks if needed (in case cron didn't run)
+        await this.taskScheduler.checkAndResetDailyTasksIfNeeded();
+      }
+    }
+
+    const where: Prisma.TaskWhereInput = {
       deletedAt: null,
       todoList: {
         deletedAt: null,
@@ -311,14 +332,15 @@ export class TasksService {
         // For list-based tasks, calculate based on list type
         const list = task.todoList;
         switch (list.type) {
-          case ListType.WEEKLY:
+          case ListType.WEEKLY: {
             // Next Sunday (start of week)
             const daysUntilSunday = (7 - targetDate.getDay()) % 7 || 7;
             taskDueDate = new Date(targetDate);
             taskDueDate.setDate(taskDueDate.getDate() + daysUntilSunday);
             taskDueDate.setHours(0, 0, 0, 0);
             break;
-          case ListType.MONTHLY:
+          }
+          case ListType.MONTHLY: {
             // First day of next month
             taskDueDate = new Date(
               targetDate.getFullYear(),
@@ -327,11 +349,13 @@ export class TasksService {
             );
             taskDueDate.setHours(0, 0, 0, 0);
             break;
-          case ListType.YEARLY:
+          }
+          case ListType.YEARLY: {
             // January 1st of next year
             taskDueDate = new Date(targetDate.getFullYear() + 1, 0, 1);
             taskDueDate.setHours(0, 0, 0, 0);
             break;
+          }
           default:
             return false;
         }
@@ -343,10 +367,8 @@ export class TasksService {
 
       // Check if any reminder date matches target date
       return reminderDaysArray.some((reminderDays) => {
-        const reminderTargetDate = new Date(taskDueDate!);
-        reminderTargetDate.setDate(
-          reminderTargetDate.getDate() - reminderDays,
-        );
+        const reminderTargetDate = new Date(taskDueDate);
+        reminderTargetDate.setDate(reminderTargetDate.getDate() - reminderDays);
         reminderTargetDate.setHours(0, 0, 0, 0);
         return reminderTargetDate.getTime() === targetDate.getTime();
       });
@@ -360,7 +382,7 @@ export class TasksService {
    */
   async restore(id: number, ownerId: number) {
     const task = await this.findTaskForUser(id, ownerId);
-    
+
     // Check if task is in a FINISHED list
     if (task.todoList.type !== ListType.FINISHED) {
       throw new BadRequestException('Only archived tasks can be restored');
@@ -407,10 +429,12 @@ export class TasksService {
    */
   async permanentDelete(id: number, ownerId: number) {
     const task = await this.findTaskForUser(id, ownerId);
-    
+
     // Only allow permanent deletion of archived tasks
     if (task.todoList.type !== ListType.FINISHED) {
-      throw new BadRequestException('Only archived tasks can be permanently deleted. Use regular delete for active tasks.');
+      throw new BadRequestException(
+        'Only archived tasks can be permanently deleted. Use regular delete for active tasks.',
+      );
     }
 
     // Delete all steps first

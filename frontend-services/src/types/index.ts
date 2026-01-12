@@ -42,6 +42,7 @@ export enum ListType {
   MONTHLY = 'MONTHLY',
   YEARLY = 'YEARLY',
   CUSTOM = 'CUSTOM',
+  FINISHED = 'FINISHED',
 }
 
 export interface ToDoList {
@@ -58,12 +59,10 @@ export interface ToDoList {
 
 export interface CreateToDoListDto {
   name: string;
-  type?: ListType;
 }
 
 export interface UpdateToDoListDto {
   name?: string;
-  type?: ListType;
 }
 
 // Task Types

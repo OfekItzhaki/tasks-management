@@ -48,4 +48,3 @@ export class MeController {
     return this.tasksService.findAll(user.userId, listId);
   }
 }
-

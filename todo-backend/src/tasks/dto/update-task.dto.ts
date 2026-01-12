@@ -31,7 +31,8 @@ export class UpdateTaskDto {
   dueDate?: Date;
 
   @ApiPropertyOptional({
-    description: 'Specific day of week (0 = Sunday, 1 = Monday, ..., 6 = Saturday)',
+    description:
+      'Specific day of week (0 = Sunday, 1 = Monday, ..., 6 = Saturday)',
     example: 1,
     minimum: 0,
     maximum: 6,

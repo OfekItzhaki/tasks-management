@@ -7,8 +7,7 @@ import {
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from '../prisma/prisma.service';
-import { User, Prisma } from '@prisma/client';
-import { ListType } from '../todo-lists/dto/create-todo-list.dto';
+import { User, Prisma, ListType } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 
@@ -137,17 +136,24 @@ class UsersService {
   }
 
   private async createDefaultLists(userId: number) {
-    const defaultLists = [
+    const defaultLists: Array<{
+      name: string;
+      type: ListType;
+      isSystem?: boolean;
+    }> = [
       { name: 'Daily', type: ListType.DAILY },
       { name: 'Weekly', type: ListType.WEEKLY },
       { name: 'Monthly', type: ListType.MONTHLY },
       { name: 'Yearly', type: ListType.YEARLY },
+      // System list for archived completed tasks (created once per user)
+      { name: 'Finished Tasks', type: ListType.FINISHED, isSystem: true },
     ];
 
     await this.prisma.toDoList.createMany({
       data: defaultLists.map((list) => ({
         name: list.name,
         type: list.type,
+        isSystem: Boolean(list.isSystem ?? false),
         ownerId: userId,
       })),
     });

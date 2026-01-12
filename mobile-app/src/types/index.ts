@@ -90,12 +90,10 @@ export interface CreateUserDto {
 
 export interface CreateTodoListDto {
   name: string;
-  type?: ListType;
 }
 
 export interface UpdateTodoListDto {
   name?: string;
-  type?: ListType;
 }
 
 export interface CreateTaskDto {

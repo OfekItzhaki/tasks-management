@@ -12,7 +12,7 @@ React Native mobile app built with Expo for managing to-do lists, tasks, and rem
 - 👥 List sharing
 - 📱 Native iOS and Android support
 
-⚠️ **Notification Testing Note:** Android push notifications are **not supported in Expo Go**. To test notifications on Android, you'll need to build a development build or production build. See [PRODUCTION_BUILD.md](./PRODUCTION_BUILD.md) for details.
+⚠️ **Notification Testing Note:** Android push notifications are **not supported in Expo Go**. To test notifications on Android, you'll need to build a development build or production build.
 
 ## Prerequisites
 
@@ -128,7 +128,6 @@ npx expo build:ios
 - [x] Task sorting (by due date, completed, alphabetical)
 
 ### 🔧 Remaining Improvements
-See [IMPROVEMENTS_CHECKLIST.md](./IMPROVEMENTS_CHECKLIST.md) for detailed list.
 
 **High Priority:**
 - [ ] Implement list sharing UI (backend API exists, needs UI)

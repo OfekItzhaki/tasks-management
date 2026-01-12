@@ -4,25 +4,24 @@ import {
   Text,
   ScrollView,
   TouchableOpacity,
-  StyleSheet,
   ActivityIndicator,
   Alert,
   TextInput,
   Modal,
   RefreshControl,
-  Platform,
 } from 'react-native';
 import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { tasksService } from '../services/tasks.service';
 import { stepsService } from '../services/steps.service';
-import { Task, Step, UpdateTaskDto, CreateStepDto, ReminderConfig, ReminderTimeframe, ReminderSpecificDate } from '../types';
+import { Task, Step, UpdateTaskDto, ReminderConfig, ReminderTimeframe, ReminderSpecificDate } from '../types';
 import ReminderConfigComponent from '../components/ReminderConfig';
 import DatePicker from '../components/DatePicker';
 import { scheduleTaskReminders, cancelAllTaskNotifications } from '../services/notifications.service';
 import { EveryDayRemindersStorage, ReminderAlarmsStorage, ReminderTimesStorage } from '../utils/storage';
-import { convertRemindersToBackend, formatDate } from '../utils/helpers';
+import { convertRemindersToBackend, formatDate, formatReminderDisplay } from '../utils/helpers';
+import { styles } from './styles/TaskDetailsScreen.styles';
 
 type TaskDetailsRouteProp = RouteProp<RootStackParamList, 'TaskDetails'>;
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -56,49 +55,17 @@ export default function TaskDetailsScreen() {
     loadTaskData();
   }, [taskId]);
 
-  // Format reminder for display
-  const formatReminderDisplay = (reminder: ReminderConfig): string => {
-    const timeStr = reminder.time || '09:00';
-    let description = '';
-
-    if (reminder.daysBefore !== undefined && reminder.daysBefore > 0) {
-      description = `${reminder.daysBefore} day(s) before due date at ${timeStr}`;
-      return description;
+  // Sync editReminders with alarm states when they change (for edit mode sync)
+  useEffect(() => {
+    if (Object.keys(reminderAlarmStates).length > 0) {
+      setEditReminders(prev => 
+        prev.map(r => ({
+          ...r,
+          hasAlarm: reminderAlarmStates[r.id] !== undefined ? reminderAlarmStates[r.id] : r.hasAlarm,
+        }))
+      );
     }
-
-    switch (reminder.timeframe) {
-      case ReminderTimeframe.SPECIFIC_DATE:
-        if (reminder.specificDate === ReminderSpecificDate.START_OF_WEEK) {
-          description = `Every Monday at ${timeStr}`;
-        } else if (reminder.specificDate === ReminderSpecificDate.START_OF_MONTH) {
-          description = `1st of every month at ${timeStr}`;
-        } else if (reminder.specificDate === ReminderSpecificDate.START_OF_YEAR) {
-          description = `Jan 1st every year at ${timeStr}`;
-        } else if (reminder.customDate) {
-          const date = new Date(reminder.customDate);
-          description = `${date.toLocaleDateString()} at ${timeStr}`;
-        } else {
-          description = `Specific date at ${timeStr}`;
-        }
-        break;
-      case ReminderTimeframe.EVERY_DAY:
-        description = `Every day at ${timeStr}`;
-        break;
-      case ReminderTimeframe.EVERY_WEEK:
-        const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-        const dayName = reminder.dayOfWeek !== undefined ? dayNames[reminder.dayOfWeek] : 'Monday';
-        description = `Every ${dayName} at ${timeStr}`;
-        break;
-      case ReminderTimeframe.EVERY_MONTH:
-        description = `1st of every month at ${timeStr}`;
-        break;
-      case ReminderTimeframe.EVERY_YEAR:
-        description = `Same date every year at ${timeStr}`;
-        break;
-    }
-
-    return description;
-  };
+  }, [reminderAlarmStates]);
 
   // Convert backend format to ReminderConfig format
   const convertBackendToReminders = (
@@ -364,10 +331,18 @@ export default function TaskDetailsScreen() {
   const handleToggleTask = async () => {
     if (!task) return;
 
+    const currentCompleted = Boolean(task.completed);
+    const newCompleted = !currentCompleted;
+    
+    // Optimistic update - update UI immediately
+    setTask(prev => prev ? { ...prev, completed: newCompleted } : prev);
+
     try {
-      await tasksService.update(taskId, { completed: !task.completed });
-      loadTaskData();
+      await tasksService.update(taskId, { completed: newCompleted });
+      // No need to reload - optimistic update already applied
     } catch (error: any) {
+      // Revert on error
+      setTask(prev => prev ? { ...prev, completed: currentCompleted } : prev);
       const errorMessage = error?.response?.data?.message || error?.message || 'Unable to toggle task completion. Please try again.';
       Alert.alert('Update Failed', errorMessage);
     }
@@ -391,10 +366,26 @@ export default function TaskDetailsScreen() {
   };
 
   const handleToggleStep = async (step: Step) => {
+    const currentCompleted = Boolean(step.completed);
+    const newCompleted = !currentCompleted;
+    
+    // Optimistic update - update UI immediately
+    setSteps(prevSteps => 
+      prevSteps.map(s => 
+        s.id === step.id ? { ...s, completed: newCompleted } : s
+      )
+    );
+
     try {
-      await stepsService.update(step.id, { completed: !step.completed });
-      loadTaskData();
+      await stepsService.update(step.id, { completed: newCompleted });
+      // No need to reload - optimistic update already applied
     } catch (error: any) {
+      // Revert on error
+      setSteps(prevSteps => 
+        prevSteps.map(s => 
+          s.id === step.id ? { ...s, completed: currentCompleted } : s
+        )
+      );
       const errorMessage = error?.response?.data?.message || error?.message || 'Unable to update step. Please try again.';
       Alert.alert('Update Failed', errorMessage);
     }
@@ -522,6 +513,13 @@ export default function TaskDetailsScreen() {
   const completedSteps = steps.filter((s) => s.completed).length;
   const totalSteps = steps.length;
   const stepsProgress = totalSteps > 0 ? (completedSteps / totalSteps) * 100 : 0;
+  
+  // Check if task has repeating reminders (based on task properties, not list type)
+  // A task is repeating if it has weekly reminders (specificDayOfWeek) or daily reminders (client-side)
+  const isRepeatingTask = (
+    (task.specificDayOfWeek !== null && task.specificDayOfWeek !== undefined) ||
+    displayEveryDayReminders.length > 0
+  );
 
   return (
     <View style={styles.container}>
@@ -541,6 +539,7 @@ export default function TaskDetailsScreen() {
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        showsVerticalScrollIndicator={true}
       >
         {/* Task Header */}
         <View style={styles.header}>
@@ -566,7 +565,7 @@ export default function TaskDetailsScreen() {
                 </Text>
               )}
               {/* Show completion count for repeating tasks */}
-              {!isEditing && task.completionCount > 0 && (
+              {!isEditing && isRepeatingTask && task.completionCount > 0 && (
                 <Text style={styles.completionCountBadge}>
                   🔄 Completed {task.completionCount} time{task.completionCount !== 1 ? 's' : ''}
                 </Text>
@@ -855,429 +854,3 @@ export default function TaskDetailsScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  screenHeader: {
-    backgroundColor: '#fff',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: 15,
-    paddingTop: Platform.OS === 'ios' ? 60 : 45, // Account for status bar
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
-  },
-  backButton: {
-    padding: 5,
-  },
-  backButtonText: {
-    fontSize: 16,
-    color: '#007AFF',
-    fontWeight: '600',
-  },
-  screenTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  headerSpacer: {
-    width: 60, // Balance the back button width
-  },
-  center: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    padding: 20,
-  },
-  header: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
-  },
-  headerTop: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-  },
-  checkbox: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: '#007AFF',
-    marginRight: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  checkboxCompleted: {
-    backgroundColor: '#007AFF',
-  },
-  checkmark: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  headerText: {
-    flex: 1,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  titleCompleted: {
-    textDecorationLine: 'line-through',
-    color: '#999',
-  },
-  completionCountBadge: {
-    fontSize: 13,
-    color: '#4CAF50',
-    fontWeight: '500',
-    backgroundColor: '#E8F5E9',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-    marginTop: 8,
-    alignSelf: 'flex-start',
-  },
-  editButton: {
-    marginTop: 12,
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    backgroundColor: '#007AFF',
-    borderRadius: 8,
-    alignSelf: 'flex-start',
-  },
-  editButtonText: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  editInput: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
-    paddingBottom: 4,
-  },
-  section: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
-  },
-  progressText: {
-    fontSize: 14,
-    color: '#666',
-  },
-  progressBar: {
-    height: 8,
-    backgroundColor: '#e0e0e0',
-    borderRadius: 4,
-    marginBottom: 16,
-    overflow: 'hidden',
-  },
-  progressFill: {
-    height: '100%',
-    backgroundColor: '#007AFF',
-    borderRadius: 4,
-  },
-  infoRow: {
-    flexDirection: 'row',
-    marginBottom: 8,
-  },
-  infoLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#666',
-    marginRight: 8,
-    minWidth: 100,
-  },
-  infoValue: {
-    fontSize: 14,
-    color: '#333',
-    flex: 1,
-  },
-  datePickerContainer: {
-    flex: 1,
-  },
-  stepItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-  },
-  stepItemCompleted: {
-    opacity: 0.6,
-  },
-  stepCheckbox: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    borderWidth: 2,
-    borderColor: '#007AFF',
-    marginRight: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  stepContent: {
-    flex: 1,
-  },
-  stepText: {
-    fontSize: 16,
-    color: '#333',
-  },
-  stepTextCompleted: {
-    textDecorationLine: 'line-through',
-    color: '#999',
-  },
-  stepActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginLeft: 8,
-    gap: 8,
-  },
-  stepEditButton: {
-    padding: 6,
-  },
-  stepEditButtonText: {
-    fontSize: 16,
-  },
-  stepDeleteButton: {
-    padding: 6,
-  },
-  stepDeleteButtonText: {
-    fontSize: 16,
-  },
-  stepEditContainer: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginLeft: 8,
-  },
-  stepEditInput: {
-    flex: 1,
-    fontSize: 16,
-    color: '#333',
-    borderWidth: 1,
-    borderColor: '#007AFF',
-    borderRadius: 6,
-    padding: 8,
-    marginRight: 8,
-  },
-  stepEditSaveButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#4CAF50',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 6,
-  },
-  stepEditSaveText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  stepEditCancelButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#f44336',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  stepEditCancelText: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
-  emptyText: {
-    fontSize: 14,
-    color: '#999',
-    fontStyle: 'italic',
-    textAlign: 'center',
-    paddingVertical: 20,
-  },
-  emptyStepsContainer: {
-    paddingVertical: 20,
-    alignItems: 'center',
-  },
-  emptyStepsIcon: {
-    fontSize: 48,
-    marginBottom: 12,
-    opacity: 0.3,
-  },
-  emptyStepsText: {
-    fontSize: 16,
-    color: '#666',
-    fontWeight: '500',
-    marginBottom: 4,
-  },
-  emptyStepsSubtext: {
-    fontSize: 13,
-    color: '#999',
-    textAlign: 'center',
-  },
-  addStepButton: {
-    marginTop: 12,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    backgroundColor: '#f0f0f0',
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  addStepButtonText: {
-    color: '#007AFF',
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  editActions: {
-    flexDirection: 'row',
-    gap: 12,
-    marginTop: 16,
-  },
-  actionButton: {
-    flex: 1,
-    paddingVertical: 14,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  cancelButton: {
-    backgroundColor: '#f5f5f5',
-  },
-  cancelButtonText: {
-    color: '#666',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  saveButton: {
-    backgroundColor: '#007AFF',
-  },
-  saveButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
-  },
-  modalContent: {
-    backgroundColor: '#fff',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    padding: 20,
-    paddingBottom: 40,
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 20,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-    marginBottom: 20,
-    minHeight: 50,
-  },
-  modalButtons: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  modalButton: {
-    flex: 1,
-    paddingVertical: 14,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  submitButton: {
-    backgroundColor: '#007AFF',
-  },
-  submitButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  errorText: {
-    fontSize: 16,
-    color: '#f44336',
-  },
-  remindersList: {
-    flex: 1,
-    marginTop: 4,
-  },
-  reminderDisplayItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 6,
-  },
-  reminderDisplayText: {
-    fontSize: 14,
-    color: '#333',
-    lineHeight: 20,
-    flex: 1,
-  },
-  alarmToggleButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 8,
-    paddingHorizontal: 12,
-    marginLeft: 8,
-    borderRadius: 8,
-    backgroundColor: '#f5f5f5',
-    borderWidth: 2,
-    borderColor: '#ddd',
-    minWidth: 70,
-    justifyContent: 'center',
-  },
-  alarmToggleButtonActive: {
-    backgroundColor: '#e3f2fd',
-    borderColor: '#2196F3',
-    borderWidth: 2,
-  },
-  alarmToggleIcon: {
-    fontSize: 20,
-    marginRight: 6,
-  },
-  alarmToggleIconActive: {
-    fontSize: 20,
-  },
-  alarmToggleText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#999',
-    textTransform: 'uppercase',
-  },
-  alarmToggleTextActive: {
-    color: '#2196F3',
-    fontWeight: '700',
-  },
-});
