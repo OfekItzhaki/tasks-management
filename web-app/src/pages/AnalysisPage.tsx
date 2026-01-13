@@ -8,12 +8,12 @@ import Skeleton from '../components/Skeleton';
 export default function AnalysisPage() {
   const { t } = useTranslation();
 
-  const { data: lists = [], isLoading: listsLoading } = useQuery<ToDoList[]>({
+  const { data: lists = [], isLoading: listsLoading, isError: listsError, error: listsErrorObj, refetch: refetchLists } = useQuery<ToDoList[]>({
     queryKey: ['lists'],
     queryFn: () => listsService.getAllLists(),
   });
 
-  const { data: allTasks = [], isLoading: tasksLoading } = useQuery<Task[]>({
+  const { data: allTasks = [], isLoading: tasksLoading, isError: tasksError, error: tasksErrorObj, refetch: refetchTasks } = useQuery<Task[]>({
     queryKey: ['all-tasks'],
     queryFn: async () => {
       const tasksPromises = lists.map((list) => tasksService.getTasksByListId(list.id));
@@ -24,6 +24,42 @@ export default function AnalysisPage() {
   });
 
   const isLoading = listsLoading || tasksLoading;
+  const hasError = listsError || tasksError;
+
+  if (hasError && !isLoading) {
+    return (
+      <div className="space-y-6">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Task Analysis</h1>
+        <div className="rounded-md bg-red-50 dark:bg-red-900/20 p-4">
+          <div className="text-sm text-red-800 dark:text-red-200 mb-3">
+            {listsError
+              ? `Failed to load lists: ${listsErrorObj?.message || 'Unknown error'}`
+              : tasksError
+              ? `Failed to load tasks: ${tasksErrorObj?.message || 'Unknown error'}`
+              : 'An error occurred'}
+          </div>
+          <div className="flex gap-3">
+            {listsError && (
+              <button
+                onClick={() => refetchLists()}
+                className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-md transition-colors"
+              >
+                Retry Lists
+              </button>
+            )}
+            {tasksError && (
+              <button
+                onClick={() => refetchTasks()}
+                className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-md transition-colors"
+              >
+                Retry Tasks
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const completedTasks = allTasks.filter((task) => task.completed);
   const pendingTasks = allTasks.filter((task) => !task.completed);

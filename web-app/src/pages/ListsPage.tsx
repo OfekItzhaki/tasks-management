@@ -21,6 +21,7 @@ export default function ListsPage() {
     isLoading,
     isError,
     error,
+    refetch,
   } = useQuery<ToDoList[], ApiError>({
     queryKey: ['lists'],
     queryFn: () => listsService.getAllLists(),
@@ -96,9 +97,15 @@ export default function ListsPage() {
   if (isError) {
     return (
       <div className="rounded-md bg-red-50 dark:bg-red-900/20 p-4">
-        <div className="text-sm text-red-800 dark:text-red-200">
+        <div className="text-sm text-red-800 dark:text-red-200 mb-3">
           {formatApiError(error, t('lists.loadFailed'))}
         </div>
+        <button
+          onClick={() => refetch()}
+          className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-md transition-colors"
+        >
+          {t('common.retry') || 'Retry'}
+        </button>
       </div>
     );
   }

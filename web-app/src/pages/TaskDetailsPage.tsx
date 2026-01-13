@@ -58,6 +58,7 @@ export default function TaskDetailsPage() {
     isLoading,
     isError,
     error,
+    refetch,
   } = useQuery<Task, ApiError>({
     queryKey: ['task', numericTaskId],
     enabled: typeof numericTaskId === 'number' && !Number.isNaN(numericTaskId),
@@ -354,17 +355,27 @@ export default function TaskDetailsPage() {
   if (isError || !task) {
     return (
       <div className="rounded-md bg-red-50 dark:bg-red-900/20 p-4">
-        <div className="text-sm text-red-800 dark:text-red-200">
+        <div className="text-sm text-red-800 dark:text-red-200 mb-3">
           {isError
             ? formatApiError(error, t('taskDetails.loadFailed'))
             : t('taskDetails.notFound')}
         </div>
-        <Link
-          to="/lists"
-          className="mt-4 inline-block text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 text-sm font-medium"
-        >
-          {t('tasks.backToLists')}
-        </Link>
+        <div className="flex gap-3">
+          {isError && (
+            <button
+              onClick={() => refetch()}
+              className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-md transition-colors"
+            >
+              {t('common.retry') || 'Retry'}
+            </button>
+          )}
+          <Link
+            to="/lists"
+            className="inline-flex items-center px-4 py-2 text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300"
+          >
+            {t('tasks.backToLists')}
+          </Link>
+        </div>
       </div>
     );
   }
