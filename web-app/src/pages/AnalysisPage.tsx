@@ -124,17 +124,6 @@ export default function AnalysisPage() {
     };
   });
 
-  const tasksByType = lists.reduce((acc, list) => {
-    const type = list.type;
-    if (!acc[type]) {
-      acc[type] = { total: 0, completed: 0, pending: 0 };
-    }
-    const listTasks = allTasks.filter((task) => task.todoListId === list.id);
-    acc[type].total += listTasks.length;
-    acc[type].completed += listTasks.filter((t) => t.completed).length;
-    acc[type].pending += listTasks.filter((t) => !t.completed).length;
-    return acc;
-  }, {} as Record<string, { total: number; completed: number; pending: number }>);
 
   if (isLoading) {
     return (
@@ -220,40 +209,6 @@ export default function AnalysisPage() {
                 </Pie>
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                    border: '1px solid #e5e7eb',
-                    borderRadius: '8px',
-                  }}
-                />
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-        )}
-
-        {/* Tasks by Type Bar Chart */}
-        {Object.keys(tasksByType).length > 0 && (
-          <div className="bg-white dark:bg-[#1f1f1f] p-6 rounded-lg shadow">
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
-              Tasks by Type
-            </h2>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart
-                data={Object.entries(tasksByType).map(([type, stats]) => ({
-                  name: type.charAt(0) + type.slice(1).toLowerCase(),
-                  completed: stats.completed,
-                  pending: stats.pending,
-                }))}
-              >
-                <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.1} />
-                <XAxis
-                  dataKey="name"
-                  stroke={isDark ? '#9ca3af' : '#6b7280'}
-                  style={{ fontSize: '12px' }}
-                />
-                <YAxis stroke={isDark ? '#9ca3af' : '#6b7280'} style={{ fontSize: '12px' }} />
-                <Tooltip
-                  contentStyle={{
                     backgroundColor: isDark ? '#1f1f1f' : 'rgba(255, 255, 255, 0.95)',
                     border: isDark ? '1px solid #2a2a2a' : '1px solid #e5e7eb',
                     borderRadius: '8px',
@@ -261,9 +216,7 @@ export default function AnalysisPage() {
                   }}
                 />
                 <Legend wrapperStyle={{ color: isDark ? '#ffffff' : '#000000' }} />
-                <Bar dataKey="completed" fill="#10b981" name="Completed" />
-                <Bar dataKey="pending" fill="#ef4444" name="Pending" />
-              </BarChart>
+              </PieChart>
             </ResponsiveContainer>
           </div>
         )}
@@ -431,51 +384,6 @@ export default function AnalysisPage() {
         </div>
       </div>
 
-      {/* Tasks by Type */}
-      <div className="bg-white dark:bg-[#1f1f1f] p-6 rounded-lg shadow">
-        <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Tasks by Type</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {Object.entries(tasksByType).map(([type, stats]) => {
-            const progress = stats.total > 0 ? (stats.completed / stats.total) * 100 : 0;
-            return (
-              <div key={type} className="border border-gray-200 dark:border-[#2a2a2a] rounded-lg p-4">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white capitalize mb-2">
-                  {type}
-                </h3>
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-500 dark:text-gray-400">Total:</span>
-                    <span className="font-medium text-gray-900 dark:text-white">{stats.total}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-500 dark:text-gray-400">Completed:</span>
-                    <span className="font-medium text-green-600 dark:text-green-400">
-                      {stats.completed}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-500 dark:text-gray-400">Pending:</span>
-                    <span className="font-medium text-red-600 dark:text-red-400">
-                      {stats.pending}
-                    </span>
-                  </div>
-                  <div className="mt-2">
-                    <div className="w-full bg-gray-200 dark:bg-[#2a2a2a] rounded-full h-2">
-                      <div
-                        className="bg-blue-600 dark:bg-blue-500 h-2 rounded-full"
-                        style={{ width: `${progress}%` }}
-                      />
-                    </div>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                      {progress.toFixed(1)}% complete
-                    </p>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
     </div>
   );
 }
