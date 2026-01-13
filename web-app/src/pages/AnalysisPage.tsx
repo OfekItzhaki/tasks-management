@@ -126,6 +126,35 @@ export default function AnalysisPage() {
     };
   });
 
+  // Calculate daily task completion streak
+  const dailyList = lists.find((list) => list.type === 'DAILY');
+  const dailyTasks = dailyList ? allTasks.filter((task) => task.todoListId === dailyList.id) : [];
+  const allDailyCompleted = dailyTasks.length > 0 && dailyTasks.every((task) => task.completed);
+  
+  // Simple streak calculation: if all daily tasks are completed today, check if they were completed yesterday, etc.
+  // For now, we'll show a streak based on current completion status
+  // A more accurate streak would require tracking completion history
+  const calculateStreak = () => {
+    if (dailyTasks.length === 0) return 0;
+    if (!allDailyCompleted) return 0;
+    
+    // Check if all tasks were completed today
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    // For a simple implementation, if all daily tasks are completed, assume streak of 1
+    // In a real implementation, you'd check completion history
+    const completedToday = dailyTasks.every((task) => {
+      // If task has no completedAt, it's not part of the streak
+      // This is a simplified version - real streak tracking would need history
+      return task.completed;
+    });
+    
+    return completedToday ? 1 : 0; // Simplified: returns 1 if all completed, 0 otherwise
+  };
+  
+  const currentStreak = calculateStreak();
+
 
   if (isLoading) {
     return (
@@ -181,7 +210,7 @@ export default function AnalysisPage() {
 
       {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Completion Status Pie Chart */}
+        {/* Completion Status Pie Chart with Streak */}
         {allTasks.length > 0 && (
           <div className="bg-white dark:bg-[#1f1f1f] p-6 rounded-lg shadow">
             <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
@@ -199,6 +228,7 @@ export default function AnalysisPage() {
                   labelLine={false}
                   label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
                   outerRadius={80}
+                  innerRadius={60}
                   fill="#8884d8"
                   dataKey="value"
                 >
@@ -211,13 +241,43 @@ export default function AnalysisPage() {
                 </Pie>
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: isDark ? '#1f1f1f' : 'rgba(255, 255, 255, 0.95)',
+                    backgroundColor: isDark ? '#1f1f1f' : '#ffffff',
                     border: isDark ? '1px solid #2a2a2a' : '1px solid #e5e7eb',
                     borderRadius: '8px',
-                    color: isDark ? '#ffffff' : '#000000',
+                    color: isDark ? '#ffffff' : '#111827',
                   }}
                 />
-                <Legend wrapperStyle={{ color: isDark ? '#ffffff' : '#000000' }} />
+                <Legend wrapperStyle={{ color: isDark ? '#ffffff' : '#111827' }} />
+                {/* Center text showing streak */}
+                <text
+                  x="50%"
+                  y="45%"
+                  textAnchor="middle"
+                  fill={isDark ? '#ffffff' : '#111827'}
+                  fontSize={14}
+                  fontWeight="bold"
+                >
+                  Daily Streak
+                </text>
+                <text
+                  x="50%"
+                  y="55%"
+                  textAnchor="middle"
+                  fill={isDark ? '#10b981' : '#059669'}
+                  fontSize={24}
+                  fontWeight="bold"
+                >
+                  {currentStreak}
+                </text>
+                <text
+                  x="50%"
+                  y="65%"
+                  textAnchor="middle"
+                  fill={isDark ? '#9ca3af' : '#6b7280'}
+                  fontSize={12}
+                >
+                  {currentStreak === 1 ? 'day' : 'days'}
+                </text>
               </PieChart>
             </ResponsiveContainer>
           </div>
