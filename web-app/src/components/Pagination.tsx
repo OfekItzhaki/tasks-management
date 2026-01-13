@@ -1,3 +1,6 @@
+import { useTranslation } from 'react-i18next';
+import { isRtlLanguage } from '@tasks-management/frontend-services/i18n';
+
 interface PaginationProps {
   currentPage: number;
   totalPages: number;
@@ -15,6 +18,8 @@ export default function Pagination({
   totalItems,
   onItemsPerPageChange,
 }: PaginationProps) {
+  const { i18n } = useTranslation();
+  const isRtl = isRtlLanguage(i18n.language);
   const startItem = (currentPage - 1) * itemsPerPage + 1;
   const endItem = Math.min(currentPage * itemsPerPage, totalItems);
 
@@ -55,8 +60,8 @@ export default function Pagination({
   };
 
   return (
-    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6">
-      <div className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+    <div className={`flex flex-col sm:flex-row items-center ${isRtl ? 'flex-row-reverse' : ''} justify-between gap-4 mt-6`}>
+      <div className={`flex items-center ${isRtl ? 'flex-row-reverse space-x-reverse space-x-2' : 'gap-2'} text-sm text-gray-700 dark:text-gray-300`}>
         <span>
           Showing {startItem} to {endItem} of {totalItems} tasks
         </span>
@@ -75,7 +80,7 @@ export default function Pagination({
       </div>
 
       {totalPages > 1 && (
-        <div className="flex items-center gap-2">
+        <div className={`flex items-center ${isRtl ? 'flex-row-reverse space-x-reverse space-x-2' : 'gap-2'}`}>
           <button
             type="button"
             onClick={() => onPageChange(currentPage - 1)}
