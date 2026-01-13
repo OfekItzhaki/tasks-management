@@ -109,6 +109,11 @@ export default {
     creditsValue: 'Ofek Itzhaki',
     sourceCode: 'Source code',
     openRepo: 'Open repo',
+    profilePicture: 'Profile Picture',
+    addPicture: 'Add Picture',
+    changePicture: 'Change Picture',
+    resendVerification: 'Resend Verification Email',
+    verificationEmailSent: 'Verification email sent. Please check your inbox.',
   },
 } as const;
 

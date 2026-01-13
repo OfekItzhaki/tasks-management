@@ -109,6 +109,11 @@ export default {
     creditsValue: 'אופק יצחקי',
     sourceCode: 'קוד מקור',
     openRepo: 'פתח מאגר',
+    profilePicture: 'תמונת פרופיל',
+    addPicture: 'הוסף תמונה',
+    changePicture: 'שנה תמונה',
+    resendVerification: 'שלח שוב אימייל אימות',
+    verificationEmailSent: 'אימייל אימות נשלח. אנא בדוק את תיבת הדואר הנכנס.',
   },
 } as const;
 

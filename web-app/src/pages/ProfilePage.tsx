@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { BUILD_INFO } from '../utils/buildInfo';
 import { isRtlLanguage } from '@tasks-management/frontend-services/i18n';
 import { usersService } from '@tasks-management/frontend-services';
+import { authService } from '../services/auth.service';
 import toast from 'react-hot-toast';
 
 export default function ProfilePage() {
@@ -64,7 +65,7 @@ export default function ProfilePage() {
           {/* Profile Picture */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              {t('profile.profilePicture') || 'Profile Picture'}
+              {t('profile.profilePicture')}
             </label>
             <div className={`flex ${isRtl ? 'flex-row-reverse' : ''} items-center gap-4`}>
               {user.profilePicture ? (
@@ -119,7 +120,7 @@ export default function ProfilePage() {
                   }}
                   className="inline-flex justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700"
                 >
-                  {user.profilePicture ? (t('profile.changePicture') || 'Change Picture') : (t('profile.addPicture') || 'Add Picture')}
+                  {user.profilePicture ? t('profile.changePicture') : t('profile.addPicture')}
                 </button>
               )}
             </div>
@@ -141,9 +142,27 @@ export default function ProfilePage() {
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
               {t('profile.emailVerified')}
             </label>
-            <p className="mt-1 text-sm text-gray-900 dark:text-white">
-              {user.emailVerified ? t('profile.yes') : t('profile.no')}
-            </p>
+            <div className={`mt-1 flex ${isRtl ? 'flex-row-reverse' : ''} items-center gap-2`}>
+              <p className="text-sm text-gray-900 dark:text-white">
+                {user.emailVerified ? t('profile.yes') : t('profile.no')}
+              </p>
+              {!user.emailVerified && (
+                <button
+                  type="button"
+                  onClick={async () => {
+                    try {
+                      await authService.resendVerification(user.email);
+                      toast.success(t('profile.verificationEmailSent'));
+                    } catch (error) {
+                      toast.error(error instanceof Error ? error.message : t('profile.verificationEmailSent'));
+                    }
+                  }}
+                  className="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-medium"
+                >
+                  {t('profile.resendVerification')}
+                </button>
+              )}
+            </div>
           </div>
 
           <div>
