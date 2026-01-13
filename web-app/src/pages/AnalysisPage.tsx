@@ -3,16 +3,17 @@ import { listsService } from '../services/lists.service';
 import { tasksService } from '../services/tasks.service';
 import { ToDoList, Task } from '@tasks-management/frontend-services';
 import { useTranslation } from 'react-i18next';
+import Skeleton from '../components/Skeleton';
 
 export default function AnalysisPage() {
   const { t } = useTranslation();
 
-  const { data: lists = [] } = useQuery<ToDoList[]>({
+  const { data: lists = [], isLoading: listsLoading } = useQuery<ToDoList[]>({
     queryKey: ['lists'],
     queryFn: () => listsService.getAllLists(),
   });
 
-  const { data: allTasks = [] } = useQuery<Task[]>({
+  const { data: allTasks = [], isLoading: tasksLoading } = useQuery<Task[]>({
     queryKey: ['all-tasks'],
     queryFn: async () => {
       const tasksPromises = lists.map((list) => tasksService.getTasksByListId(list.id));
@@ -21,6 +22,8 @@ export default function AnalysisPage() {
     },
     enabled: lists.length > 0,
   });
+
+  const isLoading = listsLoading || tasksLoading;
 
   const completedTasks = allTasks.filter((task) => task.completed);
   const pendingTasks = allTasks.filter((task) => !task.completed);
