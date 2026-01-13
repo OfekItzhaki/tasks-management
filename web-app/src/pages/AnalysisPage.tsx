@@ -31,7 +31,7 @@ export default function AnalysisPage() {
   const { data: allTasks = [], isLoading: tasksLoading, isError: tasksError, error: tasksErrorObj, refetch: refetchTasks } = useQuery<Task[]>({
     queryKey: ['all-tasks'],
     queryFn: async () => {
-      const tasksPromises = lists.map((list) => tasksService.getTasksByListId(list.id));
+      const tasksPromises = lists.map((list) => tasksService.getTasksByList(list.id));
       const tasksArrays = await Promise.all(tasksPromises);
       return tasksArrays.flat();
     },
