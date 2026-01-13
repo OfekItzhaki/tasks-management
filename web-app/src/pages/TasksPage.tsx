@@ -29,6 +29,8 @@ export default function TasksPage() {
   const [newTaskDescription, setNewTaskDescription] = useState('');
   const [isEditingListName, setIsEditingListName] = useState(false);
   const [listNameDraft, setListNameDraft] = useState('');
+  const [selectedTasks, setSelectedTasks] = useState<Set<number>>(new Set());
+  const [isBulkMode, setIsBulkMode] = useState(false);
 
   const numericListId = listId ? Number(listId) : null;
 
@@ -418,6 +420,94 @@ export default function TasksPage() {
 
       <div className="flex items-center justify-between mb-6 gap-3">
         <div className="min-w-0 flex-1">
+          {isBulkMode && (
+            <div className="flex items-center gap-3 mb-4 p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg">
+              <span className="text-sm font-medium text-indigo-900 dark:text-indigo-200">
+                {selectedTasks.size} task{selectedTasks.size !== 1 ? 's' : ''} selected
+              </span>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const allSelected = tasks.every((t) => selectedTasks.has(t.id));
+                    if (allSelected) {
+                      setSelectedTasks(new Set());
+                    } else {
+                      setSelectedTasks(new Set(tasks.map((t) => t.id)));
+                    }
+                  }}
+                  className="px-3 py-1 text-xs font-medium text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-800 rounded"
+                >
+                  {tasks.every((t) => selectedTasks.has(t.id)) ? 'Deselect All' : 'Select All'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    selectedTasks.forEach((taskId) => {
+                      const task = tasks.find((t) => t.id === taskId);
+                      if (task && !task.completed) {
+                        updateTaskMutation.mutate({
+                          id: taskId,
+                          data: { completed: true },
+                        });
+                      }
+                    });
+                    setSelectedTasks(new Set());
+                  }}
+                  disabled={selectedTasks.size === 0 || updateTaskMutation.isPending}
+                  className="px-3 py-1 text-xs font-medium text-white bg-green-600 hover:bg-green-700 disabled:opacity-50 rounded"
+                >
+                  Mark Complete
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    selectedTasks.forEach((taskId) => {
+                      const task = tasks.find((t) => t.id === taskId);
+                      if (task && task.completed) {
+                        updateTaskMutation.mutate({
+                          id: taskId,
+                          data: { completed: false },
+                        });
+                      }
+                    });
+                    setSelectedTasks(new Set());
+                  }}
+                  disabled={selectedTasks.size === 0 || updateTaskMutation.isPending}
+                  className="px-3 py-1 text-xs font-medium text-white bg-yellow-600 hover:bg-yellow-700 disabled:opacity-50 rounded"
+                >
+                  Mark Incomplete
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const ok = window.confirm(
+                      `Delete ${selectedTasks.size} task${selectedTasks.size !== 1 ? 's' : ''}?`,
+                    );
+                    if (!ok) return;
+                    selectedTasks.forEach((taskId) => {
+                      deleteTaskMutation.mutate({ id: taskId });
+                    });
+                    setSelectedTasks(new Set());
+                  }}
+                  disabled={selectedTasks.size === 0 || deleteTaskMutation.isPending || isFinishedList}
+                  className="px-3 py-1 text-xs font-medium text-white bg-red-600 hover:bg-red-700 disabled:opacity-50 rounded"
+                >
+                  Delete
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsBulkMode(false);
+                    setSelectedTasks(new Set());
+                  }}
+                  className="px-3 py-1 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
           {isEditingListName ? (
             <div className="flex flex-col gap-2">
               <input
@@ -476,6 +566,15 @@ export default function TasksPage() {
         </div>
 
         <div className="flex items-center gap-2">
+          {!isBulkMode && (
+            <button
+              type="button"
+              onClick={() => setIsBulkMode(true)}
+              className="inline-flex justify-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+            >
+              Select Multiple
+            </button>
+          )}
           {list && !list.isSystem && (
             <button
               type="button"
@@ -569,37 +668,84 @@ export default function TasksPage() {
                 queryFn: () => tasksService.getTaskById(task.id),
               });
             }}
-            onClick={() => navigate(`/tasks/${task.id}`)}
+            onClick={() => {
+              if (isBulkMode) {
+                const newSelected = new Set(selectedTasks);
+                if (newSelected.has(task.id)) {
+                  newSelected.delete(task.id);
+                } else {
+                  newSelected.add(task.id);
+                }
+                setSelectedTasks(newSelected);
+              } else {
+                navigate(`/tasks/${task.id}`);
+              }
+            }}
             onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
+              if (isBulkMode) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  const newSelected = new Set(selectedTasks);
+                  if (newSelected.has(task.id)) {
+                    newSelected.delete(task.id);
+                  } else {
+                    newSelected.add(task.id);
+                  }
+                  setSelectedTasks(newSelected);
+                }
+              } else if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
                 navigate(`/tasks/${task.id}`);
               }
             }}
-            className="p-4 bg-white dark:bg-[#1f1f1f] rounded-lg shadow hover:shadow-md transition-shadow cursor-pointer"
+            className={`p-4 bg-white dark:bg-[#1f1f1f] rounded-lg shadow transition-shadow ${
+              isBulkMode
+                ? selectedTasks.has(task.id)
+                  ? 'ring-2 ring-indigo-500 cursor-pointer'
+                  : 'hover:shadow-md cursor-pointer'
+                : 'hover:shadow-md cursor-pointer'
+            }`}
           >
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center space-x-3 min-w-0 flex-1">
-                <input
-                  type="checkbox"
-                  checked={task.completed}
-                  disabled={
-                    updateTaskMutation.isPending &&
-                    updateTaskMutation.variables?.id === task.id
-                  }
-                  onPointerDown={(e) => e.stopPropagation()}
-                  onMouseDown={(e) => e.stopPropagation()}
-                  onClick={(e) => e.stopPropagation()}
-                  onKeyDown={(e) => e.stopPropagation()}
-                  onChange={(e) => {
-                    e.stopPropagation();
-                    updateTaskMutation.mutate({
-                      id: task.id,
-                      data: { completed: !task.completed },
-                    });
-                  }}
-                  className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                />
+                {isBulkMode ? (
+                  <input
+                    type="checkbox"
+                    checked={selectedTasks.has(task.id)}
+                    onChange={(e) => {
+                      e.stopPropagation();
+                      const newSelected = new Set(selectedTasks);
+                      if (newSelected.has(task.id)) {
+                        newSelected.delete(task.id);
+                      } else {
+                        newSelected.add(task.id);
+                      }
+                      setSelectedTasks(newSelected);
+                    }}
+                    className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                  />
+                ) : (
+                  <input
+                    type="checkbox"
+                    checked={task.completed}
+                    disabled={
+                      updateTaskMutation.isPending &&
+                      updateTaskMutation.variables?.id === task.id
+                    }
+                    onPointerDown={(e) => e.stopPropagation()}
+                    onMouseDown={(e) => e.stopPropagation()}
+                    onClick={(e) => e.stopPropagation()}
+                    onKeyDown={(e) => e.stopPropagation()}
+                    onChange={(e) => {
+                      e.stopPropagation();
+                      updateTaskMutation.mutate({
+                        id: task.id,
+                        data: { completed: !task.completed },
+                      });
+                    }}
+                    className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                  />
+                )}
                 <span
                   className={
                     task.completed
@@ -616,7 +762,7 @@ export default function TasksPage() {
                     {new Date(task.dueDate).toLocaleDateString()}
                   </span>
                 )}
-                {isFinishedList ? (
+                {!isBulkMode && (isFinishedList ? (
                   <>
                     <button
                       type="button"
@@ -665,7 +811,7 @@ export default function TasksPage() {
                   >
                     {t('common.delete')}
                   </button>
-                )}
+                ))}
               </div>
             </div>
           </div>
