@@ -147,7 +147,15 @@ export default function TasksPage() {
     } else {
       setTasksOrder([]);
     }
+    // Reset to first page when tasks change
+    setCurrentPage(1);
   }, [tasks]);
+
+  // Calculate pagination
+  const totalPages = Math.ceil(tasksOrder.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedTasks = tasksOrder.slice(startIndex, endIndex);
 
   const isFinishedList = list?.type === ListType.FINISHED;
 
