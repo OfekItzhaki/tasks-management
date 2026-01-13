@@ -9,6 +9,22 @@ import Skeleton from '../components/Skeleton';
 import { useTranslation } from 'react-i18next';
 import { useKeyboardShortcuts } from '../utils/useKeyboardShortcuts';
 import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { SortableTaskItem } from '../components/SortableTaskItem';
+import {
   Task,
   ApiError,
   CreateTaskDto,
@@ -32,8 +48,21 @@ export default function TasksPage() {
   const [listNameDraft, setListNameDraft] = useState('');
   const [selectedTasks, setSelectedTasks] = useState<Set<number>>(new Set());
   const [isBulkMode, setIsBulkMode] = useState(false);
+  const [tasksOrder, setTasksOrder] = useState<Task[]>([]);
 
   const numericListId = listId ? Number(listId) : null;
+
+  // Drag and drop sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
+  );
 
   // Keyboard shortcuts
   useKeyboardShortcuts([
@@ -107,6 +136,17 @@ export default function TasksPage() {
   useEffect(() => {
     if (list) setListNameDraft(list.name);
   }, [list]);
+
+  // Update local order when tasks change
+  useEffect(() => {
+    if (tasks.length > 0) {
+      // Sort by order field to maintain backend order
+      const sorted = [...tasks].sort((a, b) => a.order - b.order);
+      setTasksOrder(sorted);
+    } else {
+      setTasksOrder([]);
+    }
+  }, [tasks]);
 
   const isFinishedList = list?.type === ListType.FINISHED;
 
@@ -346,6 +386,55 @@ export default function TasksPage() {
       }
     },
   });
+
+  const reorderTasksMutation = useMutation<
+    void,
+    ApiError,
+    { taskIds: number[] }
+  >({
+    mutationFn: async ({ taskIds }) => {
+      // Update each task's order based on new position
+      const updatePromises = taskIds.map((taskId, index) =>
+        tasksService.updateTask(taskId, { order: index + 1 }),
+      );
+      await Promise.all(updatePromises);
+    },
+    onSuccess: async () => {
+      toast.success(t('tasks.reordered') || 'Tasks reordered');
+      // Invalidate queries to refresh the list
+      if (numericListId) {
+        await queryClient.invalidateQueries({ queryKey: ['tasks', numericListId] });
+      }
+    },
+    onError: (err) => {
+      toast.error(formatApiError(err, t('tasks.reorderFailed') || 'Failed to reorder tasks'));
+      // Revert to original order on error
+      if (tasks.length > 0) {
+        const sorted = [...tasks].sort((a, b) => a.order - b.order);
+        setTasksOrder(sorted);
+      }
+    },
+  });
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (!over || active.id === over.id || isBulkMode || isFinishedList) {
+      return;
+    }
+
+    const oldIndex = tasksOrder.findIndex((task) => task.id === active.id);
+    const newIndex = tasksOrder.findIndex((task) => task.id === over.id);
+
+    if (oldIndex !== -1 && newIndex !== -1) {
+      const newOrder = arrayMove(tasksOrder, oldIndex, newIndex);
+      setTasksOrder(newOrder);
+
+      // Update backend with new order
+      const taskIds = newOrder.map((task) => task.id);
+      reorderTasksMutation.mutate({ taskIds });
+    }
+  };
 
   const updateTaskMutation = useMutation<
     Task,
@@ -685,48 +774,24 @@ export default function TasksPage() {
         </form>
       )}
 
-      <div className="space-y-4">
-        {tasks.map((task) => (
-          <div
-            key={task.id}
-            role="button"
-            tabIndex={0}
-            onMouseEnter={() => {
-              // Prefetch details for instant TaskDetailsPage.
-              void queryClient.prefetchQuery({
-                queryKey: ['task', task.id],
-                queryFn: () => tasksService.getTaskById(task.id),
-              });
-            }}
-            onFocus={() => {
-              void queryClient.prefetchQuery({
-                queryKey: ['task', task.id],
-                queryFn: () => tasksService.getTaskById(task.id),
-              });
-            }}
-            onPointerDown={() => {
-              void queryClient.prefetchQuery({
-                queryKey: ['task', task.id],
-                queryFn: () => tasksService.getTaskById(task.id),
-              });
-            }}
-            onClick={() => {
-              if (isBulkMode) {
-                const newSelected = new Set(selectedTasks);
-                if (newSelected.has(task.id)) {
-                  newSelected.delete(task.id);
-                } else {
-                  newSelected.add(task.id);
-                }
-                setSelectedTasks(newSelected);
-              } else {
-                navigate(`/tasks/${task.id}`);
-              }
-            }}
-            onKeyDown={(e) => {
-              if (isBulkMode) {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+      >
+        <SortableContext
+          items={tasksOrder.map((t) => t.id)}
+          strategy={verticalListSortingStrategy}
+        >
+          <div className="space-y-4">
+            {tasksOrder.map((task) => (
+              <SortableTaskItem
+                key={task.id}
+                task={task}
+                isBulkMode={isBulkMode}
+                isSelected={selectedTasks.has(task.id)}
+                isFinishedList={isFinishedList}
+                onToggleSelect={() => {
                   const newSelected = new Set(selectedTasks);
                   if (newSelected.has(task.id)) {
                     newSelected.delete(task.id);
@@ -734,28 +799,51 @@ export default function TasksPage() {
                     newSelected.add(task.id);
                   }
                   setSelectedTasks(newSelected);
-                }
-              } else if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                navigate(`/tasks/${task.id}`);
-              }
-            }}
-            className={`p-4 bg-white dark:bg-[#1f1f1f] rounded-lg shadow transition-shadow ${
-              isBulkMode
-                ? selectedTasks.has(task.id)
-                  ? 'ring-2 ring-indigo-500 cursor-pointer'
-                  : 'hover:shadow-md cursor-pointer'
-                : 'hover:shadow-md cursor-pointer'
-            }`}
-          >
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center space-x-3 min-w-0 flex-1">
-                {isBulkMode ? (
-                  <input
-                    type="checkbox"
-                    checked={selectedTasks.has(task.id)}
-                    onChange={(e) => {
-                      e.stopPropagation();
+                }}
+                onToggleComplete={() => {
+                  updateTaskMutation.mutate({
+                    id: task.id,
+                    data: { completed: !task.completed },
+                  });
+                }}
+                onDelete={() => {
+                  const ok = window.confirm(
+                    t('tasks.deleteTaskConfirm', { description: task.description }),
+                  );
+                  if (!ok) return;
+                  deleteTaskMutation.mutate({ id: task.id });
+                }}
+                onRestore={() => {
+                  const ok = window.confirm(
+                    t('tasks.restoreConfirm', { description: task.description }),
+                  );
+                  if (!ok) return;
+                  restoreTaskMutation.mutate({ id: task.id });
+                }}
+                onPermanentDelete={() => {
+                  const ok = window.confirm(
+                    t('tasks.deleteForeverConfirm', { description: task.description }),
+                  );
+                  if (!ok) return;
+                  permanentDeleteTaskMutation.mutate({ id: task.id });
+                }}
+                onClick={() => {
+                  if (isBulkMode) {
+                    const newSelected = new Set(selectedTasks);
+                    if (newSelected.has(task.id)) {
+                      newSelected.delete(task.id);
+                    } else {
+                      newSelected.add(task.id);
+                    }
+                    setSelectedTasks(newSelected);
+                  } else {
+                    navigate(`/tasks/${task.id}`);
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if (isBulkMode) {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
                       const newSelected = new Set(selectedTasks);
                       if (newSelected.has(task.id)) {
                         newSelected.delete(task.id);
@@ -763,102 +851,147 @@ export default function TasksPage() {
                         newSelected.add(task.id);
                       }
                       setSelectedTasks(newSelected);
-                    }}
-                    className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                  />
-                ) : (
-                  <input
-                    type="checkbox"
-                    checked={task.completed}
-                    disabled={
-                      updateTaskMutation.isPending &&
-                      updateTaskMutation.variables?.id === task.id
                     }
-                    onPointerDown={(e) => e.stopPropagation()}
-                    onMouseDown={(e) => e.stopPropagation()}
-                    onClick={(e) => e.stopPropagation()}
-                    onKeyDown={(e) => e.stopPropagation()}
-                    onChange={(e) => {
-                      e.stopPropagation();
-                      updateTaskMutation.mutate({
-                        id: task.id,
-                        data: { completed: !task.completed },
-                      });
-                    }}
-                    className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                  />
-                )}
-                <span
-                  className={
-                    task.completed
-                      ? 'line-through text-gray-500 dark:text-gray-400 truncate'
-                      : 'text-gray-900 dark:text-white truncate'
+                  } else if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    navigate(`/tasks/${task.id}`);
                   }
+                }}
+              >
+                <div
+                  onMouseEnter={() => {
+                    void queryClient.prefetchQuery({
+                      queryKey: ['task', task.id],
+                      queryFn: () => tasksService.getTaskById(task.id),
+                    });
+                  }}
+                  onFocus={() => {
+                    void queryClient.prefetchQuery({
+                      queryKey: ['task', task.id],
+                      queryFn: () => tasksService.getTaskById(task.id),
+                    });
+                  }}
+                  onPointerDown={() => {
+                    void queryClient.prefetchQuery({
+                      queryKey: ['task', task.id],
+                      queryFn: () => tasksService.getTaskById(task.id),
+                    });
+                  }}
                 >
-                  {task.description}
-                </span>
-              </div>
-              <div className="flex items-center gap-3">
-                {task.dueDate && (
-                  <span className="text-sm text-gray-500 dark:text-gray-400">
-                    {new Date(task.dueDate).toLocaleDateString()}
-                  </span>
-                )}
-                {!isBulkMode && (isFinishedList ? (
-                  <>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        const ok = window.confirm(
-                          t('tasks.restoreConfirm', { description: task.description }),
-                        );
-                        if (!ok) return;
-                        restoreTaskMutation.mutate({ id: task.id });
-                      }}
-                      disabled={restoreTaskMutation.isPending}
-                      className="inline-flex justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {t('tasks.restore')}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        const ok = window.confirm(
-                          t('tasks.deleteForeverConfirm', { description: task.description }),
-                        );
-                        if (!ok) return;
-                        permanentDeleteTaskMutation.mutate({ id: task.id });
-                      }}
-                      disabled={permanentDeleteTaskMutation.isPending}
-                      className="inline-flex justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {t('tasks.deleteForever')}
-                    </button>
-                  </>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      const ok = window.confirm(
-                        t('tasks.deleteTaskConfirm', { description: task.description }),
-                      );
-                      if (!ok) return;
-                      deleteTaskMutation.mutate({ id: task.id });
-                    }}
-                    disabled={deleteTaskMutation.isPending}
-                    className="inline-flex justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {t('common.delete')}
-                  </button>
-                ))}
-              </div>
-            </div>
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center space-x-3 min-w-0 flex-1">
+                      {isBulkMode ? (
+                        <input
+                          type="checkbox"
+                          checked={selectedTasks.has(task.id)}
+                          onChange={(e) => {
+                            e.stopPropagation();
+                            const newSelected = new Set(selectedTasks);
+                            if (newSelected.has(task.id)) {
+                              newSelected.delete(task.id);
+                            } else {
+                              newSelected.add(task.id);
+                            }
+                            setSelectedTasks(newSelected);
+                          }}
+                          className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                        />
+                      ) : (
+                        <input
+                          type="checkbox"
+                          checked={task.completed}
+                          disabled={
+                            updateTaskMutation.isPending &&
+                            updateTaskMutation.variables?.id === task.id
+                          }
+                          onPointerDown={(e) => e.stopPropagation()}
+                          onMouseDown={(e) => e.stopPropagation()}
+                          onClick={(e) => e.stopPropagation()}
+                          onKeyDown={(e) => e.stopPropagation()}
+                          onChange={(e) => {
+                            e.stopPropagation();
+                            updateTaskMutation.mutate({
+                              id: task.id,
+                              data: { completed: !task.completed },
+                            });
+                          }}
+                          className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                        />
+                      )}
+                      <span
+                        className={
+                          task.completed
+                            ? 'line-through text-gray-500 dark:text-gray-400 truncate'
+                            : 'text-gray-900 dark:text-white truncate'
+                        }
+                      >
+                        {task.description}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      {task.dueDate && (
+                        <span className="text-sm text-gray-500 dark:text-gray-400">
+                          {new Date(task.dueDate).toLocaleDateString()}
+                        </span>
+                      )}
+                      {!isBulkMode && (isFinishedList ? (
+                        <>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const ok = window.confirm(
+                                t('tasks.restoreConfirm', { description: task.description }),
+                              );
+                              if (!ok) return;
+                              restoreTaskMutation.mutate({ id: task.id });
+                            }}
+                            disabled={restoreTaskMutation.isPending}
+                            className="inline-flex justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            {t('tasks.restore')}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const ok = window.confirm(
+                                t('tasks.deleteForeverConfirm', { description: task.description }),
+                              );
+                              if (!ok) return;
+                              permanentDeleteTaskMutation.mutate({ id: task.id });
+                            }}
+                            disabled={permanentDeleteTaskMutation.isPending}
+                            className="inline-flex justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            {t('tasks.deleteForever')}
+                          </button>
+                        </>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const ok = window.confirm(
+                              t('tasks.deleteTaskConfirm', { description: task.description }),
+                            );
+                            if (!ok) return;
+                            deleteTaskMutation.mutate({ id: task.id });
+                          }}
+                          disabled={deleteTaskMutation.isPending}
+                          className="inline-flex justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {t('common.delete')}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </SortableTaskItem>
+            ))}
           </div>
-        ))}
-      </div>
+        </SortableContext>
+      </DndContext>
 
       {tasks.length === 0 && (
         <div className="text-center py-12">
