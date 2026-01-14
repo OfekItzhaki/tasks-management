@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../context/AuthContext';
 import { useTranslation } from 'react-i18next';
@@ -12,35 +12,21 @@ export default function ProfilePage() {
   const { user, loading } = useAuth();
   const { t, i18n } = useTranslation();
   const isRtl = isRtlLanguage(i18n.language);
-  const [isEditingPicture, setIsEditingPicture] = useState(false);
-  const [profilePictureUrl, setProfilePictureUrl] = useState(user?.profilePicture || '');
-  const [uploadMethod, setUploadMethod] = useState<'url' | 'file'>('url');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [filePreview, setFilePreview] = useState<string | null>(null);
+  const [isHoveringImage, setIsHoveringImage] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
 
-  // Update profilePictureUrl when user changes
-  useEffect(() => {
-    if (user?.profilePicture !== profilePictureUrl && !isEditingPicture) {
-      setProfilePictureUrl(user?.profilePicture || '');
-    }
-  }, [user?.profilePicture, isEditingPicture]);
 
   const updateProfilePictureMutation = useMutation({
-    mutationFn: async ({ url, file }: { url?: string; file?: File }) => {
+    mutationFn: async ({ file }: { file: File }) => {
       if (!user) throw new Error('User not found');
-      if (file) {
-        return usersService.uploadAvatar(user.id, file);
-      } else {
-        return usersService.update(user.id, { profilePicture: url || null });
-      }
+      return usersService.uploadAvatar(user.id, file);
     },
     onSuccess: async (updatedUser) => {
       toast.success(t('profile.pictureUpdated'));
-      setIsEditingPicture(false);
       setSelectedFile(null);
-      setFilePreview(null);
-      setUploadMethod('url');
       // Refresh the page to update AuthContext user
       setTimeout(() => window.location.reload(), 500);
     },
@@ -57,21 +43,7 @@ export default function ProfilePage() {
     return <div className="text-sm text-gray-600 dark:text-gray-400">{t('profile.notAuthenticated')}</div>;
   }
 
-  const handleSavePicture = () => {
-    if (uploadMethod === 'file' && selectedFile) {
-      updateProfilePictureMutation.mutate({ file: selectedFile });
-    } else {
-      updateProfilePictureMutation.mutate({ url: profilePictureUrl });
-    }
-  };
 
-  const handleCancelPicture = () => {
-    setProfilePictureUrl(user?.profilePicture || '');
-    setSelectedFile(null);
-    setFilePreview(null);
-    setUploadMethod('url');
-    setIsEditingPicture(false);
-  };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -97,7 +69,13 @@ export default function ProfilePage() {
         setFilePreview(reader.result as string);
       };
       reader.readAsDataURL(file);
+      // Auto-save after file selection
+      updateProfilePictureMutation.mutate({ file });
     }
+  };
+
+  const handleImageClick = () => {
+    fileInputRef.current?.click();
   };
 
   return (
@@ -111,122 +89,56 @@ export default function ProfilePage() {
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               {t('profile.profilePicture')}
             </label>
-            <div className={`flex ${isRtl ? 'flex-row-reverse' : ''} items-center gap-4`}>
-              {(filePreview || user.profilePicture) ? (
-                <img
-                  src={filePreview || user.profilePicture || undefined}
-                  alt={t('profile.profilePicture')}
-                  className="w-20 h-20 rounded-full object-cover border-2 border-gray-300 dark:border-[#2a2a2a]"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).style.display = 'none';
-                  }}
-                />
-              ) : (
-                <div className="w-20 h-20 rounded-full bg-gray-200 dark:bg-[#2a2a2a] flex items-center justify-center border-2 border-gray-300 dark:border-[#2a2a2a]">
-                  <span className="text-2xl text-gray-400 dark:text-gray-500">
-                    {user.name?.[0]?.toUpperCase() || user.email[0].toUpperCase()}
-                  </span>
-                </div>
-              )}
-              {isEditingPicture ? (
-                <div className="flex-1 space-y-3">
-                  {/* Upload Method Toggle */}
-                  <div className={`flex ${isRtl ? 'flex-row-reverse' : ''} gap-2`}>
-                    <button
-                      type="button"
-                      onClick={() => setUploadMethod('url')}
-                      className={`px-3 py-1 text-xs font-medium rounded ${
-                        uploadMethod === 'url'
-                          ? 'bg-indigo-600 text-white'
-                          : 'bg-gray-200 dark:bg-[#2a2a2a] text-gray-700 dark:text-gray-300'
-                      }`}
-                    >
-                      From URL
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setUploadMethod('file')}
-                      className={`px-3 py-1 text-xs font-medium rounded ${
-                        uploadMethod === 'file'
-                          ? 'bg-indigo-600 text-white'
-                          : 'bg-gray-200 dark:bg-[#2a2a2a] text-gray-700 dark:text-gray-300'
-                      }`}
-                    >
-                      Upload File
-                    </button>
+            <div className="relative inline-block">
+              <div
+                className="relative cursor-pointer group"
+                onMouseEnter={() => setIsHoveringImage(true)}
+                onMouseLeave={() => setIsHoveringImage(false)}
+                onClick={handleImageClick}
+              >
+                {(filePreview || user.profilePicture) ? (
+                  <img
+                    src={filePreview || user.profilePicture || undefined}
+                    alt={t('profile.profilePicture')}
+                    className="w-20 h-20 rounded-full object-cover border-2 border-gray-300 dark:border-[#2a2a2a] transition-opacity group-hover:opacity-75"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = 'none';
+                    }}
+                  />
+                ) : (
+                  <div className="w-20 h-20 rounded-full bg-gray-200 dark:bg-[#2a2a2a] flex items-center justify-center border-2 border-gray-300 dark:border-[#2a2a2a] transition-opacity group-hover:opacity-75">
+                    <span className="text-2xl text-gray-400 dark:text-gray-500">
+                      {user.name?.[0]?.toUpperCase() || user.email[0].toUpperCase()}
+                    </span>
                   </div>
-
-                  {/* File Preview */}
-                  {(filePreview || selectedFile) && (
-                    <div className="mt-2">
-                      <img
-                        src={filePreview || undefined}
-                        alt="Preview"
-                        className="w-20 h-20 rounded-full object-cover border-2 border-gray-300 dark:border-[#2a2a2a]"
-                      />
-                    </div>
-                  )}
-
-                  {/* URL Input */}
-                  {uploadMethod === 'url' && (
-                    <input
-                      type="url"
-                      value={profilePictureUrl}
-                      onChange={(e) => setProfilePictureUrl(e.target.value)}
-                      placeholder="https://example.com/avatar.jpg"
-                      className="w-full rounded-md border border-gray-300 dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a] text-gray-900 dark:text-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                    />
-                  )}
-
-                  {/* File Input */}
-                  {uploadMethod === 'file' && (
-                    <div>
-                      <input
-                        type="file"
-                        accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
-                        onChange={handleFileSelect}
-                        className="block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-indigo-50 dark:file:bg-[#2a2a2a] file:text-indigo-700 dark:file:text-indigo-400 hover:file:bg-indigo-100 dark:hover:file:bg-[#333333] cursor-pointer"
-                      />
-                      <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                        Max file size: 5MB. Allowed: JPEG, PNG, GIF, WebP
-                      </p>
-                    </div>
-                  )}
-
-                  <div className={`flex ${isRtl ? 'flex-row-reverse' : ''} gap-2`}>
-                    <button
-                      type="button"
-                      onClick={handleSavePicture}
-                      disabled={
-                        updateProfilePictureMutation.isPending ||
-                        (uploadMethod === 'url' && !profilePictureUrl.trim()) ||
-                        (uploadMethod === 'file' && !selectedFile)
-                      }
-                      className="inline-flex justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                )}
+                {/* Edit overlay on hover */}
+                {isHoveringImage && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full">
+                    <svg
+                      className="w-6 h-6 text-white"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
                     >
-                      {t('common.save')}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleCancelPicture}
-                      className="inline-flex justify-center rounded-md bg-gray-100 dark:bg-[#2a2a2a] px-3 py-2 text-sm font-medium text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-[#333333]"
-                    >
-                      {t('common.cancel')}
-                    </button>
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                      />
+                    </svg>
                   </div>
-                </div>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsEditingPicture(true);
-                    setProfilePictureUrl(user.profilePicture || '');
-                  }}
-                  className="inline-flex justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700"
-                >
-                  {user.profilePicture ? t('profile.changePicture') : t('profile.addPicture')}
-                </button>
-              )}
+                )}
+              </div>
+              {/* Hidden file input */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+                onChange={handleFileSelect}
+                className="hidden"
+              />
             </div>
           </div>
 
@@ -273,8 +185,14 @@ export default function ProfilePage() {
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
               {t('profile.memberSince')}
             </label>
-            <p className="mt-1 text-sm text-gray-900 dark:text-white">
-              {new Date(user.createdAt).toLocaleDateString()}
+            <p className="mt-1 text-sm text-gray-900 dark:text-white" dir={isRtl ? 'rtl' : 'ltr'}>
+              {(() => {
+                const date = new Date(user.createdAt);
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                return isRtl ? `${day}/${month}/${year}` : `${month}/${day}/${year}`;
+              })()}
             </p>
           </div>
         </div>
