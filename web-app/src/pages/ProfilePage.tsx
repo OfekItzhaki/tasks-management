@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { useAuth } from '../context/AuthContext';
 import { useTranslation } from 'react-i18next';
 import { BUILD_INFO } from '../utils/buildInfo';
@@ -12,11 +12,9 @@ export default function ProfilePage() {
   const { user, loading, updateUser } = useAuth();
   const { t, i18n } = useTranslation();
   const isRtl = isRtlLanguage(i18n.language);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [filePreview, setFilePreview] = useState<string | null>(null);
   const [isHoveringImage, setIsHoveringImage] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const queryClient = useQueryClient();
 
 
   const updateProfilePictureMutation = useMutation({
@@ -26,7 +24,6 @@ export default function ProfilePage() {
     },
     onSuccess: async (updatedUser) => {
       toast.success(t('profile.pictureUpdated'));
-      setSelectedFile(null);
       setFilePreview(null);
       // Reset file input
       if (fileInputRef.current) {
@@ -67,7 +64,6 @@ export default function ProfilePage() {
         return;
       }
 
-      setSelectedFile(file);
       // Create preview
       const reader = new FileReader();
       reader.onloadend = () => {

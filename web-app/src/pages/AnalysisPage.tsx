@@ -21,7 +21,7 @@ import {
 } from 'recharts';
 
 export default function AnalysisPage() {
-  const { t, i18n } = useTranslation();
+  const { i18n } = useTranslation();
   const { isDark } = useTheme();
   const isRtl = isRtlLanguage(i18n.language);
 
@@ -226,7 +226,7 @@ export default function AnalysisPage() {
                   cx="50%"
                   cy="50%"
                   labelLine={false}
-                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                  label={({ name, percent }) => `${name}: ${((percent ?? 0) * 100).toFixed(0)}%`}
                   outerRadius={80}
                   innerRadius={60}
                   fill="#8884d8"
@@ -318,7 +318,7 @@ export default function AnalysisPage() {
                   borderRadius: '8px',
                   color: isDark ? '#ffffff' : '#1f2937',
                 }}
-                formatter={(value: number, name: string) => [value, name]}
+                formatter={(value: number | undefined, name: string | undefined) => [value ?? 0, name ?? '']}
                 labelFormatter={(label) => `List: ${label}`}
               />
               <Legend wrapperStyle={{ color: isDark ? '#ffffff' : '#1f2937' }} />
