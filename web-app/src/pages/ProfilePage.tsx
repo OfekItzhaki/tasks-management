@@ -14,6 +14,9 @@ export default function ProfilePage() {
   const isRtl = isRtlLanguage(i18n.language);
   const [isEditingPicture, setIsEditingPicture] = useState(false);
   const [profilePictureUrl, setProfilePictureUrl] = useState(user?.profilePicture || '');
+  const [uploadMethod, setUploadMethod] = useState<'url' | 'file'>('url');
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [filePreview, setFilePreview] = useState<string | null>(null);
   const queryClient = useQueryClient();
 
   // Update profilePictureUrl when user changes
@@ -24,13 +27,20 @@ export default function ProfilePage() {
   }, [user?.profilePicture, isEditingPicture]);
 
   const updateProfilePictureMutation = useMutation({
-    mutationFn: async (url: string) => {
+    mutationFn: async ({ url, file }: { url?: string; file?: File }) => {
       if (!user) throw new Error('User not found');
-      return usersService.update(user.id, { profilePicture: url || null });
+      if (file) {
+        return usersService.uploadAvatar(user.id, file);
+      } else {
+        return usersService.update(user.id, { profilePicture: url || null });
+      }
     },
     onSuccess: async (updatedUser) => {
       toast.success(t('profile.pictureUpdated'));
       setIsEditingPicture(false);
+      setSelectedFile(null);
+      setFilePreview(null);
+      setUploadMethod('url');
       // Refresh the page to update AuthContext user
       setTimeout(() => window.location.reload(), 500);
     },
@@ -48,12 +58,46 @@ export default function ProfilePage() {
   }
 
   const handleSavePicture = () => {
-    updateProfilePictureMutation.mutate(profilePictureUrl);
+    if (uploadMethod === 'file' && selectedFile) {
+      updateProfilePictureMutation.mutate({ file: selectedFile });
+    } else {
+      updateProfilePictureMutation.mutate({ url: profilePictureUrl });
+    }
   };
 
   const handleCancelPicture = () => {
     setProfilePictureUrl(user?.profilePicture || '');
+    setSelectedFile(null);
+    setFilePreview(null);
+    setUploadMethod('url');
     setIsEditingPicture(false);
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file type
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+      if (!allowedTypes.includes(file.type)) {
+        toast.error('Invalid file type. Please select an image file (JPEG, PNG, GIF, or WebP).');
+        return;
+      }
+
+      // Validate file size (5MB)
+      const maxSize = 5 * 1024 * 1024;
+      if (file.size > maxSize) {
+        toast.error('File too large. Maximum size is 5MB.');
+        return;
+      }
+
+      setSelectedFile(file);
+      // Create preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFilePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   return (
@@ -68,10 +112,10 @@ export default function ProfilePage() {
               {t('profile.profilePicture')}
             </label>
             <div className={`flex ${isRtl ? 'flex-row-reverse' : ''} items-center gap-4`}>
-              {user.profilePicture ? (
+              {(filePreview || user.profilePicture) ? (
                 <img
-                  src={user.profilePicture}
-                  alt={t('profile.profilePicture') || 'Profile picture'}
+                  src={filePreview || user.profilePicture || undefined}
+                  alt={t('profile.profilePicture')}
                   className="w-20 h-20 rounded-full object-cover border-2 border-gray-300 dark:border-[#2a2a2a]"
                   onError={(e) => {
                     (e.target as HTMLImageElement).style.display = 'none';
@@ -85,19 +129,79 @@ export default function ProfilePage() {
                 </div>
               )}
               {isEditingPicture ? (
-                <div className="flex-1 space-y-2">
-                  <input
-                    type="url"
-                    value={profilePictureUrl}
-                    onChange={(e) => setProfilePictureUrl(e.target.value)}
-                    placeholder="https://example.com/avatar.jpg"
-                    className="w-full rounded-md border border-gray-300 dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a] text-gray-900 dark:text-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                  />
+                <div className="flex-1 space-y-3">
+                  {/* Upload Method Toggle */}
+                  <div className={`flex ${isRtl ? 'flex-row-reverse' : ''} gap-2`}>
+                    <button
+                      type="button"
+                      onClick={() => setUploadMethod('url')}
+                      className={`px-3 py-1 text-xs font-medium rounded ${
+                        uploadMethod === 'url'
+                          ? 'bg-indigo-600 text-white'
+                          : 'bg-gray-200 dark:bg-[#2a2a2a] text-gray-700 dark:text-gray-300'
+                      }`}
+                    >
+                      From URL
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setUploadMethod('file')}
+                      className={`px-3 py-1 text-xs font-medium rounded ${
+                        uploadMethod === 'file'
+                          ? 'bg-indigo-600 text-white'
+                          : 'bg-gray-200 dark:bg-[#2a2a2a] text-gray-700 dark:text-gray-300'
+                      }`}
+                    >
+                      Upload File
+                    </button>
+                  </div>
+
+                  {/* File Preview */}
+                  {(filePreview || selectedFile) && (
+                    <div className="mt-2">
+                      <img
+                        src={filePreview || undefined}
+                        alt="Preview"
+                        className="w-20 h-20 rounded-full object-cover border-2 border-gray-300 dark:border-[#2a2a2a]"
+                      />
+                    </div>
+                  )}
+
+                  {/* URL Input */}
+                  {uploadMethod === 'url' && (
+                    <input
+                      type="url"
+                      value={profilePictureUrl}
+                      onChange={(e) => setProfilePictureUrl(e.target.value)}
+                      placeholder="https://example.com/avatar.jpg"
+                      className="w-full rounded-md border border-gray-300 dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a] text-gray-900 dark:text-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    />
+                  )}
+
+                  {/* File Input */}
+                  {uploadMethod === 'file' && (
+                    <div>
+                      <input
+                        type="file"
+                        accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+                        onChange={handleFileSelect}
+                        className="block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-indigo-50 dark:file:bg-[#2a2a2a] file:text-indigo-700 dark:file:text-indigo-400 hover:file:bg-indigo-100 dark:hover:file:bg-[#333333] cursor-pointer"
+                      />
+                      <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                        Max file size: 5MB. Allowed: JPEG, PNG, GIF, WebP
+                      </p>
+                    </div>
+                  )}
+
                   <div className={`flex ${isRtl ? 'flex-row-reverse' : ''} gap-2`}>
                     <button
                       type="button"
                       onClick={handleSavePicture}
-                      disabled={updateProfilePictureMutation.isPending}
+                      disabled={
+                        updateProfilePictureMutation.isPending ||
+                        (uploadMethod === 'url' && !profilePictureUrl.trim()) ||
+                        (uploadMethod === 'file' && !selectedFile)
+                      }
                       className="inline-flex justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {t('common.save')}
