@@ -127,10 +127,6 @@ export default function ProfileScreen() {
       height: 24,
       tintColor: '#fff',
     },
-    verificationStatus: {
-      fontWeight: '600',
-      color: colors.text,
-    },
     resendButton: {
       marginTop: 8,
     },
@@ -434,17 +430,17 @@ export default function ProfileScreen() {
 
           {/* Email Verification */}
           <View style={styles.profileSection}>
-            <Text style={styles.profileLabel}>
-              {t('profile.emailVerified')}{' '}
-              <Text style={styles.verificationStatus}>
+            <Text style={styles.profileLabel}>{t('profile.emailVerified')}</Text>
+            <View style={{ flexDirection: isRtl ? 'row-reverse' : 'row', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
+              <Text style={[styles.profileValue, { fontWeight: 'bold' }]}>
                 {user.emailVerified ? t('profile.yes') : t('profile.no')}
               </Text>
-            </Text>
-            {!user.emailVerified && (
-              <TouchableOpacity onPress={handleResendVerification} style={styles.resendButton}>
-                <Text style={styles.resendButtonText}>{t('profile.resendVerification')}</Text>
-              </TouchableOpacity>
-            )}
+              {!user.emailVerified && (
+                <TouchableOpacity onPress={handleResendVerification}>
+                  <Text style={styles.resendButtonText}>{t('profile.resendVerification')}</Text>
+                </TouchableOpacity>
+              )}
+            </View>
           </View>
 
           {/* Member Since */}
