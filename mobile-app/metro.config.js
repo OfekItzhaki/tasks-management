@@ -6,6 +6,12 @@ const fs = require('fs');
 /** @type {import('expo/metro-config').MetroConfig} */
 const config = getDefaultConfig(__dirname);
 
+// Add parent directory to nodeModulesPaths so Metro can find frontend-services
+config.resolver.nodeModulesPaths = [
+  ...(config.resolver.nodeModulesPaths || []),
+  path.resolve(__dirname, '..'),
+];
+
 // Find the frontend-services package location
 function findFrontendServicesPath() {
   const nodeModulesPath = path.resolve(__dirname, 'node_modules/@tasks-management/frontend-services');
