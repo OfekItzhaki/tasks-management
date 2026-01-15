@@ -34,42 +34,39 @@ function findFrontendServicesPath() {
 
 const frontendServicesPath = findFrontendServicesPath();
 
-// Add support for resolving subpath exports and direct dist paths from frontend-services
+// Add support for resolving @tasks-management/frontend-services package
 if (frontendServicesPath) {
-  const i18nDirPath = path.resolve(frontendServicesPath, 'dist/i18n');
-  
-  // Use extraNodeModules to map module paths
+  // Map the entire package to ensure Metro can find it
   config.resolver.extraNodeModules = {
     ...config.resolver.extraNodeModules,
-    '@tasks-management/frontend-services/i18n': i18nDirPath,
-    '@tasks-management/frontend-services/dist/i18n': i18nDirPath,
+    '@tasks-management/frontend-services': frontendServicesPath,
   };
   
-  // Custom resolver for subpath exports and direct dist paths
+  // Custom resolver to handle the package and its exports
   const originalResolveRequest = config.resolver.resolveRequest;
   config.resolver.resolveRequest = (context, moduleName, platform) => {
-    // Handle both @tasks-management/frontend-services/i18n and @tasks-management/frontend-services/dist/i18n
+    // Handle @tasks-management/frontend-services (main package)
+    if (moduleName === '@tasks-management/frontend-services') {
+      const mainPath = path.resolve(frontendServicesPath, 'dist/index.js');
+      if (fs.existsSync(mainPath)) {
+        return {
+          type: 'sourceFile',
+          filePath: mainPath,
+        };
+      }
+    }
+    
+    // Handle subpath exports (legacy support)
     if (
       moduleName === '@tasks-management/frontend-services/i18n' ||
       moduleName === '@tasks-management/frontend-services/dist/i18n'
     ) {
-      const possiblePaths = [
-        path.resolve(__dirname, 'node_modules/@tasks-management/frontend-services/dist/i18n/index.js'),
-        path.resolve(__dirname, '../frontend-services/dist/i18n/index.js'),
-        path.resolve(frontendServicesPath, 'dist/i18n/index.js'),
-      ];
-      
-      for (const possiblePath of possiblePaths) {
-        try {
-          if (fs.existsSync(possiblePath)) {
-            return {
-              type: 'sourceFile',
-              filePath: possiblePath,
-            };
-          }
-        } catch (e) {
-          // Continue to next path
-        }
+      const i18nPath = path.resolve(frontendServicesPath, 'dist/i18n/index.js');
+      if (fs.existsSync(i18nPath)) {
+        return {
+          type: 'sourceFile',
+          filePath: i18nPath,
+        };
       }
     }
     
