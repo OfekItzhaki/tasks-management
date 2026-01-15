@@ -42,6 +42,7 @@ if (frontendServicesPath) {
   config.resolver.extraNodeModules = {
     ...config.resolver.extraNodeModules,
     '@tasks-management/frontend-services/i18n': i18nDirPath,
+    '@tasks-management/frontend-services/dist/i18n': i18nDirPath,
   };
   
   // Custom resolver for subpath exports and direct dist paths
