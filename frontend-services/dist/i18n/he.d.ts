@@ -1,0 +1,142 @@
+declare const _default: {
+    readonly nav: {
+        readonly lists: "רשימות";
+        readonly analysis: "ניתוח";
+        readonly profile: "פרופיל";
+        readonly logout: "התנתקות";
+        readonly language: "שפה";
+        readonly theme: {
+            readonly light: "בהיר";
+            readonly dark: "כהה";
+            readonly auto: "אוטומטי";
+        };
+    };
+    readonly languageNames: {
+        readonly en: "English";
+        readonly he: "עברית";
+    };
+    readonly common: {
+        readonly cancel: "ביטול";
+        readonly save: "שמירה";
+        readonly delete: "מחיקה";
+        readonly close: "סגירה";
+        readonly create: "יצירה";
+        readonly loading: "טוען...";
+    };
+    readonly login: {
+        readonly title: "התחברות למנהל המשימות";
+        readonly emailPlaceholder: "כתובת אימייל";
+        readonly passwordPlaceholder: "סיסמה";
+        readonly signIn: "התחבר";
+        readonly signingIn: "מתחבר...";
+        readonly showPassword: "הצג סיסמה";
+        readonly hidePassword: "הסתר סיסמה";
+        readonly failed: "ההתחברות נכשלה. נסה שוב.";
+    };
+    readonly lists: {
+        readonly title: "רשימות";
+        readonly empty: "לא נמצאו רשימות. צור את הרשימה הראשונה שלך!";
+        readonly createFab: "צור רשימה חדשה";
+        readonly loadFailed: "טעינת הרשימות נכשלה";
+        readonly createFailed: "יצירת הרשימה נכשלה";
+        readonly form: {
+            readonly nameLabel: "שם";
+            readonly typeLabel: "סוג";
+            readonly namePlaceholder: "לדוגמה: קניות";
+            readonly tip: "טיפ: רשימת \"Finished\" מנוהלת אוטומטית על ידי המערכת.";
+        };
+    };
+    readonly tasks: {
+        readonly backToLists: "← חזרה לרשימות";
+        readonly defaultTitle: "משימות";
+        readonly renameTitle: "לחץ כדי לשנות שם";
+        readonly deleteList: "מחק רשימה";
+        readonly deleteListConfirm: "למחוק את הרשימה \"{{name}}\"? פעולה זו תמחק את כל המשימות ברשימה.";
+        readonly createFab: "צור משימה חדשה";
+        readonly empty: "לא נמצאו משימות.";
+        readonly loadFailed: "טעינת המשימות נכשלה";
+        readonly createFailed: "יצירת המשימה נכשלה";
+        readonly deleteFailed: "מחיקת המשימה נכשלה";
+        readonly taskDeleted: "המשימה נמחקה";
+        readonly listUpdated: "הרשימה עודכנה";
+        readonly listUpdateFailed: "עדכון הרשימה נכשל";
+        readonly listDeleted: "הרשימה נמחקה";
+        readonly listDeleteFailed: "מחיקת הרשימה נכשלה";
+        readonly selectMultiple: "בחר מספר";
+        readonly deleteSelected: "מחק";
+        readonly deleteSelectedConfirm: "למחוק {{count}} משימה{{plural}}?";
+        readonly form: {
+            readonly descriptionLabel: "תיאור";
+            readonly descriptionPlaceholder: "לדוגמה: לקנות חלב";
+        };
+        readonly deleteTaskConfirm: "למחוק את המשימה \"{{description}}\"?";
+        readonly restore: "שחזור";
+        readonly restoreConfirm: "לשחזר את המשימה \"{{description}}\" לרשימה המקורית?";
+        readonly restored: "המשימה שוחזרה";
+        readonly restoreFailed: "שחזור המשימה נכשל";
+        readonly deleteForever: "מחיקה לצמיתות";
+        readonly deleteForeverConfirm: "למחוק את המשימה \"{{description}}\" לצמיתות? לא ניתן לבטל פעולה זו.";
+        readonly deletedForever: "המשימה נמחקה לצמיתות";
+        readonly deleteForeverFailed: "מחיקה לצמיתות נכשלה";
+    };
+    readonly taskDetails: {
+        readonly backToTasks: "← חזרה למשימות";
+        readonly clickToEdit: "לחץ כדי לערוך";
+        readonly loadFailed: "טעינת המשימה נכשלה";
+        readonly notFound: "המשימה לא נמצאה";
+        readonly updateTaskFailed: "עדכון המשימה נכשל";
+        readonly updateStepFailed: "עדכון השלב נכשל";
+        readonly addStepFailed: "הוספת השלב נכשלה";
+        readonly deleteStepFailed: "מחיקת השלב נכשלה";
+        readonly deleteStepConfirm: "למחוק את השלב \"{{description}}\"?";
+        readonly taskUpdated: "המשימה עודכנה";
+        readonly stepUpdated: "השלב עודכן";
+        readonly stepAdded: "השלב נוסף";
+        readonly stepDeleted: "השלב נמחק";
+        readonly stepsTitle: "שלבים";
+        readonly noSteps: "אין שלבים עדיין.";
+        readonly addStepFab: "הוסף שלב";
+        readonly form: {
+            readonly descriptionLabel: "תיאור";
+            readonly descriptionPlaceholder: "לדוגמה: להתקשר לספק";
+        };
+    };
+    readonly profile: {
+        readonly title: "פרופיל";
+        readonly notAuthenticated: "לא מחובר.";
+        readonly email: "אימייל";
+        readonly name: "שם";
+        readonly emailVerified: "אימות אימייל";
+        readonly yes: "כן";
+        readonly no: "לא";
+        readonly memberSince: "חבר מאז";
+        readonly about: "אודות";
+        readonly version: "גרסה";
+        readonly credits: "קרדיטים";
+        readonly creditsValue: "אופק יצחקי";
+        readonly sourceCode: "קוד מקור";
+        readonly openRepo: "פתח מאגר";
+        readonly profilePicture: "תמונת פרופיל";
+        readonly addPicture: "הוסף תמונה";
+        readonly changePicture: "שנה תמונה";
+        readonly resendVerification: "שלח שוב אימייל אימות";
+        readonly verificationEmailSent: "אימייל אימות נשלח. אנא בדוק את תיבת הדואר הנכנס.";
+        readonly pictureUpdated: "תמונת פרופיל עודכנה";
+        readonly pictureUpdateFailed: "עדכון תמונת פרופיל נכשל";
+        readonly theme: "ערכת נושא";
+        readonly logoutConfirm: "האם אתה בטוח שברצונך להתנתק?";
+        readonly permissionDenied: "הרשאה נדחתה";
+        readonly cameraPermissionRequired: "נדרשת הרשאת מצלמה כדי להעלות תמונת פרופיל.";
+        readonly selectImageSource: "בחר מקור תמונה";
+        readonly takePhoto: "צלם תמונה";
+        readonly chooseFromLibrary: "בחר מהגלריה";
+        readonly error: "שגיאה";
+        readonly failedToPickImage: "נכשל בבחירת תמונה";
+        readonly invalidFileType: "סוג קובץ לא תקין. אנא בחר קובץ תמונה.";
+        readonly pictureUpdatedMessage: "תמונת הפרופיל עודכנה בהצלחה";
+        readonly verificationEmailSentMessage: "אימייל אימות נשלח. אנא בדוק את תיבת הדואר הנכנס.";
+        readonly failedToResendVerification: "שליחת אימייל אימות מחדש נכשלה";
+        readonly failedToOpenRepo: "לא ניתן לפתוח את המאגר";
+    };
+};
+export default _default;

@@ -1,0 +1,142 @@
+declare const _default: {
+    readonly nav: {
+        readonly lists: "Lists";
+        readonly analysis: "Analysis";
+        readonly profile: "Profile";
+        readonly logout: "Logout";
+        readonly language: "Language";
+        readonly theme: {
+            readonly light: "Light";
+            readonly dark: "Dark";
+            readonly auto: "Auto";
+        };
+    };
+    readonly languageNames: {
+        readonly en: "English";
+        readonly he: "Hebrew";
+    };
+    readonly common: {
+        readonly cancel: "Cancel";
+        readonly save: "Save";
+        readonly delete: "Delete";
+        readonly close: "Close";
+        readonly create: "Create";
+        readonly loading: "Loading...";
+    };
+    readonly login: {
+        readonly title: "Sign in to Tasks Management";
+        readonly emailPlaceholder: "Email address";
+        readonly passwordPlaceholder: "Password";
+        readonly signIn: "Sign in";
+        readonly signingIn: "Signing in...";
+        readonly showPassword: "Show password";
+        readonly hidePassword: "Hide password";
+        readonly failed: "Login failed. Please try again.";
+    };
+    readonly lists: {
+        readonly title: "Todo Lists";
+        readonly empty: "No lists found. Create your first list!";
+        readonly createFab: "Create new list";
+        readonly loadFailed: "Failed to load lists";
+        readonly createFailed: "Failed to create list";
+        readonly form: {
+            readonly nameLabel: "Name";
+            readonly typeLabel: "Type";
+            readonly namePlaceholder: "e.g. Groceries";
+            readonly tip: "Tip: system “Finished” list is managed automatically.";
+        };
+    };
+    readonly tasks: {
+        readonly backToLists: "← Back to Lists";
+        readonly defaultTitle: "Tasks";
+        readonly renameTitle: "Click to rename";
+        readonly deleteList: "Delete list";
+        readonly deleteListConfirm: "Delete list \"{{name}}\"? This will delete all tasks in this list.";
+        readonly createFab: "Create new task";
+        readonly empty: "No tasks found.";
+        readonly loadFailed: "Failed to load tasks";
+        readonly createFailed: "Failed to create task";
+        readonly deleteFailed: "Failed to delete task";
+        readonly taskDeleted: "Task deleted";
+        readonly listUpdated: "List updated";
+        readonly listUpdateFailed: "Failed to update list";
+        readonly listDeleted: "List deleted";
+        readonly listDeleteFailed: "Failed to delete list";
+        readonly selectMultiple: "Select Multiple";
+        readonly deleteSelected: "Delete";
+        readonly deleteSelectedConfirm: "Delete {{count}} task{{plural}}?";
+        readonly form: {
+            readonly descriptionLabel: "Description";
+            readonly descriptionPlaceholder: "e.g. Buy milk";
+        };
+        readonly deleteTaskConfirm: "Delete task \"{{description}}\"?";
+        readonly restore: "Restore";
+        readonly restoreConfirm: "Restore task \"{{description}}\" to its original list?";
+        readonly restored: "Task restored";
+        readonly restoreFailed: "Failed to restore task";
+        readonly deleteForever: "Delete forever";
+        readonly deleteForeverConfirm: "Delete task \"{{description}}\" forever? This cannot be undone.";
+        readonly deletedForever: "Task deleted forever";
+        readonly deleteForeverFailed: "Failed to delete task forever";
+    };
+    readonly taskDetails: {
+        readonly backToTasks: "← Back to Tasks";
+        readonly clickToEdit: "Click to edit";
+        readonly loadFailed: "Failed to load task";
+        readonly notFound: "Task not found";
+        readonly updateTaskFailed: "Failed to update task";
+        readonly updateStepFailed: "Failed to update step";
+        readonly addStepFailed: "Failed to add step";
+        readonly deleteStepFailed: "Failed to delete step";
+        readonly deleteStepConfirm: "Delete step \"{{description}}\"?";
+        readonly taskUpdated: "Task updated";
+        readonly stepUpdated: "Step updated";
+        readonly stepAdded: "Step added";
+        readonly stepDeleted: "Step deleted";
+        readonly stepsTitle: "Steps";
+        readonly noSteps: "No steps yet.";
+        readonly addStepFab: "Add step";
+        readonly form: {
+            readonly descriptionLabel: "Description";
+            readonly descriptionPlaceholder: "e.g. Call the supplier";
+        };
+    };
+    readonly profile: {
+        readonly title: "Profile";
+        readonly notAuthenticated: "Not authenticated.";
+        readonly email: "Email";
+        readonly name: "Name";
+        readonly emailVerified: "Email Verified";
+        readonly yes: "Yes";
+        readonly no: "No";
+        readonly memberSince: "Member Since";
+        readonly about: "About";
+        readonly version: "Version";
+        readonly credits: "Credits";
+        readonly creditsValue: "Ofek Itzhaki";
+        readonly sourceCode: "Source code";
+        readonly openRepo: "Open repo";
+        readonly profilePicture: "Profile Picture";
+        readonly addPicture: "Add Picture";
+        readonly changePicture: "Change Picture";
+        readonly resendVerification: "Resend Verification Email";
+        readonly verificationEmailSent: "Verification email sent. Please check your inbox.";
+        readonly pictureUpdated: "Profile picture updated";
+        readonly pictureUpdateFailed: "Failed to update profile picture";
+        readonly theme: "Theme";
+        readonly logoutConfirm: "Are you sure you want to logout?";
+        readonly permissionDenied: "Permission Denied";
+        readonly cameraPermissionRequired: "Camera permission is required to upload a profile picture.";
+        readonly selectImageSource: "Select image source";
+        readonly takePhoto: "Take Photo";
+        readonly chooseFromLibrary: "Choose from Library";
+        readonly error: "Error";
+        readonly failedToPickImage: "Failed to pick image";
+        readonly invalidFileType: "Invalid file type. Please select an image file.";
+        readonly pictureUpdatedMessage: "Profile picture updated successfully";
+        readonly verificationEmailSentMessage: "Verification email sent. Please check your inbox.";
+        readonly failedToResendVerification: "Failed to resend verification email";
+        readonly failedToOpenRepo: "Could not open repository";
+    };
+};
+export default _default;
