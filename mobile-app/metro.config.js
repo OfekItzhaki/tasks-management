@@ -24,14 +24,12 @@ if (!frontendServicesPath && fs.existsSync(relativePath)) {
   frontendServicesPath = relativePath;
 }
 
-// Use extraNodeModules to map the package
-// Metro will use package.json "main" field (dist/index.js) automatically
-if (frontendServicesPath) {
-  config.resolver.extraNodeModules = {
-    ...config.resolver.extraNodeModules,
-    '@tasks-management/frontend-services': frontendServicesPath,
-  };
-}
+// Always set extraNodeModules (even if path not found at config time)
+// In EAS builds, the path will exist at runtime
+config.resolver.extraNodeModules = {
+  ...config.resolver.extraNodeModules,
+  '@tasks-management/frontend-services': frontendServicesPath || nodeModulesPath || relativePath,
+};
 
 // Custom resolver - MUST handle the package before default resolution
 const originalResolveRequest = config.resolver.resolveRequest;
