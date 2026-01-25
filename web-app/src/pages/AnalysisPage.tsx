@@ -181,28 +181,28 @@ export default function AnalysisPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Task Analysis</h1>
+    <div className="space-y-8 animate-fade-in">
+      <h1 className="text-4xl font-bold gradient-text">Task Analysis</h1>
 
       {/* Overview Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white dark:bg-[#1f1f1f] p-6 rounded-lg shadow">
-          <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Lists</h3>
-          <p className="text-3xl font-bold text-gray-900 dark:text-white mt-2">{lists.length}</p>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="premium-card p-6">
+          <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-2">Total Lists</h3>
+          <p className="text-4xl font-bold text-gray-900 dark:text-white">{lists.length}</p>
         </div>
-        <div className="bg-white dark:bg-[#1f1f1f] p-6 rounded-lg shadow">
-          <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Tasks</h3>
-          <p className="text-3xl font-bold text-gray-900 dark:text-white mt-2">{allTasks.length}</p>
+        <div className="premium-card p-6">
+          <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-2">Total Tasks</h3>
+          <p className="text-4xl font-bold text-gray-900 dark:text-white">{allTasks.length}</p>
         </div>
-        <div className="bg-white dark:bg-[#1f1f1f] p-6 rounded-lg shadow">
-          <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Completed</h3>
-          <p className="text-3xl font-bold text-green-600 dark:text-green-400 mt-2">
+        <div className="premium-card p-6">
+          <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-2">Completed</h3>
+          <p className="text-4xl font-bold text-green-600 dark:text-green-400">
             {completedTasks.length}
           </p>
         </div>
-        <div className="bg-white dark:bg-[#1f1f1f] p-6 rounded-lg shadow">
-          <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Completion Rate</h3>
-          <p className="text-3xl font-bold text-blue-600 dark:text-blue-400 mt-2">
+        <div className="premium-card p-6">
+          <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-2">Completion Rate</h3>
+          <p className="text-4xl font-bold text-primary-600 dark:text-primary-400">
             {completionRate.toFixed(1)}%
           </p>
         </div>
@@ -212,8 +212,8 @@ export default function AnalysisPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Completion Status Pie Chart with Streak */}
         {allTasks.length > 0 && (
-          <div className="bg-white dark:bg-[#1f1f1f] p-6 rounded-lg shadow">
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+          <div className="premium-card p-8">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
               Completion Status
             </h2>
             <ResponsiveContainer width="100%" height={300}>
@@ -286,8 +286,8 @@ export default function AnalysisPage() {
 
       {/* Tasks by List Bar Chart */}
       {tasksByList.length > 0 && (
-        <div className="bg-white dark:bg-[#1f1f1f] p-6 rounded-lg shadow">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+        <div className="premium-card p-8">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
             Tasks by List (Chart)
           </h2>
           <ResponsiveContainer width="100%" height={400}>
@@ -331,8 +331,8 @@ export default function AnalysisPage() {
 
       {/* Due Date Statistics */}
       {tasksWithDueDates.length > 0 && (
-        <div className="bg-white dark:bg-[#1f1f1f] p-6 rounded-lg shadow">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Due Date Overview</h2>
+        <div className="premium-card p-8">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Due Date Overview</h2>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
               <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Overdue</h3>
@@ -364,8 +364,8 @@ export default function AnalysisPage() {
 
       {/* Steps Statistics */}
       {tasksWithSteps.length > 0 && (
-        <div className="bg-white dark:bg-[#1f1f1f] p-6 rounded-lg shadow">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Steps Progress</h2>
+        <div className="premium-card p-8">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Steps Progress</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Tasks with Steps</h3>
@@ -390,11 +390,11 @@ export default function AnalysisPage() {
       )}
 
       {/* Tasks by List */}
-      <div className="bg-white dark:bg-[#1f1f1f] p-6 rounded-lg shadow">
-        <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Tasks by List</h2>
+      <div className="premium-card p-8">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Tasks by List</h2>
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-            <thead className="bg-gray-50 dark:bg-[#1a1a1a]">
+            <thead className="glass-card">
               <tr>
                 <th className={`px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider ${isRtl ? 'text-right' : 'text-left'}`}>
                   List Name
@@ -413,7 +413,7 @@ export default function AnalysisPage() {
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white dark:bg-[#1f1f1f] divide-y divide-gray-200 dark:divide-[#2a2a2a]">
+            <tbody className="divide-y divide-gray-200/50 dark:divide-gray-700/50">
               {tasksByList.map((item, index) => {
                 const progress = item.total > 0 ? (item.completed / item.total) * 100 : 0;
                 return (

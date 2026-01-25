@@ -543,7 +543,7 @@ export default function TasksPage() {
         </div>
         <button
           onClick={() => refetch()}
-          className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-md transition-colors"
+          className="inline-flex items-center px-5 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 rounded-xl shadow-lg shadow-red-500/30 hover:shadow-xl hover:shadow-red-500/40 transition-all duration-200"
         >
           {t('common.retry') || 'Retry'}
         </button>
@@ -556,18 +556,18 @@ export default function TasksPage() {
       <div className="mb-6">
         <Link
           to="/lists"
-          className={`text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 text-sm font-medium flex items-center gap-1 ${isRtl ? 'flex-row-reverse' : ''}`}
+          className={`text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 text-sm font-semibold flex items-center gap-2 ${isRtl ? 'flex-row-reverse' : ''} glass-card px-4 py-2 rounded-xl w-fit hover:bg-white/80 dark:hover:bg-gray-800/80 transition-all duration-200`}
         >
           <span className={isRtl ? 'transform rotate-180' : ''}>←</span>
           <span>{t('tasks.backToLists').replace('← ', '')}</span>
         </Link>
       </div>
 
-      <div className={`flex ${isRtl ? 'flex-row-reverse' : ''} items-center justify-between mb-6 gap-3`}>
+      <div className={`flex ${isRtl ? 'flex-row-reverse' : ''} items-center justify-between mb-8 gap-3`}>
         <div className="min-w-0 flex-1">
           {isBulkMode && (
-            <div className={`flex ${isRtl ? 'flex-row-reverse' : ''} items-center gap-3 mb-4 p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg`}>
-              <span className="text-sm font-medium text-indigo-900 dark:text-indigo-200">
+            <div className={`flex ${isRtl ? 'flex-row-reverse' : ''} items-center gap-3 mb-4 p-4 premium-card bg-gradient-to-r from-primary-50 to-purple-50 dark:from-primary-900/20 dark:to-purple-900/20`}>
+              <span className="text-sm font-semibold text-primary-900 dark:text-primary-200">
                 {selectedTasks.size} task{selectedTasks.size !== 1 ? 's' : ''} selected
               </span>
               <div className={`flex ${isRtl ? 'flex-row-reverse' : ''} gap-2`}>
@@ -581,7 +581,7 @@ export default function TasksPage() {
                       setSelectedTasks(new Set(tasks.map((t) => t.id)));
                     }
                   }}
-                  className="px-3 py-1 text-xs font-medium text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-800 rounded"
+                  className="px-3 py-1.5 text-xs font-semibold text-primary-700 dark:text-primary-300 glass-card rounded-lg hover:bg-white/80 dark:hover:bg-gray-800/80 transition-all duration-200"
                 >
                   {tasks.every((t) => selectedTasks.has(t.id)) ? 'Deselect All' : 'Select All'}
                 </button>
@@ -600,7 +600,7 @@ export default function TasksPage() {
                     setSelectedTasks(new Set());
                   }}
                   disabled={selectedTasks.size === 0 || updateTaskMutation.isPending}
-                  className="px-3 py-1 text-xs font-medium text-white bg-green-600 hover:bg-green-700 disabled:opacity-50 rounded"
+                  className="px-3 py-1.5 text-xs font-semibold text-white bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 disabled:opacity-50 rounded-lg shadow-md shadow-green-500/30 hover:shadow-lg hover:shadow-green-500/40 transition-all duration-200"
                 >
                   Mark Complete
                 </button>
@@ -619,7 +619,7 @@ export default function TasksPage() {
                     setSelectedTasks(new Set());
                   }}
                   disabled={selectedTasks.size === 0 || updateTaskMutation.isPending}
-                  className="px-3 py-1 text-xs font-medium text-white bg-yellow-600 hover:bg-yellow-700 disabled:opacity-50 rounded"
+                  className="px-3 py-1.5 text-xs font-semibold text-white bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-700 hover:to-yellow-800 disabled:opacity-50 rounded-lg shadow-md shadow-yellow-500/30 hover:shadow-lg hover:shadow-yellow-500/40 transition-all duration-200"
                 >
                   Mark Incomplete
                 </button>
@@ -639,7 +639,7 @@ export default function TasksPage() {
                     setSelectedTasks(new Set());
                   }}
                   disabled={selectedTasks.size === 0 || deleteTaskMutation.isPending || isFinishedList}
-                  className="px-3 py-1 text-xs font-medium text-white bg-red-600 hover:bg-red-700 disabled:opacity-50 rounded"
+                  className="px-3 py-1.5 text-xs font-semibold text-white bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 disabled:opacity-50 rounded-lg shadow-md shadow-red-500/30 hover:shadow-lg hover:shadow-red-500/40 transition-all duration-200"
                 >
                   {t('tasks.deleteSelected')}
                 </button>
@@ -682,7 +682,7 @@ export default function TasksPage() {
                       },
                     );
                   }}
-                  className="inline-flex justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="inline-flex justify-center rounded-xl bg-gradient-to-r from-primary-600 to-purple-600 px-4 py-2.5 text-sm font-semibold text-white hover:from-primary-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-primary-500/30 hover:shadow-xl hover:shadow-primary-500/40 transition-all duration-200"
                 >
                   {t('common.save')}
                 </button>
@@ -700,7 +700,7 @@ export default function TasksPage() {
             </div>
           ) : (
             <h1
-              className="text-2xl font-bold text-gray-900 dark:text-white truncate cursor-text"
+              className="text-4xl font-bold gradient-text truncate cursor-text hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200"
               title={t('tasks.renameTitle')}
               onClick={() => {
                 if (!list) return;
@@ -725,13 +725,13 @@ export default function TasksPage() {
           )}
         </div>
 
-        <div className={`flex ${isRtl ? 'flex-row-reverse' : ''} items-center gap-2`}>
+        <div className={`flex ${isRtl ? 'flex-row-reverse' : ''} items-center gap-3`}>
           {!isBulkMode && (
             <button
               type="button"
               onClick={() => setIsBulkMode(true)}
               aria-label="Select multiple tasks for bulk operations"
-              className="inline-flex justify-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+              className="inline-flex justify-center rounded-xl bg-gradient-to-r from-primary-600 to-purple-600 px-5 py-2.5 text-sm font-semibold text-white hover:from-primary-700 hover:to-purple-700 shadow-lg shadow-primary-500/30 hover:shadow-xl hover:shadow-primary-500/40 transition-all duration-200"
             >
               {t('tasks.selectMultiple')}
             </button>
@@ -747,7 +747,7 @@ export default function TasksPage() {
                 if (!ok) return;
                 deleteListMutation.mutate({ id: list.id });
               }}
-              className="inline-flex justify-center rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex justify-center rounded-xl glass-card px-5 py-2.5 text-sm font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
             >
               {t('tasks.deleteList')}
             </button>
@@ -757,24 +757,25 @@ export default function TasksPage() {
 
       {showCreate && (
         <form
-          className="bg-white dark:bg-[#1f1f1f] rounded-lg border border-gray-200 dark:border-[#2a2a2a] p-4 mb-6"
+          className="premium-card p-6 mb-8 animate-slide-down"
           onSubmit={(e) => {
             e.preventDefault();
             if (!newTaskDescription.trim() || !numericListId || isFinishedList) return;
             createTaskMutation.mutate({ description: newTaskDescription.trim() });
           }}
         >
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-12 sm:items-end">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-12 sm:items-end">
             <div className="sm:col-span-10">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                 {t('tasks.form.descriptionLabel')}
               </label>
               <input
                 value={newTaskDescription}
                 onChange={(e) => setNewTaskDescription(e.target.value)}
                 aria-label={t('tasks.form.descriptionLabel')}
-                className="mt-1 block w-full rounded-md border border-gray-300 dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a] text-gray-900 dark:text-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                className="premium-input w-full text-gray-900 dark:text-white"
                 placeholder={t('tasks.form.descriptionPlaceholder')}
+                autoFocus
               />
             </div>
             <div className={`sm:col-span-2 flex ${isRtl ? 'flex-row-reverse' : ''} gap-2`}>
@@ -786,7 +787,7 @@ export default function TasksPage() {
                   isFinishedList ||
                   !newTaskDescription.trim()
                 }
-                className="inline-flex flex-1 justify-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="inline-flex flex-1 justify-center rounded-xl bg-gradient-to-r from-primary-600 to-purple-600 px-4 py-2.5 text-sm font-semibold text-white hover:from-primary-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-primary-500/30 hover:shadow-xl hover:shadow-primary-500/40 transition-all duration-200"
               >
                 {createTaskMutation.isPending ? t('common.loading') : t('common.create')}
               </button>
@@ -796,7 +797,7 @@ export default function TasksPage() {
                   setShowCreate(false);
                   setNewTaskDescription('');
                 }}
-                className="inline-flex justify-center rounded-md bg-gray-100 dark:bg-[#2a2a2a] px-4 py-2 text-sm font-medium text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-[#333333]"
+                className="inline-flex justify-center rounded-xl glass-card px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-white/80 dark:hover:bg-gray-800/80 transition-all duration-200"
               >
                 {t('common.cancel')}
               </button>
@@ -980,7 +981,7 @@ export default function TasksPage() {
                               restoreTaskMutation.mutate({ id: task.id });
                             }}
                             disabled={restoreTaskMutation.isPending}
-                            className="inline-flex justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="inline-flex justify-center rounded-xl bg-gradient-to-r from-primary-600 to-purple-600 px-4 py-2.5 text-sm font-semibold text-white hover:from-primary-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-primary-500/30 hover:shadow-xl hover:shadow-primary-500/40 transition-all duration-200"
                           >
                             {t('tasks.restore')}
                           </button>
@@ -995,7 +996,7 @@ export default function TasksPage() {
                               permanentDeleteTaskMutation.mutate({ id: task.id });
                             }}
                             disabled={permanentDeleteTaskMutation.isPending}
-                            className="inline-flex justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="inline-flex justify-center rounded-xl bg-gradient-to-r from-red-600 to-red-700 px-4 py-2.5 text-sm font-semibold text-white hover:from-red-700 hover:to-red-800 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-red-500/30 hover:shadow-xl hover:shadow-red-500/40 transition-all duration-200"
                           >
                             {t('tasks.deleteForever')}
                           </button>
@@ -1038,8 +1039,15 @@ export default function TasksPage() {
       )}
 
       {tasks.length === 0 && (
-        <div className="text-center py-12">
-          <p className="text-gray-500 dark:text-gray-400">{t('tasks.empty')}</p>
+        <div className="text-center py-16">
+          <div className="premium-card p-12 max-w-md mx-auto">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-primary-500/20 to-purple-500/20 flex items-center justify-center">
+              <svg className="w-8 h-8 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+              </svg>
+            </div>
+            <p className="text-gray-600 dark:text-gray-400 text-lg">{t('tasks.empty')}</p>
+          </div>
         </div>
       )}
 

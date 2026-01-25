@@ -80,10 +80,10 @@ export default function ProfilePage() {
   };
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">{t('profile.title')}</h1>
+    <div className="animate-fade-in">
+      <h1 className="text-4xl font-bold gradient-text mb-8">{t('profile.title')}</h1>
 
-      <div className="bg-white dark:bg-[#1f1f1f] rounded-lg shadow p-6">
+      <div className="premium-card p-8 mb-6">
         <div className="space-y-4">
           {/* Profile Picture */}
           <div>
@@ -200,8 +200,8 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      <div className="bg-white dark:bg-[#1f1f1f] rounded-lg shadow p-6 mt-6">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{t('profile.about')}</h2>
+      <div className="premium-card p-8">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">{t('profile.about')}</h2>
         <div className="mt-4 space-y-3 text-sm">
           <div className="flex items-center justify-between gap-4">
             <span className="text-gray-600 dark:text-gray-400">{t('profile.version')}</span>

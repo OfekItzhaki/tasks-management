@@ -26,16 +26,8 @@ export class TodoListsService {
         deletedAt: null,
         ownerId,
       },
-      include: {
-        tasks: {
-          where: {
-            deletedAt: null,
-          },
-          orderBy: {
-            order: 'asc',
-          },
-        },
-      },
+      // Tasks are not needed for list view - only when viewing a specific list
+      // This dramatically reduces payload size and improves performance
       orderBy: {
         order: 'asc',
       },

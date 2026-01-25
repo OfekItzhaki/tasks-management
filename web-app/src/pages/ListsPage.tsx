@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { listsService } from '../services/lists.service';
@@ -28,6 +28,8 @@ export default function ListsPage() {
   } = useQuery<ToDoList[], ApiError>({
     queryKey: ['lists'],
     queryFn: () => listsService.getAllLists(),
+    staleTime: 5 * 60 * 1000, // 5 minutes - lists don't change often
+    gcTime: 10 * 60 * 1000, // 10 minutes - keep in cache longer
   });
 
   // Keyboard shortcuts
@@ -102,17 +104,71 @@ export default function ListsPage() {
     },
   });
 
+  // Consolidated prefetch handler - prevents duplicate API calls
+  const handlePrefetch = useCallback(
+    (listId: number) => {
+      // Only prefetch if not already in cache or stale
+      const tasksQuery = queryClient.getQueryState(['tasks', listId]);
+      const listQuery = queryClient.getQueryState(['list', listId]);
+
+      if (!tasksQuery?.data || tasksQuery.isStale) {
+        void queryClient.prefetchQuery({
+          queryKey: ['tasks', listId],
+          queryFn: () => tasksService.getTasksByList(listId),
+          staleTime: 2 * 60 * 1000, // 2 minutes
+        });
+      }
+
+      if (!listQuery?.data || listQuery.isStale) {
+        void queryClient.prefetchQuery({
+          queryKey: ['list', listId],
+          queryFn: () => listsService.getListById(listId),
+          staleTime: 5 * 60 * 1000, // 5 minutes
+        });
+      }
+    },
+    [queryClient],
+  );
+
+  // Memoize keyboard shortcuts to prevent recreation
+  const keyboardShortcuts = useMemo(
+    () => [
+      {
+        key: 'n',
+        handler: () => {
+          if (!showCreate) {
+            setShowCreate(true);
+          }
+        },
+        description: 'Create new list',
+      },
+      {
+        key: 'Escape',
+        handler: () => {
+          if (showCreate) {
+            setShowCreate(false);
+            setNewListName('');
+          }
+        },
+        description: 'Cancel creating list',
+      },
+    ],
+    [showCreate],
+  );
+
+  useKeyboardShortcuts(keyboardShortcuts);
+
   if (isLoading) {
     return (
       <div>
-        <div className={`flex ${isRtl ? 'flex-row-reverse' : ''} justify-between items-center mb-6 gap-3`}>
-          <Skeleton className="h-8 w-48" />
+        <div className={`flex ${isRtl ? 'flex-row-reverse' : ''} justify-between items-center mb-8 gap-3`}>
+          <Skeleton className="h-10 w-56 rounded-xl" />
         </div>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="p-6 bg-white dark:bg-[#1f1f1f] rounded-lg shadow">
-              <Skeleton className="h-5 w-40" />
-              <Skeleton className="mt-3 h-4 w-24" />
+            <div key={i} className="premium-card p-6 animate-pulse">
+              <Skeleton className="h-6 w-40 rounded-lg" />
+              <Skeleton className="mt-4 h-4 w-24 rounded-lg" />
             </div>
           ))}
         </div>
@@ -137,14 +193,14 @@ export default function ListsPage() {
   }
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6 gap-3">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('lists.title')}</h1>
+    <div className="animate-fade-in">
+      <div className="flex justify-between items-center mb-8 gap-3">
+        <h1 className="text-4xl font-bold gradient-text">{t('lists.title')}</h1>
       </div>
 
       {showCreate && (
         <form
-          className="bg-white dark:bg-[#1f1f1f] rounded-lg border border-gray-200 dark:border-[#2a2a2a] p-4 mb-6"
+          className="premium-card p-6 mb-8 animate-slide-down"
           onSubmit={(e) => {
             e.preventDefault();
             if (!newListName.trim()) return;
@@ -153,23 +209,24 @@ export default function ListsPage() {
             });
           }}
         >
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-12 sm:items-end">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-12 sm:items-end">
             <div className="sm:col-span-10">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                 {t('lists.form.nameLabel')}
               </label>
               <input
                 value={newListName}
                 onChange={(e) => setNewListName(e.target.value)}
-                className="mt-1 block w-full rounded-md border border-gray-300 dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a] text-gray-900 dark:text-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                className="premium-input w-full text-gray-900 dark:text-white"
                 placeholder={t('lists.form.namePlaceholder')}
+                autoFocus
               />
             </div>
-            <div className="sm:col-span-2 flex gap-2">
+            <div className={`sm:col-span-2 flex ${isRtl ? 'flex-row-reverse' : ''} gap-2`}>
               <button
                 type="submit"
                 disabled={createListMutation.isPending || !newListName.trim()}
-                className="inline-flex flex-1 justify-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="inline-flex flex-1 justify-center rounded-xl bg-gradient-to-r from-primary-600 to-purple-600 px-4 py-2.5 text-sm font-semibold text-white hover:from-primary-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-primary-500/30 hover:shadow-xl hover:shadow-primary-500/40 transition-all duration-200"
               >
                 {createListMutation.isPending ? t('common.loading') : t('common.create')}
               </button>
@@ -179,66 +236,60 @@ export default function ListsPage() {
                   setShowCreate(false);
                   setNewListName('');
                 }}
-                className="inline-flex justify-center rounded-md bg-gray-100 dark:bg-[#2a2a2a] px-4 py-2 text-sm font-medium text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-[#333333]"
+                className="inline-flex justify-center rounded-xl glass-card px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-white/80 dark:hover:bg-gray-800/80 transition-all duration-200"
               >
                 {t('common.cancel')}
               </button>
             </div>
           </div>
-          <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+          <p className="mt-3 text-xs text-gray-500 dark:text-gray-400">
             {t('lists.form.tip')}
           </p>
         </form>
       )}
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {lists.map((list) => (
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {lists.map((list, index) => (
           <Link
             key={list.id}
             to={`/lists/${list.id}/tasks`}
-            onMouseEnter={() => {
-              // Prefetch tasks + list details for snappy navigation.
-              void queryClient.prefetchQuery({
-                queryKey: ['tasks', list.id],
-                queryFn: () => tasksService.getTasksByList(list.id),
-              });
-              void queryClient.prefetchQuery({
-                queryKey: ['list', list.id],
-                queryFn: () => listsService.getListById(list.id),
-              });
-            }}
-            onFocus={() => {
-              // Keyboard navigation
-              void queryClient.prefetchQuery({
-                queryKey: ['tasks', list.id],
-                queryFn: () => tasksService.getTasksByList(list.id),
-              });
-              void queryClient.prefetchQuery({
-                queryKey: ['list', list.id],
-                queryFn: () => listsService.getListById(list.id),
-              });
-            }}
-            onPointerDown={() => {
-              // Touch devices (no hover)
-              void queryClient.prefetchQuery({
-                queryKey: ['tasks', list.id],
-                queryFn: () => tasksService.getTasksByList(list.id),
-              });
-              void queryClient.prefetchQuery({
-                queryKey: ['list', list.id],
-                queryFn: () => listsService.getListById(list.id),
-              });
-            }}
-            className="block p-6 bg-white dark:bg-[#1f1f1f] rounded-lg shadow hover:shadow-md transition-shadow"
+            onMouseEnter={() => handlePrefetch(list.id)}
+            onFocus={() => handlePrefetch(list.id)}
+            className="premium-card p-6 group animate-fade-in"
+            style={{ animationDelay: `${index * 50}ms` }}
           >
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{list.name}</h3>
+            <div className="flex items-start justify-between">
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors duration-200">
+                {list.name}
+              </h3>
+              <svg
+                className="w-5 h-5 text-gray-400 group-hover:text-primary-500 transform group-hover:translate-x-1 transition-all duration-200"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </div>
+            {list.tasks && list.tasks.length > 0 && (
+              <p className="mt-3 text-sm text-gray-500 dark:text-gray-400">
+                {list.tasks.length} {list.tasks.length === 1 ? 'task' : 'tasks'}
+              </p>
+            )}
           </Link>
         ))}
       </div>
 
       {lists.length === 0 && (
-        <div className="text-center py-12">
-          <p className="text-gray-500 dark:text-gray-400">{t('lists.empty')}</p>
+        <div className="text-center py-16">
+          <div className="premium-card p-12 max-w-md mx-auto">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-primary-500/20 to-purple-500/20 flex items-center justify-center">
+              <svg className="w-8 h-8 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+              </svg>
+            </div>
+            <p className="text-gray-600 dark:text-gray-400 text-lg">{t('lists.empty')}</p>
+          </div>
         </div>
       )}
 

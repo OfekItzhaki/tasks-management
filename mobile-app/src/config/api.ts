@@ -9,11 +9,10 @@
  * 2. Fallback to development URL (localhost or local IP)
  */
 export const API_CONFIG = {
-  // Production: Set via EXPO_PUBLIC_API_URL in .env or EAS build secrets
-  // Development: Falls back to local IP for testing
-  baseURL: process.env.EXPO_PUBLIC_API_URL || (__DEV__ 
-    ? 'http://192.168.1.198:3000'  // Development fallback
-    : 'https://tasksmanagement-lv54.onrender.com'),  // Production fallback (update after deployment)
+  // Set EXPO_PUBLIC_API_URL in .env. Never use localhost for physical device / Android emulator.
+  baseURL: process.env.EXPO_PUBLIC_API_URL || (__DEV__
+    ? 'http://192.168.7.97:3000'  // Dev fallback: use your machine's IP (ipconfig / ifconfig)
+    : 'https://tasksmanagement-lv54.onrender.com'),
 };
 
 export const getApiUrl = (endpoint: string): string => {

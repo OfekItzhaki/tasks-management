@@ -14,25 +14,34 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  // Check token synchronously first (instant check)
+  const hasToken = authService.isAuthenticated();
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false); // Start as false - don't block render
+  const [userLoading, setUserLoading] = useState(hasToken); // Only load user if token exists
 
   useEffect(() => {
-    // Check if user is already logged in
-    const checkAuth = async () => {
-      try {
-        const currentUser = await authService.getCurrentUser();
-        setUser(currentUser);
-      } catch {
-        // User is not authenticated
-        setUser(null);
-      } finally {
-        setLoading(false);
-      }
-    };
+    // Load user data in background if token exists
+    // This doesn't block the UI from rendering
+    if (hasToken) {
+      const loadUser = async () => {
+        try {
+          const currentUser = await authService.getCurrentUser();
+          setUser(currentUser);
+        } catch {
+          // Token might be invalid, clear it
+          authService.logout();
+          setUser(null);
+        } finally {
+          setUserLoading(false);
+        }
+      };
 
-    checkAuth();
-  }, []);
+      loadUser();
+    } else {
+      setUserLoading(false);
+    }
+  }, [hasToken]);
 
   const login = async (credentials: LoginDto) => {
     const response = await authService.login(credentials);
@@ -42,6 +51,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = async () => {
     authService.logout();
     setUser(null);
+    setUserLoading(false);
   };
 
   const updateUser = (updatedUser: User) => {
@@ -52,11 +62,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     <AuthContext.Provider
       value={{
         user,
-        loading,
+        loading: userLoading, // Only show loading when actually fetching user data
         login,
         logout,
         updateUser,
-        isAuthenticated: !!user,
+        isAuthenticated: hasToken, // Use token check (instant) instead of user (slow)
       }}
     >
       {children}

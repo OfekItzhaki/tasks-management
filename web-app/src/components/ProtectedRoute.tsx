@@ -10,17 +10,12 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { isAuthenticated, loading } = useAuth();
   const { t } = useTranslation();
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-lg">{t('common.loading')}</div>
-      </div>
-    );
-  }
-
+  // If not authenticated, redirect immediately (no loading state needed)
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 
+  // If authenticated but user data is still loading, show UI with loading states
+  // This allows progressive rendering - UI appears immediately, data loads in background
   return <>{children}</>;
 }

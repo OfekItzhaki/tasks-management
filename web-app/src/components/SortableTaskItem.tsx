@@ -51,14 +51,14 @@ export function SortableTaskItem({
       ref={setNodeRef}
       style={style}
       {...(!isBulkMode && !isFinishedList ? { ...attributes, ...listeners } : {})}
-      className={`p-4 bg-white dark:bg-[#1f1f1f] rounded-lg shadow transition-shadow ${
+      className={`premium-card p-5 transition-all duration-200 ${
         isBulkMode
           ? isSelected
-            ? 'ring-2 ring-indigo-500 cursor-pointer'
-            : 'hover:shadow-md cursor-pointer'
+            ? 'ring-2 ring-primary-500 shadow-glow cursor-pointer bg-primary-50/50 dark:bg-primary-900/20'
+            : 'hover:shadow-premium cursor-pointer'
           : isDragging
-          ? 'cursor-grabbing'
-          : 'hover:shadow-md cursor-pointer cursor-grab'
+          ? 'cursor-grabbing opacity-60 scale-95'
+          : 'hover:shadow-premium cursor-pointer cursor-grab'
       }`}
       onClick={onClick}
       onKeyDown={onKeyDown}
