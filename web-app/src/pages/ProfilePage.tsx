@@ -97,22 +97,36 @@ export default function ProfilePage() {
                 onMouseLeave={() => setIsHoveringImage(false)}
                 onClick={handleImageClick}
               >
-                {(filePreview || user.profilePicture) ? (
+                {(filePreview || user.profilePicture) && (
                   <img
-                    src={filePreview || user.profilePicture || undefined}
+                    key={filePreview ? `preview-${Date.now()}` : `${user.id}-${user.profilePicture}-${user.updatedAt}`} // Force re-render when picture changes
+                    src={
+                      filePreview
+                        ? filePreview // File preview is already a data URL, no cache busting needed
+                        : `${user.profilePicture}?t=${user.updatedAt ? new Date(user.updatedAt).getTime() : Date.now()}`
+                    }
                     alt={t('profile.profilePicture')}
-                    className="w-20 h-20 rounded-full object-cover border-2 border-gray-300 dark:border-[#2a2a2a] transition-opacity group-hover:opacity-75"
+                    className="w-20 h-20 rounded-full object-cover border-2 border-primary-500/30 dark:border-primary-500/30 transition-opacity group-hover:opacity-75 shadow-lg"
+                    loading="eager" // Load immediately
                     onError={(e) => {
-                      (e.target as HTMLImageElement).style.display = 'none';
+                      // Only show placeholder if image actually fails to load
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = 'none';
+                      const placeholder = target.nextElementSibling as HTMLElement;
+                      if (placeholder) placeholder.style.display = 'flex';
                     }}
                   />
-                ) : (
-                  <div className="w-20 h-20 rounded-full bg-gray-200 dark:bg-[#2a2a2a] flex items-center justify-center border-2 border-gray-300 dark:border-[#2a2a2a] transition-opacity group-hover:opacity-75">
-                    <span className="text-2xl text-gray-400 dark:text-gray-500">
-                      {user.name?.[0]?.toUpperCase() || user.email[0].toUpperCase()}
-                    </span>
-                  </div>
                 )}
+                <div
+                  className={`w-20 h-20 rounded-full flex items-center justify-center border-2 border-primary-500/30 dark:border-primary-500/30 transition-opacity group-hover:opacity-75 shadow-lg bg-gradient-to-br from-primary-500 to-purple-500 ${
+                    filePreview || user.profilePicture ? 'hidden' : ''
+                  }`}
+                  style={{ display: filePreview || user.profilePicture ? 'none' : 'flex' }}
+                >
+                  <span className="text-3xl font-bold text-white">
+                    {user.name?.[0]?.toUpperCase() || user.email[0].toUpperCase()}
+                  </span>
+                </div>
                 {/* Edit overlay on hover */}
                 {isHoveringImage && (
                   <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full">
