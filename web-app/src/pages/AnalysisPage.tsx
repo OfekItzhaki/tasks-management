@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { useMemo } from 'react';
 import { listsService } from '../services/lists.service';
 import { tasksService } from '../services/tasks.service';
 import { ToDoList, Task } from '@tasks-management/frontend-services';
@@ -12,6 +13,8 @@ import {
   Cell,
   BarChart,
   Bar,
+  LineChart,
+  Line,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -19,6 +22,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
+import CalendarHeatmap from '../components/CalendarHeatmap';
 
 export default function AnalysisPage() {
   const { i18n } = useTranslation();
@@ -126,34 +130,100 @@ export default function AnalysisPage() {
     };
   });
 
-  // Calculate daily task completion streak
+  // Calculate daily task completion data
   const dailyList = lists.find((list) => list.type === 'DAILY');
   const dailyTasks = dailyList ? allTasks.filter((task) => task.todoListId === dailyList.id) : [];
   const allDailyCompleted = dailyTasks.length > 0 && dailyTasks.every((task) => task.completed);
   
-  // Simple streak calculation: if all daily tasks are completed today, check if they were completed yesterday, etc.
-  // For now, we'll show a streak based on current completion status
-  // A more accurate streak would require tracking completion history
-  const calculateStreak = () => {
-    if (dailyTasks.length === 0) return 0;
-    if (!allDailyCompleted) return 0;
+  // Calculate daily completions for calendar heatmap
+  const dailyCompletions = useMemo(() => {
+    const completionMap = new Map<string, number>();
     
-    // Check if all tasks were completed today
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
-    // For a simple implementation, if all daily tasks are completed, assume streak of 1
-    // In a real implementation, you'd check completion history
-    const completedToday = dailyTasks.every((task) => {
-      // If task has no completedAt, it's not part of the streak
-      // This is a simplified version - real streak tracking would need history
-      return task.completed;
+    // Process all tasks (not just daily) to show overall activity
+    allTasks.forEach((task) => {
+      if (task.completed && task.completedAt) {
+        const completionDate = new Date(task.completedAt);
+        const dateKey = completionDate.toISOString().split('T')[0]; // YYYY-MM-DD
+        completionMap.set(dateKey, (completionMap.get(dateKey) || 0) + 1);
+      }
     });
     
-    return completedToday ? 1 : 0; // Simplified: returns 1 if all completed, 0 otherwise
+    return Array.from(completionMap.entries()).map(([date, count]) => ({
+      date,
+      count,
+    }));
+  }, [allTasks]);
+
+  // Calculate daily streak based on daily tasks completion
+  const calculateDailyStreak = () => {
+    if (dailyTasks.length === 0) return 0;
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    let streak = 0;
+    
+    // Check backwards from today
+    for (let i = 0; i < 365; i++) { // Check up to a year back
+      const checkDate = new Date(today);
+      checkDate.setDate(checkDate.getDate() - i);
+      const dateKey = checkDate.toISOString().split('T')[0];
+      
+      // Check if all daily tasks were completed on this date
+      const tasksCompletedOnDate = dailyTasks.filter((task) => {
+        if (!task.completed || !task.completedAt) return false;
+        const completedDate = new Date(task.completedAt);
+        completedDate.setHours(0, 0, 0, 0);
+        return completedDate.getTime() === checkDate.getTime();
+      });
+      
+      // For today, check if all tasks are currently completed
+      if (i === 0) {
+        if (allDailyCompleted) {
+          streak++;
+        } else {
+          break; // Streak broken today
+        }
+      } else {
+        // For past days, check if all tasks were completed on that day
+        // This is an approximation - we check if at least one task was completed on that day
+        // and assume if tasks exist, they should all be completed for the streak
+        if (tasksCompletedOnDate.length === dailyTasks.length && dailyTasks.length > 0) {
+          streak++;
+        } else {
+          break; // Streak broken
+        }
+      }
+    }
+    
+    return streak;
   };
   
-  const currentStreak = calculateStreak();
+  const currentStreak = calculateDailyStreak();
+
+  // Calculate completion trends for the last 30 days
+  const completionTrends = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const trends: Array<{ date: string; completions: number; label: string }> = [];
+    
+    for (let i = 29; i >= 0; i--) {
+      const date = new Date(today);
+      date.setDate(date.getDate() - i);
+      const dateKey = date.toISOString().split('T')[0];
+      
+      const completionsOnDate = allTasks.filter((task) => {
+        if (!task.completed || !task.completedAt) return false;
+        const completedDate = new Date(task.completedAt);
+        completedDate.setHours(0, 0, 0, 0);
+        return completedDate.getTime() === date.getTime();
+      }).length;
+      
+      const label = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      trends.push({ date: dateKey, completions: completionsOnDate, label });
+    }
+    
+    return trends;
+  }, [allTasks]);
 
 
   if (isLoading) {
@@ -282,6 +352,14 @@ export default function AnalysisPage() {
             </ResponsiveContainer>
           </div>
         )}
+
+        {/* Daily Completion Activity Calendar Heatmap */}
+        <div className="premium-card p-8">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+            Daily Completion Activity
+          </h2>
+          <CalendarHeatmap data={dailyCompletions} days={90} />
+        </div>
       </div>
 
       {/* Tasks by List Bar Chart */}
@@ -325,6 +403,51 @@ export default function AnalysisPage() {
               <Bar dataKey="completed" fill="#10b981" name="Completed" />
               <Bar dataKey="pending" fill="#ef4444" name="Pending" />
             </BarChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+
+      {/* Completion Trends Line Chart */}
+      {completionTrends.length > 0 && (
+        <div className="premium-card p-8">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+            Completion Trends (Last 30 Days)
+          </h2>
+          <ResponsiveContainer width="100%" height={300}>
+            <LineChart
+              data={completionTrends}
+              margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#4b5563' : '#374151'} opacity={0.1} />
+              <XAxis
+                dataKey="label"
+                stroke={isDark ? '#9ca3af' : '#6b7280'}
+                style={{ fontSize: '12px' }}
+                angle={-45}
+                textAnchor="end"
+                height={80}
+              />
+              <YAxis stroke={isDark ? '#9ca3af' : '#6b7280'} style={{ fontSize: '12px' }} />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: isDark ? '#1f1f1f' : '#ffffff',
+                  border: isDark ? '1px solid #2a2a2a' : '1px solid #e5e7eb',
+                  borderRadius: '8px',
+                  color: isDark ? '#ffffff' : '#1f2937',
+                }}
+                formatter={(value: number | undefined) => [`${value ?? 0} tasks`, 'Completions']}
+              />
+              <Legend wrapperStyle={{ color: isDark ? '#ffffff' : '#1f2937' }} />
+              <Line
+                type="monotone"
+                dataKey="completions"
+                stroke="#10b981"
+                strokeWidth={2}
+                dot={{ fill: '#10b981', r: 4 }}
+                activeDot={{ r: 6 }}
+                name="Tasks Completed"
+              />
+            </LineChart>
           </ResponsiveContainer>
         </div>
       )}

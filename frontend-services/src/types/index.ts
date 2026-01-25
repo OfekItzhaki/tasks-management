@@ -70,6 +70,7 @@ export interface Task {
   id: number;
   description: string;
   completed: boolean;
+  completedAt: string | null; // When the task was marked complete
   todoListId: number;
   order: number;
   dueDate: string | null;
