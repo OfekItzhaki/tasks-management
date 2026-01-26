@@ -18,7 +18,7 @@ import {
   UpdateStepDto,
   ListType,
 } from '@tasks-management/frontend-services';
-import { formatApiError } from '../utils/formatApiError';
+import { handleApiError, extractErrorMessage } from '../utils/errorHandler';
 
 export default function TaskDetailsPage() {
   const { t, i18n } = useTranslation();
@@ -153,7 +153,7 @@ export default function TaskDetailsPage() {
       if (typeof ctx?.todoListId === 'number' && ctx?.previousTasks) {
         queryClient.setQueryData(['tasks', ctx.todoListId], ctx.previousTasks);
       }
-      toast.error(formatApiError(err, t('taskDetails.updateTaskFailed')));
+      handleApiError(err, t('taskDetails.updateTaskFailed', { defaultValue: 'Failed to update task. Please try again.' }));
     },
     onSettled: async (_data, _err, vars) => {
       await queryClient.invalidateQueries({ queryKey: ['task', vars.id] });
@@ -205,7 +205,7 @@ export default function TaskDetailsPage() {
       if (ctx?.previousTasks) {
         queryClient.setQueryData(['tasks', vars.task.todoListId], ctx.previousTasks);
       }
-      toast.error(formatApiError(err, t('taskDetails.updateStepFailed')));
+      handleApiError(err, t('taskDetails.updateStepFailed', { defaultValue: 'Failed to update step. Please try again.' }));
     },
     onSettled: async (_data, _err, vars) => {
       await invalidateTask(vars.task);
@@ -251,7 +251,7 @@ export default function TaskDetailsPage() {
       if (ctx?.previousTask) {
         queryClient.setQueryData(['task', vars.task.id], ctx.previousTask);
       }
-      toast.error(formatApiError(err, t('taskDetails.addStepFailed')));
+      handleApiError(err, t('taskDetails.addStepFailed', { defaultValue: 'Failed to add step. Please try again.' }));
     },
     onSuccess: (_created, vars) => {
       setNewStepDescription('');
@@ -290,7 +290,7 @@ export default function TaskDetailsPage() {
       if (ctx?.previousTask) {
         queryClient.setQueryData(['task', vars.task.id], ctx.previousTask);
       }
-      toast.error(formatApiError(err, t('taskDetails.deleteStepFailed')));
+      handleApiError(err, t('taskDetails.deleteStepFailed', { defaultValue: 'Failed to delete step. Please try again.' }));
     },
     onSuccess: () => {
       toast.success(t('taskDetails.stepDeleted'));
@@ -308,7 +308,7 @@ export default function TaskDetailsPage() {
   const restoreTaskMutation = useMutation<Task, ApiError, { id: number }>({
     mutationFn: ({ id }) => tasksService.restoreTask(id),
     onError: (err) => {
-      toast.error(formatApiError(err, t('tasks.restoreFailed')));
+      handleApiError(err, t('tasks.restoreFailed', { defaultValue: 'Failed to restore task. Please try again.' }));
     },
     onSuccess: async (restored) => {
       toast.success(t('tasks.restored'));
@@ -336,7 +336,7 @@ export default function TaskDetailsPage() {
   const permanentDeleteTaskMutation = useMutation<Task, ApiError, { id: number }>({
     mutationFn: ({ id }) => tasksService.permanentDeleteTask(id),
     onError: (err) => {
-      toast.error(formatApiError(err, t('tasks.deleteForeverFailed')));
+      handleApiError(err, t('tasks.deleteForeverFailed', { defaultValue: 'Failed to permanently delete task. Please try again.' }));
     },
     onSuccess: async () => {
       toast.success(t('tasks.deletedForever'));
@@ -389,7 +389,7 @@ export default function TaskDetailsPage() {
       <div className="rounded-md bg-red-50 dark:bg-red-900/20 p-4">
         <div className="text-sm text-red-800 dark:text-red-200 mb-3">
           {isError
-            ? formatApiError(error, t('taskDetails.loadFailed'))
+            ? extractErrorMessage(error, t('taskDetails.loadFailed', { defaultValue: 'Failed to load task. Please try again.' }))
             : t('taskDetails.notFound')}
         </div>
         <div className="flex gap-3">

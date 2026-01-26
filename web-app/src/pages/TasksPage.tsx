@@ -35,7 +35,7 @@ import {
   UpdateToDoListDto,
   UpdateTaskDto,
 } from '@tasks-management/frontend-services';
-import { formatApiError } from '../utils/formatApiError';
+import { handleApiError, extractErrorMessage } from '../utils/errorHandler';
 
 type ListWithSystemFlag = ToDoList & { isSystem?: boolean };
 
@@ -200,7 +200,7 @@ export default function TasksPage() {
       if (ctx?.previousLists) {
         queryClient.setQueryData(['lists'], ctx.previousLists);
       }
-      toast.error(formatApiError(err, t('tasks.listUpdateFailed')));
+      handleApiError(err, t('tasks.listUpdateFailed', { defaultValue: 'Failed to update list. Please try again.' }));
     },
     onSettled: async (_data, _err, vars) => {
       await queryClient.invalidateQueries({ queryKey: ['list', vars.id] });
@@ -234,7 +234,7 @@ export default function TasksPage() {
       if (ctx?.previousLists) {
         queryClient.setQueryData(['lists'], ctx.previousLists);
       }
-      toast.error(formatApiError(err, t('tasks.listDeleteFailed')));
+      handleApiError(err, t('tasks.listDeleteFailed', { defaultValue: 'Failed to delete list. Please try again.' }));
     },
   });
 
@@ -278,7 +278,7 @@ export default function TasksPage() {
       if (numericListId && ctx?.previousTasks) {
         queryClient.setQueryData(['tasks', numericListId], ctx.previousTasks);
       }
-      toast.error(formatApiError(err, t('tasks.createFailed')));
+      handleApiError(err, t('tasks.createFailed', { defaultValue: 'Failed to create task. Please try again.' }));
     },
     onSuccess: () => {
       setNewTaskDescription('');
@@ -314,7 +314,7 @@ export default function TasksPage() {
       if (numericListId && ctx?.previousTasks) {
         queryClient.setQueryData(['tasks', numericListId], ctx.previousTasks);
       }
-      toast.error(formatApiError(err, t('tasks.deleteFailed')));
+      handleApiError(err, t('tasks.deleteFailed', { defaultValue: 'Failed to delete task. Please try again.' }));
     },
     onSuccess: () => {
       toast.success(t('tasks.taskDeleted'));
@@ -349,7 +349,7 @@ export default function TasksPage() {
       if (numericListId && ctx?.previousTasks) {
         queryClient.setQueryData(['tasks', numericListId], ctx.previousTasks);
       }
-      toast.error(formatApiError(err, t('tasks.restoreFailed')));
+      handleApiError(err, t('tasks.restoreFailed', { defaultValue: 'Failed to restore task. Please try again.' }));
     },
     onSuccess: async (restored) => {
       toast.success(t('tasks.restored'));
@@ -388,7 +388,7 @@ export default function TasksPage() {
       if (numericListId && ctx?.previousTasks) {
         queryClient.setQueryData(['tasks', numericListId], ctx.previousTasks);
       }
-      toast.error(formatApiError(err, t('tasks.deleteForeverFailed')));
+      handleApiError(err, t('tasks.deleteForeverFailed', { defaultValue: 'Failed to permanently delete task. Please try again.' }));
     },
     onSuccess: () => {
       toast.success(t('tasks.deletedForever'));
@@ -420,7 +420,7 @@ export default function TasksPage() {
       }
     },
     onError: (err) => {
-      toast.error(formatApiError(err, t('tasks.reorderFailed') || 'Failed to reorder tasks'));
+      handleApiError(err, t('tasks.reorderFailed', { defaultValue: 'Failed to reorder tasks. Please try again.' }));
       // Revert to original order on error
       if (tasks.length > 0) {
         const sorted = [...tasks].sort((a, b) => a.order - b.order);
@@ -498,7 +498,7 @@ export default function TasksPage() {
       if (ctx?.previousTask) {
         queryClient.setQueryData(['task', vars.id], ctx.previousTask);
       }
-      toast.error(formatApiError(err, t('taskDetails.updateTaskFailed')));
+      handleApiError(err, t('taskDetails.updateTaskFailed', { defaultValue: 'Failed to update task. Please try again.' }));
     },
     onSettled: async (_data, _err, vars) => {
       if (typeof numericListId === 'number') {
@@ -539,7 +539,7 @@ export default function TasksPage() {
     return (
       <div className="rounded-md bg-red-50 dark:bg-red-900/20 p-4">
         <div className="text-sm text-red-800 dark:text-red-200 mb-3">
-          {formatApiError(error, t('tasks.loadFailed'))}
+          {extractErrorMessage(error, t('tasks.loadFailed', { defaultValue: 'Failed to load tasks. Please try again.' }))}
         </div>
         <button
           onClick={() => refetch()}

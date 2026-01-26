@@ -5,7 +5,7 @@ import toast from 'react-hot-toast';
 import { listsService } from '../services/lists.service';
 import { tasksService } from '../services/tasks.service';
 import { ToDoList, ApiError, ListType } from '@tasks-management/frontend-services';
-import { formatApiError } from '../utils/formatApiError';
+import { handleApiError, extractErrorMessage } from '../utils/errorHandler';
 import FloatingActionButton from '../components/FloatingActionButton';
 import Skeleton from '../components/Skeleton';
 import { useTranslation } from 'react-i18next';
@@ -93,7 +93,7 @@ export default function ListsPage() {
       if (ctx?.previousLists) {
         queryClient.setQueryData(['lists'], ctx.previousLists);
       }
-      toast.error(formatApiError(err, t('lists.createFailed')));
+      handleApiError(err, t('lists.createFailed', { defaultValue: 'Failed to create list. Please try again.' }));
     },
     onSuccess: () => {
       setNewListName('');
@@ -180,7 +180,7 @@ export default function ListsPage() {
     return (
       <div className="rounded-md bg-red-50 dark:bg-red-900/20 p-4">
         <div className="text-sm text-red-800 dark:text-red-200 mb-3">
-          {formatApiError(error, t('lists.loadFailed'))}
+          {extractErrorMessage(error, t('lists.loadFailed', { defaultValue: 'Failed to load lists. Please try again.' }))}
         </div>
         <button
           onClick={() => refetch()}

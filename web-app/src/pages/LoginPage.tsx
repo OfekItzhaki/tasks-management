@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { LoginDto, ApiError } from '@tasks-management/frontend-services';
+import { handleApiError, extractErrorMessage } from '../utils/errorHandler';
 import { useTranslation } from 'react-i18next';
 import { isRtlLanguage } from '@tasks-management/frontend-services';
 
@@ -26,10 +27,7 @@ export default function LoginPage() {
       await login(credentials);
       navigate('/lists');
     } catch (err: unknown) {
-      const error = err as ApiError;
-      const errorMessage = Array.isArray(error.message)
-        ? error.message.join(', ')
-        : error.message || t('login.failed');
+      const errorMessage = extractErrorMessage(err, t('login.failed', { defaultValue: 'Login failed. Please try again.' }));
       setError(errorMessage);
     } finally {
       setLoading(false);

@@ -7,6 +7,7 @@ import { isRtlLanguage } from '@tasks-management/frontend-services';
 import { usersService } from '@tasks-management/frontend-services';
 import { authService } from '../services/auth.service';
 import toast from 'react-hot-toast';
+import { handleApiError } from '../utils/errorHandler';
 
 export default function ProfilePage() {
   const { user, loading, updateUser } = useAuth();
@@ -32,8 +33,8 @@ export default function ProfilePage() {
       // Update user in context without page reload
       updateUser(updatedUser);
     },
-    onError: (error: Error) => {
-      toast.error(error.message || t('profile.pictureUpdateFailed'));
+    onError: (error: unknown) => {
+      handleApiError(error, t('profile.pictureUpdateFailed', { defaultValue: 'Failed to update profile picture. Please try again.' }));
     },
   });
 
@@ -185,7 +186,7 @@ export default function ProfilePage() {
                       await authService.resendVerification(user.email);
                       toast.success(t('profile.verificationEmailSent'));
                     } catch (error) {
-                      toast.error(error instanceof Error ? error.message : t('profile.verificationEmailSent'));
+                      handleApiError(error, t('profile.failedToResendVerification', { defaultValue: 'Failed to resend verification email. Please try again.' }));
                     }
                   }}
                   className="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-medium"
