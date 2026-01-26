@@ -252,7 +252,7 @@ export default function AnalysisPage() {
 
   return (
     <div className="space-y-8 animate-fade-in">
-      <h1 className="text-4xl font-bold gradient-text">Task Analysis</h1>
+      <h1 className="text-4xl font-bold gradient-text text-center">Task Analysis</h1>
 
       {/* Overview Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">

@@ -1,4 +1,5 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQueuedMutation } from '../hooks/useQueuedMutation';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -170,9 +171,8 @@ export default function TasksPage() {
     { previousList?: ListWithSystemFlag; previousLists?: ListWithSystemFlag[] }
   >({
     mutationFn: ({ id, data }) => listsService.updateList(id, data),
-    onMutate: async ({ id, data }) => {
-      await queryClient.cancelQueries({ queryKey: ['list', id] });
-      await queryClient.cancelQueries({ queryKey: ['lists'] });
+    onMutate: ({ id, data }) => {
+      // Removed cancelQueries to allow parallel mutations
 
       const previousList = queryClient.getQueryData<ListWithSystemFlag>([
         'list',
@@ -202,9 +202,10 @@ export default function TasksPage() {
       }
       handleApiError(err, t('tasks.listUpdateFailed', { defaultValue: 'Failed to update list. Please try again.' }));
     },
-    onSettled: async (_data, _err, vars) => {
-      await queryClient.invalidateQueries({ queryKey: ['list', vars.id] });
-      await queryClient.invalidateQueries({ queryKey: ['lists'] });
+    onSettled: (_data, _err, vars) => {
+      // Non-blocking invalidations - don't await
+      queryClient.invalidateQueries({ queryKey: ['list', vars.id] });
+      queryClient.invalidateQueries({ queryKey: ['lists'] });
     },
   });
 
@@ -215,8 +216,8 @@ export default function TasksPage() {
     { previousLists?: ListWithSystemFlag[] }
   >({
     mutationFn: ({ id }) => listsService.deleteList(id),
-    onMutate: async ({ id }) => {
-      await queryClient.cancelQueries({ queryKey: ['lists'] });
+    onMutate: ({ id }) => {
+      // Removed cancelQueries to allow parallel mutations
       const previousLists = queryClient.getQueryData<ListWithSystemFlag[]>([
         'lists',
       ]);
@@ -225,8 +226,9 @@ export default function TasksPage() {
       );
       return { previousLists };
     },
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['lists'] });
+    onSuccess: () => {
+      // Non-blocking invalidation - don't await
+      queryClient.invalidateQueries({ queryKey: ['lists'] });
       toast.success(t('tasks.listDeleted'));
       navigate('/lists');
     },
@@ -241,9 +243,9 @@ export default function TasksPage() {
   const createTaskMutation = useMutation<Task, ApiError, CreateTaskDto, { previousTasks?: Task[] }>({
     mutationFn: (data) =>
       tasksService.createTask(numericListId as number, data),
-    onMutate: async (data) => {
+    onMutate: (data) => {
       if (!numericListId) return { previousTasks: undefined };
-      await queryClient.cancelQueries({ queryKey: ['tasks', numericListId] });
+      // Removed cancelQueries to allow parallel mutations
 
       const previousTasks = queryClient.getQueryData<Task[]>([
         'tasks',
@@ -284,27 +286,29 @@ export default function TasksPage() {
       setNewTaskDescription('');
       setShowCreate(false);
     },
-    onSettled: async () => {
+    onSettled: () => {
+      // Non-blocking invalidation - don't await
       if (numericListId) {
-        await queryClient.invalidateQueries({ queryKey: ['tasks', numericListId] });
+        queryClient.invalidateQueries({ queryKey: ['tasks', numericListId] });
       }
     },
   });
 
-  const deleteTaskMutation = useMutation<
+  const deleteTaskMutation = useQueuedMutation<
     Task,
     ApiError,
     { id: number },
     { previousTasks?: Task[] }
   >({
     mutationFn: ({ id }) => tasksService.deleteTask(id),
-    onMutate: async ({ id }) => {
+    onMutate: ({ id }) => {
       if (!numericListId) return { previousTasks: undefined };
-      await queryClient.cancelQueries({ queryKey: ['tasks', numericListId] });
+      // Removed cancelQueries to allow parallel mutations
       const previousTasks = queryClient.getQueryData<Task[]>([
         'tasks',
         numericListId,
       ]);
+      // Optimistic update - remove task immediately
       queryClient.setQueryData<Task[]>(['tasks', numericListId], (old = []) =>
         old.filter((t) => t.id !== id),
       );
@@ -319,27 +323,29 @@ export default function TasksPage() {
     onSuccess: () => {
       toast.success(t('tasks.taskDeleted'));
     },
-    onSettled: async () => {
+    onSettled: () => {
+      // Non-blocking invalidation - don't await
       if (numericListId) {
-        await queryClient.invalidateQueries({ queryKey: ['tasks', numericListId] });
+        queryClient.invalidateQueries({ queryKey: ['tasks', numericListId] });
       }
     },
   });
 
-  const restoreTaskMutation = useMutation<
+  const restoreTaskMutation = useQueuedMutation<
     Task,
     ApiError,
     { id: number },
     { previousTasks?: Task[] }
   >({
     mutationFn: ({ id }) => tasksService.restoreTask(id),
-    onMutate: async ({ id }) => {
+    onMutate: ({ id }) => {
       if (!numericListId) return { previousTasks: undefined };
-      await queryClient.cancelQueries({ queryKey: ['tasks', numericListId] });
+      // Removed cancelQueries to allow parallel mutations
       const previousTasks = queryClient.getQueryData<Task[]>([
         'tasks',
         numericListId,
       ]);
+      // Optimistic update - remove task immediately
       queryClient.setQueryData<Task[]>(['tasks', numericListId], (old = []) =>
         old.filter((t) => t.id !== id),
       );
@@ -351,34 +357,36 @@ export default function TasksPage() {
       }
       handleApiError(err, t('tasks.restoreFailed', { defaultValue: 'Failed to restore task. Please try again.' }));
     },
-    onSuccess: async (restored) => {
+    onSuccess: (restored) => {
       toast.success(t('tasks.restored'));
-      // Task moved to original list; refresh that list if we know it.
+      // Task moved to original list; refresh that list if we know it (non-blocking).
       if (typeof restored.todoListId === 'number') {
-        await queryClient.invalidateQueries({ queryKey: ['tasks', restored.todoListId] });
+        queryClient.invalidateQueries({ queryKey: ['tasks', restored.todoListId] });
       }
     },
-    onSettled: async () => {
+    onSettled: () => {
+      // Non-blocking invalidation - don't await
       if (numericListId) {
-        await queryClient.invalidateQueries({ queryKey: ['tasks', numericListId] });
+        queryClient.invalidateQueries({ queryKey: ['tasks', numericListId] });
       }
     },
   });
 
-  const permanentDeleteTaskMutation = useMutation<
+  const permanentDeleteTaskMutation = useQueuedMutation<
     Task,
     ApiError,
     { id: number },
     { previousTasks?: Task[] }
   >({
     mutationFn: ({ id }) => tasksService.permanentDeleteTask(id),
-    onMutate: async ({ id }) => {
+    onMutate: ({ id }) => {
       if (!numericListId) return { previousTasks: undefined };
-      await queryClient.cancelQueries({ queryKey: ['tasks', numericListId] });
+      // Removed cancelQueries to allow parallel mutations
       const previousTasks = queryClient.getQueryData<Task[]>([
         'tasks',
         numericListId,
       ]);
+      // Optimistic update - remove task immediately
       queryClient.setQueryData<Task[]>(['tasks', numericListId], (old = []) =>
         old.filter((t) => t.id !== id),
       );
@@ -393,9 +401,10 @@ export default function TasksPage() {
     onSuccess: () => {
       toast.success(t('tasks.deletedForever'));
     },
-    onSettled: async () => {
+    onSettled: () => {
+      // Non-blocking invalidation - don't await
       if (numericListId) {
-        await queryClient.invalidateQueries({ queryKey: ['tasks', numericListId] });
+        queryClient.invalidateQueries({ queryKey: ['tasks', numericListId] });
       }
     },
   });
@@ -412,11 +421,11 @@ export default function TasksPage() {
       );
       await Promise.all(updatePromises);
     },
-    onSuccess: async () => {
+    onSuccess: () => {
       toast.success(t('tasks.reordered') || 'Tasks reordered');
-      // Invalidate queries to refresh the list
+      // Non-blocking invalidation - don't await
       if (numericListId) {
-        await queryClient.invalidateQueries({ queryKey: ['tasks', numericListId] });
+        queryClient.invalidateQueries({ queryKey: ['tasks', numericListId] });
       }
     },
     onError: (err) => {
@@ -449,14 +458,14 @@ export default function TasksPage() {
     }
   };
 
-  const updateTaskMutation = useMutation<
+  const updateTaskMutation = useQueuedMutation<
     Task,
     ApiError,
     { id: number; data: UpdateTaskDto },
     { previousTasks?: Task[]; previousTask?: Task }
   >({
     mutationFn: ({ id, data }) => tasksService.updateTask(id, data),
-    onMutate: async ({ id, data }) => {
+    onMutate: ({ id, data }) => {
       const previousTasks =
         typeof numericListId === 'number'
           ? queryClient.getQueryData<Task[]>(['tasks', numericListId])
@@ -481,13 +490,7 @@ export default function TasksPage() {
         });
       }
 
-      if (typeof numericListId === 'number') {
-        await queryClient.cancelQueries({ queryKey: ['tasks', numericListId] });
-      }
-
-      if (previousTask) {
-        await queryClient.cancelQueries({ queryKey: ['task', id] });
-      }
+      // Removed cancelQueries to allow parallel mutations
 
       return { previousTasks, previousTask };
     },
@@ -500,11 +503,12 @@ export default function TasksPage() {
       }
       handleApiError(err, t('taskDetails.updateTaskFailed', { defaultValue: 'Failed to update task. Please try again.' }));
     },
-    onSettled: async (_data, _err, vars) => {
+    onSettled: (_data, _err, vars) => {
+      // Non-blocking invalidations - don't await
       if (typeof numericListId === 'number') {
-        await queryClient.invalidateQueries({ queryKey: ['tasks', numericListId] });
+        queryClient.invalidateQueries({ queryKey: ['tasks', numericListId] });
       }
-      await queryClient.invalidateQueries({ queryKey: ['task', vars.id] });
+      queryClient.invalidateQueries({ queryKey: ['task', vars.id] });
     },
   });
 
@@ -553,7 +557,7 @@ export default function TasksPage() {
 
   return (
     <div>
-      <div className="mb-6">
+      <div className={`flex ${isRtl ? 'flex-row-reverse' : ''} justify-between items-center mb-6`}>
         <Link
           to="/lists"
           className={`text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 text-sm font-semibold flex items-center gap-2 ${isRtl ? 'flex-row-reverse' : ''} glass-card px-4 py-2 rounded-xl w-fit hover:bg-white/80 dark:hover:bg-gray-800/80 transition-all duration-200`}
@@ -561,10 +565,26 @@ export default function TasksPage() {
           <span className={isRtl ? 'transform rotate-180' : ''}>←</span>
           <span>{t('tasks.backToLists').replace('← ', '')}</span>
         </Link>
+        {list && !list.isSystem && !isBulkMode && (
+          <button
+            type="button"
+            disabled={deleteListMutation.isPending}
+            onClick={() => {
+              const ok = window.confirm(
+                t('tasks.deleteListConfirm', { name: list.name }),
+              );
+              if (!ok) return;
+              deleteListMutation.mutate({ id: list.id });
+            }}
+            className="inline-flex justify-center rounded-xl glass-card px-5 py-2.5 text-sm font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+          >
+            {t('tasks.deleteList')}
+          </button>
+        )}
       </div>
 
-      <div className={`flex ${isRtl ? 'flex-row-reverse' : ''} items-center justify-between mb-8 gap-3`}>
-        <div className="min-w-0 flex-1">
+      <div className={`flex ${isRtl ? 'flex-row-reverse' : ''} flex-col items-center justify-center mb-8 gap-3`}>
+        <div className="min-w-0 flex-1 w-full flex justify-center">
           {isBulkMode && (
             <div className={`flex ${isRtl ? 'flex-row-reverse' : ''} items-center gap-3 mb-4 p-4 premium-card bg-gradient-to-r from-primary-50 to-purple-50 dark:from-primary-900/20 dark:to-purple-900/20`}>
               <span className="text-sm font-semibold text-primary-900 dark:text-primary-200">
@@ -599,7 +619,7 @@ export default function TasksPage() {
                     });
                     setSelectedTasks(new Set());
                   }}
-                  disabled={selectedTasks.size === 0 || updateTaskMutation.isPending}
+                  disabled={selectedTasks.size === 0}
                   className="px-3 py-1.5 text-xs font-semibold text-white bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 disabled:opacity-50 rounded-lg shadow-md shadow-green-500/30 hover:shadow-lg hover:shadow-green-500/40 transition-all duration-200"
                 >
                   Mark Complete
@@ -618,7 +638,7 @@ export default function TasksPage() {
                     });
                     setSelectedTasks(new Set());
                   }}
-                  disabled={selectedTasks.size === 0 || updateTaskMutation.isPending}
+                  disabled={selectedTasks.size === 0}
                   className="px-3 py-1.5 text-xs font-semibold text-white bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-700 hover:to-yellow-800 disabled:opacity-50 rounded-lg shadow-md shadow-yellow-500/30 hover:shadow-lg hover:shadow-yellow-500/40 transition-all duration-200"
                 >
                   Mark Incomplete
@@ -638,7 +658,7 @@ export default function TasksPage() {
                     });
                     setSelectedTasks(new Set());
                   }}
-                  disabled={selectedTasks.size === 0 || deleteTaskMutation.isPending || isFinishedList}
+                  disabled={selectedTasks.size === 0 || isFinishedList}
                   className="px-3 py-1.5 text-xs font-semibold text-white bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 disabled:opacity-50 rounded-lg shadow-md shadow-red-500/30 hover:shadow-lg hover:shadow-red-500/40 transition-all duration-200"
                 >
                   {t('tasks.deleteSelected')}
@@ -657,18 +677,18 @@ export default function TasksPage() {
             </div>
           )}
           {isEditingListName ? (
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2 items-center">
               <input
                 value={listNameDraft}
                 onChange={(e) => setListNameDraft(e.target.value)}
                 aria-label="Edit list name"
                 className="w-full max-w-xl rounded-md border border-gray-300 dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a] text-gray-900 dark:text-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               />
-              <div className="flex gap-2">
+              <div className="flex gap-2 justify-center">
                 <button
                   type="button"
                   disabled={
-                    updateListMutation.isPending || !list || !listNameDraft.trim()
+                    !list || !listNameDraft.trim()
                   }
                   onClick={() => {
                     if (!list) return;
@@ -700,7 +720,7 @@ export default function TasksPage() {
             </div>
           ) : (
             <h1
-              className="text-4xl font-bold gradient-text truncate cursor-text hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200"
+              className="text-4xl font-bold gradient-text text-center cursor-text hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200"
               title={t('tasks.renameTitle')}
               onClick={() => {
                 if (!list) return;
@@ -725,8 +745,8 @@ export default function TasksPage() {
           )}
         </div>
 
-        <div className={`flex ${isRtl ? 'flex-row-reverse' : ''} items-center gap-3`}>
-          {!isBulkMode && (
+        {!isBulkMode && (
+          <div className={`flex ${isRtl ? 'flex-row-reverse' : ''} items-center justify-center gap-3 mt-4`}>
             <button
               type="button"
               onClick={() => setIsBulkMode(true)}
@@ -735,24 +755,8 @@ export default function TasksPage() {
             >
               {t('tasks.selectMultiple')}
             </button>
-          )}
-          {list && !list.isSystem && (
-            <button
-              type="button"
-              disabled={deleteListMutation.isPending}
-              onClick={() => {
-                const ok = window.confirm(
-                  t('tasks.deleteListConfirm', { name: list.name }),
-                );
-                if (!ok) return;
-                deleteListMutation.mutate({ id: list.id });
-              }}
-              className="inline-flex justify-center rounded-xl glass-card px-5 py-2.5 text-sm font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
-            >
-              {t('tasks.deleteList')}
-            </button>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       {showCreate && (
@@ -839,25 +843,36 @@ export default function TasksPage() {
                   });
                 }}
                 onDelete={() => {
-                  const ok = window.confirm(
+                  // Apply optimistic update immediately, then show confirmation
+                  // This ensures UI updates even if user cancels
+                  const shouldDelete = window.confirm(
                     t('tasks.deleteTaskConfirm', { description: task.description }),
                   );
-                  if (!ok) return;
-                  deleteTaskMutation.mutate({ id: task.id });
+                  if (!shouldDelete) return;
+                  
+                  // Queue the mutation asynchronously - UI already updated optimistically
+                  // Use setTimeout(0) to yield to event loop immediately
+                  setTimeout(() => {
+                    deleteTaskMutation.mutate({ id: task.id });
+                  }, 0);
                 }}
                 onRestore={() => {
-                  const ok = window.confirm(
+                  const shouldRestore = window.confirm(
                     t('tasks.restoreConfirm', { description: task.description }),
                   );
-                  if (!ok) return;
-                  restoreTaskMutation.mutate({ id: task.id });
+                  if (!shouldRestore) return;
+                  setTimeout(() => {
+                    restoreTaskMutation.mutate({ id: task.id });
+                  }, 0);
                 }}
                 onPermanentDelete={() => {
-                  const ok = window.confirm(
+                  const shouldDelete = window.confirm(
                     t('tasks.deleteForeverConfirm', { description: task.description }),
                   );
-                  if (!ok) return;
-                  permanentDeleteTaskMutation.mutate({ id: task.id });
+                  if (!shouldDelete) return;
+                  setTimeout(() => {
+                    permanentDeleteTaskMutation.mutate({ id: task.id });
+                  }, 0);
                 }}
                 onClick={() => {
                   if (isBulkMode) {
@@ -933,16 +948,13 @@ export default function TasksPage() {
                         <input
                           type="checkbox"
                           checked={task.completed}
-                          disabled={
-                            updateTaskMutation.isPending &&
-                            updateTaskMutation.variables?.id === task.id
-                          }
                           onPointerDown={(e) => e.stopPropagation()}
                           onMouseDown={(e) => e.stopPropagation()}
                           onClick={(e) => e.stopPropagation()}
                           onKeyDown={(e) => e.stopPropagation()}
                           onChange={(e) => {
                             e.stopPropagation();
+                            // Allow rapid toggling - optimistic updates handle UI immediately
                             updateTaskMutation.mutate({
                               id: task.id,
                               data: { completed: !task.completed },
@@ -974,13 +986,15 @@ export default function TasksPage() {
                             type="button"
                             onClick={(e) => {
                               e.stopPropagation();
-                              const ok = window.confirm(
+                              const shouldRestore = window.confirm(
                                 t('tasks.restoreConfirm', { description: task.description }),
                               );
-                              if (!ok) return;
-                              restoreTaskMutation.mutate({ id: task.id });
+                              if (!shouldRestore) return;
+                              setTimeout(() => {
+                                restoreTaskMutation.mutate({ id: task.id });
+                              }, 0);
                             }}
-                            disabled={restoreTaskMutation.isPending}
+                            disabled={false}
                             className="inline-flex justify-center rounded-xl bg-gradient-to-r from-primary-600 to-purple-600 px-4 py-2.5 text-sm font-semibold text-white hover:from-primary-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-primary-500/30 hover:shadow-xl hover:shadow-primary-500/40 transition-all duration-200"
                           >
                             {t('tasks.restore')}
@@ -989,13 +1003,15 @@ export default function TasksPage() {
                             type="button"
                             onClick={(e) => {
                               e.stopPropagation();
-                              const ok = window.confirm(
+                              const shouldDelete = window.confirm(
                                 t('tasks.deleteForeverConfirm', { description: task.description }),
                               );
-                              if (!ok) return;
-                              permanentDeleteTaskMutation.mutate({ id: task.id });
+                              if (!shouldDelete) return;
+                              setTimeout(() => {
+                                permanentDeleteTaskMutation.mutate({ id: task.id });
+                              }, 0);
                             }}
-                            disabled={permanentDeleteTaskMutation.isPending}
+                            disabled={false}
                             className="inline-flex justify-center rounded-xl bg-gradient-to-r from-red-600 to-red-700 px-4 py-2.5 text-sm font-semibold text-white hover:from-red-700 hover:to-red-800 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-red-500/30 hover:shadow-xl hover:shadow-red-500/40 transition-all duration-200"
                           >
                             {t('tasks.deleteForever')}
@@ -1006,13 +1022,17 @@ export default function TasksPage() {
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
-                            const ok = window.confirm(
+                            const shouldDelete = window.confirm(
                               t('tasks.deleteTaskConfirm', { description: task.description }),
                             );
-                            if (!ok) return;
-                            deleteTaskMutation.mutate({ id: task.id });
+                            if (!shouldDelete) return;
+                            
+                            // Queue asynchronously to prevent blocking
+                            setTimeout(() => {
+                              deleteTaskMutation.mutate({ id: task.id });
+                            }, 0);
                           }}
-                          disabled={deleteTaskMutation.isPending}
+                          disabled={false}
                           className="inline-flex justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           {t('common.delete')}

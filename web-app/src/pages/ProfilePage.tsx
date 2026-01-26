@@ -23,7 +23,7 @@ export default function ProfilePage() {
       if (!user) throw new Error('User not found');
       return usersService.uploadAvatar(user.id, file);
     },
-    onSuccess: async (updatedUser) => {
+    onSuccess: (updatedUser) => {
       toast.success(t('profile.pictureUpdated'));
       setFilePreview(null);
       // Reset file input
@@ -82,7 +82,7 @@ export default function ProfilePage() {
 
   return (
     <div className="animate-fade-in">
-      <h1 className="text-4xl font-bold gradient-text mb-8">{t('profile.title')}</h1>
+      <h1 className="text-4xl font-bold gradient-text mb-8 text-center">{t('profile.title')}</h1>
 
       <div className="premium-card p-8 mb-6">
         <div className="space-y-4">

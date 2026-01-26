@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQueuedMutation } from '../hooks/useQueuedMutation';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -102,12 +103,13 @@ export default function TaskDetailsPage() {
     if (task) setTaskDescriptionDraft(task.description);
   }, [task]);
 
-  const invalidateTask = async (t: Task) => {
-    await queryClient.invalidateQueries({ queryKey: ['task', t.id] });
-    await queryClient.invalidateQueries({ queryKey: ['tasks', t.todoListId] });
+  const invalidateTask = (t: Task) => {
+    // Non-blocking invalidations - don't await
+    queryClient.invalidateQueries({ queryKey: ['task', t.id] });
+    queryClient.invalidateQueries({ queryKey: ['tasks', t.todoListId] });
   };
 
-  const updateTaskMutation = useMutation<
+  const updateTaskMutation = useQueuedMutation<
     Task,
     ApiError,
     { id: number; data: UpdateTaskDto },
@@ -115,8 +117,9 @@ export default function TaskDetailsPage() {
   >({
     mutationFn: ({ id, data }) =>
       tasksService.updateTask(id, data),
-    onMutate: async ({ id, data }) => {
-      await queryClient.cancelQueries({ queryKey: ['task', id] });
+    onMutate: ({ id, data }) => {
+      // Cancel only to prevent race conditions, but don't block
+      // Removed cancelQueries to allow parallel mutations
 
       const previousTask = queryClient.getQueryData<Task>(['task', id]);
       const todoListId = previousTask?.todoListId;
@@ -155,16 +158,17 @@ export default function TaskDetailsPage() {
       }
       handleApiError(err, t('taskDetails.updateTaskFailed', { defaultValue: 'Failed to update task. Please try again.' }));
     },
-    onSettled: async (_data, _err, vars) => {
-      await queryClient.invalidateQueries({ queryKey: ['task', vars.id] });
+    onSettled: (_data, _err, vars) => {
+      // Non-blocking invalidations - don't await
+      queryClient.invalidateQueries({ queryKey: ['task', vars.id] });
       const current = queryClient.getQueryData<Task>(['task', vars.id]);
       if (current?.todoListId) {
-        await queryClient.invalidateQueries({ queryKey: ['tasks', current.todoListId] });
+        queryClient.invalidateQueries({ queryKey: ['tasks', current.todoListId] });
       }
     },
   });
 
-  const updateStepMutation = useMutation<
+  const updateStepMutation = useQueuedMutation<
     Step,
     ApiError,
     { task: Task; stepId: number; data: UpdateStepDto },
@@ -172,7 +176,7 @@ export default function TaskDetailsPage() {
   >({
     mutationFn: ({ stepId, data }) => stepsService.updateStep(stepId, data),
     onMutate: async (vars) => {
-      await queryClient.cancelQueries({ queryKey: ['task', vars.task.id] });
+      // Removed cancelQueries to allow parallel mutations
 
       const previousTask = queryClient.getQueryData<Task>(['task', vars.task.id]);
       const previousTasks = queryClient.getQueryData<Task[]>([
@@ -207,8 +211,9 @@ export default function TaskDetailsPage() {
       }
       handleApiError(err, t('taskDetails.updateStepFailed', { defaultValue: 'Failed to update step. Please try again.' }));
     },
-    onSettled: async (_data, _err, vars) => {
-      await invalidateTask(vars.task);
+    onSettled: (_data, _err, vars) => {
+      // Non-blocking invalidation - don't await
+      invalidateTask(vars.task);
     },
   });
 
@@ -220,7 +225,7 @@ export default function TaskDetailsPage() {
   >({
     mutationFn: ({ task, data }) => stepsService.createStep(task.id, data),
     onMutate: async (vars) => {
-      await queryClient.cancelQueries({ queryKey: ['task', vars.task.id] });
+      // Removed cancelQueries to allow parallel mutations
 
       const previousTask = queryClient.getQueryData<Task>(['task', vars.task.id]);
 
@@ -260,12 +265,13 @@ export default function TaskDetailsPage() {
       // ensure list view reflects steps count if needed
       queryClient.invalidateQueries({ queryKey: ['tasks', vars.task.todoListId] });
     },
-    onSettled: async (_data, _err, vars) => {
-      await invalidateTask(vars.task);
+    onSettled: (_data, _err, vars) => {
+      // Non-blocking invalidation - don't await
+      invalidateTask(vars.task);
     },
   });
 
-  const deleteStepMutation = useMutation<
+  const deleteStepMutation = useQueuedMutation<
     Step,
     ApiError,
     { task: Task; id: number },
@@ -273,7 +279,7 @@ export default function TaskDetailsPage() {
   >({
     mutationFn: ({ id }) => stepsService.deleteStep(id),
     onMutate: async (vars) => {
-      await queryClient.cancelQueries({ queryKey: ['task', vars.task.id] });
+      // Removed cancelQueries to allow parallel mutations
       const previousTask = queryClient.getQueryData<Task>(['task', vars.task.id]);
 
       if (previousTask) {
@@ -295,8 +301,9 @@ export default function TaskDetailsPage() {
     onSuccess: () => {
       toast.success(t('taskDetails.stepDeleted'));
     },
-    onSettled: async (_data, _err, vars) => {
-      await invalidateTask(vars.task);
+    onSettled: (_data, _err, vars) => {
+      // Non-blocking invalidation - don't await
+      invalidateTask(vars.task);
     },
   });
 
@@ -305,23 +312,24 @@ export default function TaskDetailsPage() {
       ? numericTaskId
       : null;
 
-  const restoreTaskMutation = useMutation<Task, ApiError, { id: number }>({
+  const restoreTaskMutation = useQueuedMutation<Task, ApiError, { id: number }>({
     mutationFn: ({ id }) => tasksService.restoreTask(id),
     onError: (err) => {
       handleApiError(err, t('tasks.restoreFailed', { defaultValue: 'Failed to restore task. Please try again.' }));
     },
-    onSuccess: async (restored) => {
+    onSuccess: (restored) => {
       toast.success(t('tasks.restored'));
 
+      // Non-blocking invalidations - don't await
       if (typeof safeTaskId === 'number') {
-        await queryClient.invalidateQueries({ queryKey: ['task', safeTaskId] });
+        queryClient.invalidateQueries({ queryKey: ['task', safeTaskId] });
       }
       if (typeof restored.todoListId === 'number') {
-        await queryClient.invalidateQueries({
+        queryClient.invalidateQueries({
           queryKey: ['tasks', restored.todoListId],
         });
       } else {
-        await queryClient.invalidateQueries({ queryKey: ['tasks'] });
+        queryClient.invalidateQueries({ queryKey: ['tasks'] });
       }
 
       // Navigate to the list the task returned to.
@@ -333,18 +341,19 @@ export default function TaskDetailsPage() {
     },
   });
 
-  const permanentDeleteTaskMutation = useMutation<Task, ApiError, { id: number }>({
+  const permanentDeleteTaskMutation = useQueuedMutation<Task, ApiError, { id: number }>({
     mutationFn: ({ id }) => tasksService.permanentDeleteTask(id),
     onError: (err) => {
       handleApiError(err, t('tasks.deleteForeverFailed', { defaultValue: 'Failed to permanently delete task. Please try again.' }));
     },
-    onSuccess: async () => {
+    onSuccess: () => {
       toast.success(t('tasks.deletedForever'));
 
+      // Non-blocking invalidations - don't await
       if (typeof safeTaskId === 'number') {
-        await queryClient.invalidateQueries({ queryKey: ['task', safeTaskId] });
+        queryClient.invalidateQueries({ queryKey: ['task', safeTaskId] });
       }
-      await queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
 
       navigate('/lists');
     },
@@ -449,7 +458,7 @@ export default function TaskDetailsPage() {
                 <div className="flex gap-2">
                   <button
                     type="button"
-                    disabled={updateTaskMutation.isPending || !taskDescriptionDraft.trim()}
+                    disabled={!taskDescriptionDraft.trim()}
                     onClick={() => {
                       updateTaskMutation.mutate(
                         {
@@ -498,7 +507,7 @@ export default function TaskDetailsPage() {
             <div className="flex gap-2">
               <button
                 type="button"
-                disabled={restoreTaskMutation.isPending}
+                disabled={false}
                 onClick={() => {
                   const ok = window.confirm(
                     t('tasks.restoreConfirm', { description: task.description }),
@@ -512,7 +521,7 @@ export default function TaskDetailsPage() {
               </button>
               <button
                 type="button"
-                disabled={permanentDeleteTaskMutation.isPending}
+                disabled={false}
                 onClick={() => {
                   const ok = window.confirm(
                     t('tasks.deleteForeverConfirm', { description: task.description }),
@@ -641,7 +650,7 @@ export default function TaskDetailsPage() {
                     <div className="flex gap-2">
                       <button
                         type="button"
-                        disabled={updateStepMutation.isPending || !stepDescriptionDraft.trim()}
+                        disabled={!stepDescriptionDraft.trim()}
                         onClick={() => {
                           updateStepMutation.mutate(
                             {
@@ -676,7 +685,7 @@ export default function TaskDetailsPage() {
                   ) : (
                     <button
                       type="button"
-                      disabled={deleteStepMutation.isPending}
+                      disabled={false}
                       onClick={() => {
                         const ok = window.confirm(
                           t('taskDetails.deleteStepConfirm', { description: step.description }),

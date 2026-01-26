@@ -62,8 +62,8 @@ export default function ListsPage() {
     { previousLists?: ToDoList[] }
   >({
     mutationFn: (data) => listsService.createList(data),
-    onMutate: async (data) => {
-      await queryClient.cancelQueries({ queryKey: ['lists'] });
+    onMutate: (data) => {
+      // Removed cancelQueries to allow parallel mutations
 
       const previousLists = queryClient.getQueryData<ToDoList[]>(['lists']);
       const now = new Date().toISOString();
@@ -99,8 +99,9 @@ export default function ListsPage() {
       setNewListName('');
       setShowCreate(false);
     },
-    onSettled: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['lists'] });
+    onSettled: () => {
+      // Non-blocking invalidation - don't await
+      queryClient.invalidateQueries({ queryKey: ['lists'] });
     },
   });
 
@@ -194,8 +195,8 @@ export default function ListsPage() {
 
   return (
     <div className="animate-fade-in">
-      <div className="flex justify-between items-center mb-8 gap-3">
-        <h1 className="text-4xl font-bold gradient-text">{t('lists.title')}</h1>
+      <div className="flex justify-center items-center mb-8 gap-3">
+        <h1 className="text-4xl font-bold gradient-text text-center">{t('lists.title')}</h1>
       </div>
 
       {showCreate && (
@@ -258,24 +259,16 @@ export default function ListsPage() {
             className="premium-card p-6 group animate-fade-in"
             style={{ animationDelay: `${index * 50}ms` }}
           >
-            <div className="flex items-start justify-between">
+            <div className="flex flex-col items-center justify-center text-center">
               <h3 className="text-xl font-bold text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors duration-200">
                 {list.name}
               </h3>
-              <svg
-                className="w-5 h-5 text-gray-400 group-hover:text-primary-500 transform group-hover:translate-x-1 transition-all duration-200"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
+              {list.tasks && list.tasks.length > 0 && (
+                <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                  {list.tasks.length} {list.tasks.length === 1 ? 'task' : 'tasks'}
+                </p>
+              )}
             </div>
-            {list.tasks && list.tasks.length > 0 && (
-              <p className="mt-3 text-sm text-gray-500 dark:text-gray-400">
-                {list.tasks.length} {list.tasks.length === 1 ? 'task' : 'tasks'}
-              </p>
-            )}
           </Link>
         ))}
       </div>
