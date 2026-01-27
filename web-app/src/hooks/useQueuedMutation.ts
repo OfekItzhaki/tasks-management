@@ -30,7 +30,7 @@ export function useQueuedMutation<
       let context: TContext | undefined;
       if (options.onMutate) {
         try {
-          const result = options.onMutate(variables);
+          const result = (options.onMutate as (v: TVariables) => TContext | Promise<TContext>)(variables);
           // Handle both sync and async onMutate
           if (result && typeof result === 'object' && 'then' in result) {
             // It's a promise - resolve it but don't wait
@@ -45,8 +45,7 @@ export function useQueuedMutation<
             context = result as TContext;
           }
         } catch (error) {
-          // If onMutate throws, continue anyway
-          if (process.env.NODE_ENV === 'development') {
+          if (import.meta.env.DEV) {
             console.warn('onMutate error:', error);
           }
         }
@@ -71,22 +70,22 @@ export function useQueuedMutation<
           variables,
           {
             ...mutateOptions,
-            onError: (error, vars, ctx) => {
+            onError: (error: TError, vars: TVariables, ctx: TContext | undefined, mutation?: unknown) => {
               const errorContext = ctx ?? context;
-              mutateOptions?.onError?.(error, vars, errorContext);
-              options.onError?.(error, vars, errorContext);
+              (mutateOptions?.onError as ((e: TError, v: TVariables, c: TContext | undefined, m?: unknown) => void) | undefined)?.(error, vars, errorContext, mutation);
+              (options.onError as ((e: TError, v: TVariables, c: TContext | undefined, m?: unknown) => void) | undefined)?.(error, vars, errorContext, mutation);
               pendingRef.current.delete(mutationKey);
             },
-            onSuccess: (data, vars, ctx) => {
+            onSuccess: (data: TData, vars: TVariables, ctx: TContext | undefined, mutation?: unknown) => {
               const successContext = ctx ?? context;
-              mutateOptions?.onSuccess?.(data, vars, successContext);
-              options.onSuccess?.(data, vars, successContext);
+              (mutateOptions?.onSuccess as ((d: TData, v: TVariables, c: TContext | undefined, m?: unknown) => void) | undefined)?.(data, vars, successContext, mutation);
+              (options.onSuccess as ((d: TData, v: TVariables, c: TContext | undefined, m?: unknown) => void) | undefined)?.(data, vars, successContext, mutation);
               pendingRef.current.delete(mutationKey);
             },
-            onSettled: (data, error, vars, ctx) => {
+            onSettled: (data: TData | undefined, error: TError | null, vars: TVariables, ctx: TContext | undefined, mutation?: unknown) => {
               const settledContext = ctx ?? context;
-              mutateOptions?.onSettled?.(data, error, vars, settledContext);
-              options.onSettled?.(data, error, vars, settledContext);
+              (mutateOptions?.onSettled as ((d: TData | undefined, e: TError | null, v: TVariables, c: TContext | undefined, m?: unknown) => void) | undefined)?.(data, error, vars, settledContext, mutation);
+              (options.onSettled as ((d: TData | undefined, e: TError | null, v: TVariables, c: TContext | undefined, m?: unknown) => void) | undefined)?.(data, error, vars, settledContext, mutation);
               pendingRef.current.delete(mutationKey);
             },
           }

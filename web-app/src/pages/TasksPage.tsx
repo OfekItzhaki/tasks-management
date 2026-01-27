@@ -259,6 +259,7 @@ export default function TasksPage() {
         id: tempId,
         description: data.description,
         completed: false,
+        completedAt: null,
         todoListId: numericListId,
         order: Date.now(),
         dueDate: null,

@@ -20,7 +20,6 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
   ResponsiveContainer,
 } from 'recharts';
 import CalendarHeatmap from '../components/CalendarHeatmap';
@@ -47,51 +46,6 @@ export default function AnalysisPage() {
 
   const isLoading = listsLoading || tasksLoading;
   const hasError = listsError || tasksError;
-
-  if (hasError && !isLoading) {
-    return (
-      <div className={`space-y-6 ${isRtl ? 'rtl' : ''}`} dir={isRtl ? 'rtl' : 'ltr'}>
-        <div className="mb-6">
-          <Link
-            to="/lists"
-            className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 text-sm font-medium"
-          >
-            {t('tasks.backToLists', { defaultValue: '← Back to Lists' })}
-          </Link>
-        </div>
-        <h1 className={`premium-header-main ${isRtl ? 'text-right' : 'text-left'}`}>
-          {t('analysis.title', { defaultValue: 'Task Analysis' })}
-        </h1>
-        <div className="rounded-md bg-red-50 dark:bg-red-900/20 p-4">
-          <div className={`text-sm text-red-800 dark:text-red-200 mb-3 ${isRtl ? 'text-right' : 'text-left'}`}>
-            {listsError
-              ? `${t('analysis.loadListsFailed', { defaultValue: 'Failed to load lists' })}: ${listsErrorObj?.message || t('common.unknownError', { defaultValue: 'Unknown error' })}`
-              : tasksError
-              ? `${t('analysis.loadTasksFailed', { defaultValue: 'Failed to load tasks' })}: ${tasksErrorObj?.message || t('common.unknownError', { defaultValue: 'Unknown error' })}`
-              : t('common.errorOccurred', { defaultValue: 'An error occurred' })}
-          </div>
-          <div className={`flex gap-3 ${isRtl ? 'flex-row-reverse' : ''}`}>
-            {listsError && (
-              <button
-                onClick={() => refetchLists()}
-                className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-md transition-colors"
-              >
-                {t('analysis.retryLists', { defaultValue: 'Retry Lists' })}
-              </button>
-            )}
-            {tasksError && (
-              <button
-                onClick={() => refetchTasks()}
-                className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-md transition-colors"
-              >
-                {t('analysis.retryTasks', { defaultValue: 'Retry Tasks' })}
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   const completedTasks = allTasks.filter((task) => task.completed);
   const pendingTasks = allTasks.filter((task) => !task.completed);
@@ -154,8 +108,8 @@ export default function AnalysisPage() {
     allTasks.forEach((task) => {
       if (task.completed && task.completedAt) {
         const completionDate = new Date(task.completedAt);
-        const dateKey = completionDate.toISOString().split('T')[0]; // YYYY-MM-DD
-        completionMap.set(dateKey, (completionMap.get(dateKey) || 0) + 1);
+        const key = completionDate.toISOString().split('T')[0];
+        completionMap.set(key, (completionMap.get(key) || 0) + 1);
       }
     });
     
@@ -174,11 +128,10 @@ export default function AnalysisPage() {
     let streak = 0;
     
     // Check backwards from today
-    for (let i = 0; i < 365; i++) { // Check up to a year back
+    for (let i = 0; i < 365; i++) {
       const checkDate = new Date(today);
       checkDate.setDate(checkDate.getDate() - i);
-      const dateKey = checkDate.toISOString().split('T')[0];
-      
+
       // Check if all daily tasks were completed on this date
       const tasksCompletedOnDate = dailyTasks.filter((task) => {
         if (!task.completed || !task.completedAt) return false;
@@ -234,8 +187,52 @@ export default function AnalysisPage() {
     }
     
     return trends;
-  }, [allTasks]);
+  }, [allTasks, i18n.language]);
 
+  if (hasError && !isLoading) {
+    return (
+      <div className={`space-y-6 ${isRtl ? 'rtl' : ''}`} dir={isRtl ? 'rtl' : 'ltr'}>
+        <div className="mb-6">
+          <Link
+            to="/lists"
+            className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 text-sm font-medium"
+          >
+            {t('tasks.backToLists', { defaultValue: '← Back to Lists' })}
+          </Link>
+        </div>
+        <h1 className={`premium-header-main ${isRtl ? 'text-right' : 'text-left'}`}>
+          {t('analysis.title', { defaultValue: 'Task Analysis' })}
+        </h1>
+        <div className="rounded-md bg-red-50 dark:bg-red-900/20 p-4">
+          <div className={`text-sm text-red-800 dark:text-red-200 mb-3 ${isRtl ? 'text-right' : 'text-left'}`}>
+            {listsError
+              ? `${t('analysis.loadListsFailed', { defaultValue: 'Failed to load lists' })}: ${listsErrorObj?.message || t('common.unknownError', { defaultValue: 'Unknown error' })}`
+              : tasksError
+              ? `${t('analysis.loadTasksFailed', { defaultValue: 'Failed to load tasks' })}: ${tasksErrorObj?.message || t('common.unknownError', { defaultValue: 'Unknown error' })}`
+              : t('common.errorOccurred', { defaultValue: 'An error occurred' })}
+          </div>
+          <div className={`flex gap-3 ${isRtl ? 'flex-row-reverse' : ''}`}>
+            {listsError && (
+              <button
+                onClick={() => refetchLists()}
+                className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-md transition-colors"
+              >
+                {t('analysis.retryLists', { defaultValue: 'Retry Lists' })}
+              </button>
+            )}
+            {tasksError && (
+              <button
+                onClick={() => refetchTasks()}
+                className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-md transition-colors"
+              >
+                {t('analysis.retryTasks', { defaultValue: 'Retry Tasks' })}
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (

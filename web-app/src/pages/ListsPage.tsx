@@ -1,7 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import toast from 'react-hot-toast';
 import { listsService } from '../services/lists.service';
 import { tasksService } from '../services/tasks.service';
 import { ToDoList, ApiError, ListType } from '@tasks-management/frontend-services';
@@ -108,23 +107,22 @@ export default function ListsPage() {
   // Consolidated prefetch handler - prevents duplicate API calls
   const handlePrefetch = useCallback(
     (listId: number) => {
-      // Only prefetch if not already in cache or stale
-      const tasksQuery = queryClient.getQueryState(['tasks', listId]);
-      const listQuery = queryClient.getQueryState(['list', listId]);
+      const tasksData = queryClient.getQueryData(['tasks', listId]);
+      const listData = queryClient.getQueryData(['list', listId]);
 
-      if (!tasksQuery?.data || tasksQuery.isStale) {
+      if (!tasksData) {
         void queryClient.prefetchQuery({
           queryKey: ['tasks', listId],
           queryFn: () => tasksService.getTasksByList(listId),
-          staleTime: 2 * 60 * 1000, // 2 minutes
+          staleTime: 2 * 60 * 1000,
         });
       }
 
-      if (!listQuery?.data || listQuery.isStale) {
+      if (!listData) {
         void queryClient.prefetchQuery({
           queryKey: ['list', listId],
           queryFn: () => listsService.getListById(listId),
-          staleTime: 5 * 60 * 1000, // 5 minutes
+          staleTime: 5 * 60 * 1000,
         });
       }
     },

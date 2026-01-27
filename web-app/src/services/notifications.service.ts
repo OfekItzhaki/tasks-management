@@ -1,4 +1,9 @@
-import { ReminderConfig, ReminderTimeframe, ReminderSpecificDate } from '../utils/reminderHelpers';
+import {
+  type ReminderConfig,
+  ReminderTimeframe,
+  ReminderSpecificDate,
+  convertBackendToReminders,
+} from '@tasks-management/frontend-services';
 
 /**
  * Web Notifications Service
@@ -6,7 +11,7 @@ import { ReminderConfig, ReminderTimeframe, ReminderSpecificDate } from '../util
  */
 
 // Store scheduled notification timeouts
-const scheduledNotifications = new Map<string, NodeJS.Timeout>();
+const scheduledNotifications = new Map<string, ReturnType<typeof setTimeout>>();
 
 /**
  * Check if browser supports notifications
@@ -30,7 +35,7 @@ export function getNotificationPermission(): NotificationPermission {
  */
 export async function requestNotificationPermissions(): Promise<boolean> {
   if (!isNotificationSupported()) {
-    if (process.env.NODE_ENV === 'development') {
+    if (import.meta.env.DEV) {
       console.warn('Notifications are not supported in this browser');
     }
     return false;
@@ -41,7 +46,7 @@ export async function requestNotificationPermissions(): Promise<boolean> {
   }
 
   if (Notification.permission === 'denied') {
-    if (process.env.NODE_ENV === 'development') {
+    if (import.meta.env.DEV) {
       console.warn('Notification permission was denied. Please enable it in browser settings.');
     }
     return false;
@@ -133,22 +138,19 @@ function formatNotificationBody(
   dueDate: Date | string | null,
 ): string {
   const parts: string[] = [];
-  
-  // Add location if available (for now, we don't have location field, but structure is ready)
-  // If location exists in future: parts.push(`📍 ${location}`);
-  
-  // Add time information
+
+  if (reminder.location?.trim()) {
+    parts.push(`📍 ${reminder.location.trim()}`);
+  }
+
   const timeStr = reminder.time || '09:00';
   const timeParts = timeStr.split(':');
   const hours = parseInt(timeParts[0] || '9', 10);
   const minutes = parseInt(timeParts[1] || '0', 10);
   const timeFormatted = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-  
-  // Build the message
-  let message = `"${taskDescription}"`;
-  
-  // Add time
   parts.push(`🕐 ${timeFormatted}`);
+
+  let message = `"${taskDescription}"`;
   
   // Add due date info if available
   if (reminder.daysBefore !== undefined && reminder.daysBefore >= 0 && dueDate) {
@@ -191,8 +193,8 @@ export async function showNotification(
 
   try {
     const notification = new Notification(title, {
-      icon: '/favicon.ico',
-      badge: '/favicon.ico',
+      icon: '/favicon.svg',
+      badge: '/favicon.svg',
       ...options,
     });
 
@@ -207,10 +209,31 @@ export async function showNotification(
       }
     };
   } catch (error) {
-    if (process.env.NODE_ENV === 'development') {
+    if (import.meta.env.DEV) {
       console.error('Error showing notification:', error);
     }
   }
+}
+
+/**
+ * Trigger a test notification (dev-only). Use to verify permissions and delivery.
+ * In dev, call from console: window.__tasksTestNotification?.()
+ */
+export async function triggerTestNotification(): Promise<boolean> {
+  if (!import.meta.env.DEV) {
+    return false;
+  }
+  const ok = await requestNotificationPermissions();
+  if (!ok) {
+    console.warn('[Notifications] Test skipped: permission not granted.');
+    return false;
+  }
+  await showNotification('Tasks test notification', {
+    body: 'If you see this, reminders should work. Try a custom reminder in a few minutes.',
+    tag: 'test-notification',
+  });
+  console.log('[Notifications] Test notification sent.');
+  return true;
 }
 
 /**
@@ -223,11 +246,17 @@ export async function scheduleReminderNotification(
   dueDate: Date | string | null,
 ): Promise<string | null> {
   if (!isNotificationSupported()) {
+    if (import.meta.env.DEV) {
+      console.warn('[Notifications] Skipped: browser does not support notifications.');
+    }
     return null;
   }
 
   const permission = await requestNotificationPermissions();
   if (!permission) {
+    if (import.meta.env.DEV) {
+      console.warn('[Notifications] Skipped: permission not granted. Enable in browser settings.');
+    }
     return null;
   }
 
@@ -274,16 +303,15 @@ export async function scheduleReminderNotification(
       
       isRecurring = true;
     } else {
-      // One-time notification
+      // One-time notification (including custom date)
       scheduleDate = calculateNotificationDate(reminder, dueDate);
       if (!scheduleDate) {
+        if (import.meta.env.DEV) {
+          console.warn('[Notifications] Skipped scheduling: no date for reminder', reminder.id, reminder);
+        }
         return null;
       }
-      
-      // Don't schedule if the date is in the past
-      if (scheduleDate < new Date() && reminder.timeframe !== ReminderTimeframe.EVERY_MONTH && reminder.timeframe !== ReminderTimeframe.EVERY_YEAR) {
-        return null;
-      }
+      // If in the past: we fall through to delay <= 0 and show immediately (don't skip)
     }
 
     if (!scheduleDate) {
@@ -294,18 +322,18 @@ export async function scheduleReminderNotification(
     const delay = scheduleDate.getTime() - Date.now();
 
     if (delay <= 0) {
-      // Show immediately if time has passed
+      // Show immediately if time has passed (e.g. custom "in a few minutes" that became past)
+      if (import.meta.env.DEV) {
+        console.log('[Notifications] Firing immediately (past or due now)', notificationId, 'task', taskId, 'reminder', reminder.id);
+      }
       await showNotification(taskDescription, {
         body: formatNotificationBody(taskDescription, reminder, dueDate),
         tag: notificationId,
         data: { taskId, reminderId: reminder.id },
       });
-      
-      // If recurring, schedule next occurrence
       if (isRecurring) {
         scheduleNextRecurringNotification(taskId, taskDescription, reminder, dueDate, notificationId);
       }
-      
       return notificationId;
     }
 
@@ -325,13 +353,13 @@ export async function scheduleReminderNotification(
 
     scheduledNotifications.set(notificationId, timeoutId);
 
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`Scheduled notification ${notificationId} for task ${taskId} at ${scheduleDate.toISOString()}`);
+    if (import.meta.env.DEV) {
+      console.log('[Notifications] Scheduled', notificationId, 'for task', taskId, 'at', scheduleDate.toISOString(), 'in', Math.round(delay / 1000), 's');
     }
 
     return notificationId;
   } catch (error) {
-    if (process.env.NODE_ENV === 'development') {
+    if (import.meta.env.DEV) {
       console.error('Error scheduling notification:', error);
     }
     return null;
@@ -445,7 +473,7 @@ export async function rescheduleAllReminders(
     dueDate: string | null;
     reminderDaysBefore: number[];
     specificDayOfWeek: number | null;
-    reminderConfig?: any;
+    reminderConfig?: unknown;
   }>,
 ): Promise<void> {
   // Clear all existing scheduled notifications
@@ -453,9 +481,6 @@ export async function rescheduleAllReminders(
     clearTimeout(timeoutId);
   });
   scheduledNotifications.clear();
-
-  // Import helper function
-  const { convertBackendToReminders } = await import('../utils/reminderHelpers');
 
   let scheduledCount = 0;
 
@@ -487,7 +512,7 @@ export async function rescheduleAllReminders(
     scheduledCount += notificationIds.length;
   }
 
-  if (process.env.NODE_ENV === 'development') {
+  if (import.meta.env.DEV) {
     console.log(`Rescheduled ${scheduledCount} reminders across ${tasks.length} tasks`);
   }
 }

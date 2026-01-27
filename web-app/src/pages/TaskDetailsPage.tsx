@@ -21,10 +21,11 @@ import {
 } from '@tasks-management/frontend-services';
 import { handleApiError, extractErrorMessage } from '../utils/errorHandler';
 import {
-  ReminderConfig,
+  type ReminderConfig,
   convertBackendToReminders,
   convertRemindersToBackend,
-} from '../utils/reminderHelpers';
+} from '@tasks-management/frontend-services';
+import { validateDueDate } from '../utils/dateTimeValidation';
 import {
   scheduleTaskReminders,
   cancelAllTaskNotifications,
@@ -257,15 +258,21 @@ export default function TaskDetailsPage() {
 
     if (!task) return;
 
+    if (editDueDate.trim()) {
+      const dueResult = validateDueDate(editDueDate);
+      if (!dueResult.valid) {
+        toast.error(t('validation.invalidDueDate', { defaultValue: dueResult.error }));
+        return;
+      }
+    }
+
     const updateData: UpdateTaskDto = {
       description: editDescription.trim(),
     };
 
     if (editDueDate.trim()) {
       const date = new Date(editDueDate);
-      if (!isNaN(date.getTime())) {
-        updateData.dueDate = date.toISOString();
-      }
+      updateData.dueDate = date.toISOString();
     } else {
       updateData.dueDate = null;
     }
@@ -396,6 +403,39 @@ export default function TaskDetailsPage() {
       navigate('/lists');
     },
   });
+
+  const handleOpenEdit = useCallback(async () => {
+    if (!numericTaskId) return;
+    try {
+      const freshTask = await queryClient.fetchQuery<Task>({
+        queryKey: ['task', numericTaskId],
+        queryFn: () => tasksService.getTaskById(numericTaskId),
+      });
+      setEditDescription(freshTask.description);
+      setEditDueDate(freshTask.dueDate ? freshTask.dueDate.split('T')[0] : '');
+      const convertedReminders = convertBackendToReminders(
+        freshTask.reminderDaysBefore,
+        freshTask.specificDayOfWeek,
+        freshTask.dueDate || null,
+        freshTask.reminderConfig,
+      );
+      setEditReminders(convertedReminders);
+    } catch {
+      const latestTask = (queryClient.getQueryData<Task>(['task', numericTaskId]) || task) ?? undefined;
+      if (latestTask) {
+        setEditDescription(latestTask.description);
+        setEditDueDate(latestTask.dueDate ? latestTask.dueDate.split('T')[0] : '');
+        const convertedReminders = convertBackendToReminders(
+          latestTask.reminderDaysBefore,
+          latestTask.specificDayOfWeek,
+          latestTask.dueDate || null,
+          latestTask.reminderConfig,
+        );
+        setEditReminders(convertedReminders);
+      }
+    }
+    setIsFullEditMode(true);
+  }, [task, queryClient, numericTaskId]);
 
   if (isLoading) {
     return (
@@ -543,80 +583,7 @@ export default function TaskDetailsPage() {
           </div>
           {!isArchivedTask && (
             <button
-              onClick={useCallback(async () => {
-                // Refetch the task to ensure we have the latest data including reminderConfig
-                if (numericTaskId) {
-                  try {
-                    const freshTask = await queryClient.fetchQuery<Task>({
-                      queryKey: ['task', numericTaskId],
-                      queryFn: () => tasksService.getTaskById(numericTaskId),
-                    });
-                    
-                    setEditDescription(freshTask.description);
-                    setEditDueDate(freshTask.dueDate ? freshTask.dueDate.split('T')[0] : '');
-                    
-                    // Log raw data for debugging
-                    if (import.meta.env.DEV) {
-                      console.log('🔍 Raw task data from server:', {
-                        taskId: freshTask.id,
-                        reminderDaysBefore: freshTask.reminderDaysBefore,
-                        specificDayOfWeek: freshTask.specificDayOfWeek,
-                        reminderConfig: freshTask.reminderConfig,
-                        reminderConfigType: typeof freshTask.reminderConfig,
-                        reminderConfigIsArray: Array.isArray(freshTask.reminderConfig),
-                        reminderConfigRaw: freshTask.reminderConfig,
-                      });
-                    }
-                    
-                    const convertedReminders = convertBackendToReminders(
-                      freshTask.reminderDaysBefore,
-                      freshTask.specificDayOfWeek,
-                      freshTask.dueDate || null,
-                      freshTask.reminderConfig,
-                    );
-                    
-                    // Log conversion result
-                    if (import.meta.env.DEV) {
-                      console.log('🔍 Converted reminders:', {
-                        count: convertedReminders.length,
-                        reminders: convertedReminders,
-                      });
-                    }
-                    
-                    setEditReminders(convertedReminders);
-                  } catch (error) {
-                    // Fallback to cached data on error
-                    // Fallback to cached data
-                    const latestTask = queryClient.getQueryData<Task>(['task', numericTaskId]) || task;
-                    if (latestTask) {
-                      setEditDescription(latestTask.description);
-                      setEditDueDate(latestTask.dueDate ? latestTask.dueDate.split('T')[0] : '');
-                      const convertedReminders = convertBackendToReminders(
-                        latestTask.reminderDaysBefore,
-                        latestTask.specificDayOfWeek,
-                        latestTask.dueDate || null,
-                        latestTask.reminderConfig,
-                      );
-                      setEditReminders(convertedReminders);
-                    }
-                  }
-                } else {
-                  // Fallback if no taskId
-                  const latestTask = queryClient.getQueryData<Task>(['task', numericTaskId]) || task;
-                  if (latestTask) {
-                    setEditDescription(latestTask.description);
-                    setEditDueDate(latestTask.dueDate ? latestTask.dueDate.split('T')[0] : '');
-                    const convertedReminders = convertBackendToReminders(
-                      latestTask.reminderDaysBefore,
-                      latestTask.specificDayOfWeek,
-                      latestTask.dueDate || null,
-                      latestTask.reminderConfig,
-                    );
-                    setEditReminders(convertedReminders);
-                  }
-                }
-                setIsFullEditMode(true);
-              }, [task, queryClient, numericTaskId])}
+              onClick={handleOpenEdit}
               className="glass-button text-sm font-medium"
             >
               {t('common.edit', { defaultValue: 'Edit' })}

@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { LoginDto, ApiError } from '@tasks-management/frontend-services';
-import { handleApiError, extractErrorMessage } from '../utils/errorHandler';
+import { LoginDto } from '@tasks-management/frontend-services';
+import { extractErrorMessage } from '../utils/errorHandler';
 import { useTranslation } from 'react-i18next';
 import { isRtlLanguage } from '@tasks-management/frontend-services';
 

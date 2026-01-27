@@ -6,6 +6,7 @@ import { listsService } from '../services/lists.service';
 import {
   requestNotificationPermissions,
   rescheduleAllReminders,
+  triggerTestNotification,
 } from '../services/notifications.service';
 
 /**
@@ -33,7 +34,6 @@ export function useNotifications() {
   });
 
   // Request notification permissions when user is authenticated (only once)
-  // This effect always runs, but guards against execution when not authenticated
   useEffect(() => {
     if (!isAuthenticated || hasInitialized.current) {
       return;
@@ -41,10 +41,13 @@ export function useNotifications() {
 
     hasInitialized.current = true;
 
-    // Request notification permissions when user is authenticated
     const initializeNotifications = async () => {
       try {
         await requestNotificationPermissions();
+        if (import.meta.env.DEV && typeof window !== 'undefined') {
+          (window as Window & { __tasksTestNotification?: () => Promise<boolean> }).__tasksTestNotification =
+            triggerTestNotification;
+        }
       } catch (error) {
         if (import.meta.env.DEV) {
           console.error('Error requesting notification permissions:', error);
