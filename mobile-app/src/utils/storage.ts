@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { normalizeBooleans } from './normalize';
-import { ReminderConfig, User } from '../types';
+import type { ReminderConfig } from '@tasks-management/frontend-services';
+import type { User } from '../types';
 
 const TOKEN_KEY = '@tasks_management:token';
 const USER_KEY = '@tasks_management:user';

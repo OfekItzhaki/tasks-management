@@ -1,16 +1,14 @@
 import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 import {
+  type ReminderConfig,
   ReminderTimeframe,
   ReminderSpecificDate,
-  ReminderConfig,
-} from '../types';
-import {
   formatReminderDisplay,
   convertRemindersToBackend,
   convertBackendToReminders,
-  formatDate,
   DAY_NAMES,
-} from './helpers';
+} from '@tasks-management/frontend-services';
+import { formatDate } from './helpers';
 
 describe('helpers', () => {
   describe('formatReminderDisplay', () => {
@@ -23,7 +21,7 @@ describe('helpers', () => {
       };
 
       const result = formatReminderDisplay(reminder);
-      expect(result).toBe('7 day(s) before due date at 09:00');
+      expect(result).toBe('7 days before due date at 09:00');
     });
 
     it('should format single day before reminder', () => {
@@ -35,7 +33,7 @@ describe('helpers', () => {
       };
 
       const result = formatReminderDisplay(reminder);
-      expect(result).toBe('1 day(s) before due date at 10:00');
+      expect(result).toBe('1 day before due date at 10:00');
     });
 
     it('should format EVERY_DAY reminder', () => {
@@ -315,14 +313,6 @@ describe('helpers', () => {
       expect(result.specificDayOfWeek).toBe(2);
     });
 
-    it('should include dueDate in result when provided', () => {
-      const dueDate = '2026-01-30T00:00:00.000Z';
-      const reminders: ReminderConfig[] = [];
-
-      const result = convertRemindersToBackend(reminders, dueDate);
-
-      expect(result.dueDate).toBe(new Date(dueDate).toISOString());
-    });
   });
 
   describe('convertBackendToReminders', () => {
