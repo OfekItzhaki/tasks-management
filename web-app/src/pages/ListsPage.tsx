@@ -13,6 +13,8 @@ import { isRtlLanguage } from '@tasks-management/frontend-services';
 import { listFormSchema } from '../validation/schemas';
 import toast from 'react-hot-toast';
 
+const EMPTY_LISTS: ToDoList[] = [];
+
 export default function ListsPage() {
   const { t, i18n } = useTranslation();
   const isRtl = isRtlLanguage(i18n.language);
@@ -21,7 +23,7 @@ export default function ListsPage() {
   const [newListName, setNewListName] = useState('');
 
   const {
-    data: lists = [],
+    data: lists = EMPTY_LISTS,
     isLoading,
     isError,
     error,
@@ -215,7 +217,7 @@ export default function ListsPage() {
         >
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-12 sm:items-end">
             <div className="sm:col-span-10">
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-semibold text-gray-700 dark:text-white mb-2">
                 {t('lists.form.nameLabel')}
               </label>
               <input

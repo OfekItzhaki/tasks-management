@@ -24,17 +24,20 @@ import {
 } from 'recharts';
 import CalendarHeatmap from '../components/CalendarHeatmap';
 
+const EMPTY_LISTS: ToDoList[] = [];
+const EMPTY_TASKS: Task[] = [];
+
 export default function AnalysisPage() {
   const { t, i18n } = useTranslation();
   const { isDark } = useTheme();
   const isRtl = isRtlLanguage(i18n.language);
 
-  const { data: lists = [], isLoading: listsLoading, isError: listsError, error: listsErrorObj, refetch: refetchLists } = useQuery<ToDoList[]>({
+  const { data: lists = EMPTY_LISTS, isLoading: listsLoading, isError: listsError, error: listsErrorObj, refetch: refetchLists } = useQuery<ToDoList[]>({
     queryKey: ['lists'],
     queryFn: () => listsService.getAllLists(),
   });
 
-  const { data: allTasks = [], isLoading: tasksLoading, isError: tasksError, error: tasksErrorObj, refetch: refetchTasks } = useQuery<Task[]>({
+  const { data: allTasks = EMPTY_TASKS, isLoading: tasksLoading, isError: tasksError, error: tasksErrorObj, refetch: refetchTasks } = useQuery<Task[]>({
     queryKey: ['all-tasks'],
     queryFn: async () => {
       const tasksPromises = lists.map((list) => tasksService.getTasksByList(list.id));
@@ -99,11 +102,11 @@ export default function AnalysisPage() {
   const dailyList = lists.find((list) => list.type === 'DAILY');
   const dailyTasks = dailyList ? allTasks.filter((task) => task.todoListId === dailyList.id) : [];
   const allDailyCompleted = dailyTasks.length > 0 && dailyTasks.every((task) => task.completed);
-  
+
   // Calculate daily completions for calendar heatmap
   const dailyCompletions = useMemo(() => {
     const completionMap = new Map<string, number>();
-    
+
     // Process all tasks (not just daily) to show overall activity
     allTasks.forEach((task) => {
       if (task.completed && task.completedAt) {
@@ -112,7 +115,7 @@ export default function AnalysisPage() {
         completionMap.set(key, (completionMap.get(key) || 0) + 1);
       }
     });
-    
+
     return Array.from(completionMap.entries()).map(([date, count]) => ({
       date,
       count,
@@ -122,11 +125,11 @@ export default function AnalysisPage() {
   // Calculate daily streak based on daily tasks completion
   const calculateDailyStreak = () => {
     if (dailyTasks.length === 0) return 0;
-    
+
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     let streak = 0;
-    
+
     // Check backwards from today
     for (let i = 0; i < 365; i++) {
       const checkDate = new Date(today);
@@ -139,7 +142,7 @@ export default function AnalysisPage() {
         completedDate.setHours(0, 0, 0, 0);
         return completedDate.getTime() === checkDate.getTime();
       });
-      
+
       // For today, check if all tasks are currently completed
       if (i === 0) {
         if (allDailyCompleted) {
@@ -158,10 +161,10 @@ export default function AnalysisPage() {
         }
       }
     }
-    
+
     return streak;
   };
-  
+
   const currentStreak = calculateDailyStreak();
 
   // Calculate completion trends for the last 30 days
@@ -169,23 +172,23 @@ export default function AnalysisPage() {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const trends: Array<{ date: string; completions: number; label: string }> = [];
-    
+
     for (let i = 29; i >= 0; i--) {
       const date = new Date(today);
       date.setDate(date.getDate() - i);
       const dateKey = date.toISOString().split('T')[0];
-      
+
       const completionsOnDate = allTasks.filter((task) => {
         if (!task.completed || !task.completedAt) return false;
         const completedDate = new Date(task.completedAt);
         completedDate.setHours(0, 0, 0, 0);
         return completedDate.getTime() === date.getTime();
       }).length;
-      
+
       const label = date.toLocaleDateString(i18n.language === 'he' ? 'he-IL' : 'en-US', { month: 'short', day: 'numeric' });
       trends.push({ date: dateKey, completions: completionsOnDate, label });
     }
-    
+
     return trends;
   }, [allTasks, i18n.language]);
 
@@ -208,8 +211,8 @@ export default function AnalysisPage() {
             {listsError
               ? `${t('analysis.loadListsFailed', { defaultValue: 'Failed to load lists' })}: ${listsErrorObj?.message || t('common.unknownError', { defaultValue: 'Unknown error' })}`
               : tasksError
-              ? `${t('analysis.loadTasksFailed', { defaultValue: 'Failed to load tasks' })}: ${tasksErrorObj?.message || t('common.unknownError', { defaultValue: 'Unknown error' })}`
-              : t('common.errorOccurred', { defaultValue: 'An error occurred' })}
+                ? `${t('analysis.loadTasksFailed', { defaultValue: 'Failed to load tasks' })}: ${tasksErrorObj?.message || t('common.unknownError', { defaultValue: 'Unknown error' })}`
+                : t('common.errorOccurred', { defaultValue: 'An error occurred' })}
           </div>
           <div className={`flex gap-3 ${isRtl ? 'flex-row-reverse' : ''}`}>
             {listsError && (
@@ -377,7 +380,7 @@ export default function AnalysisPage() {
                   fill={isDark ? '#9ca3af' : '#6b7280'}
                   fontSize={11}
                 >
-                  {currentStreak === 1 
+                  {currentStreak === 1
                     ? t('analysis.day', { defaultValue: 'day' })
                     : t('analysis.days', { defaultValue: 'days' })}
                 </text>
@@ -387,13 +390,13 @@ export default function AnalysisPage() {
             <div className={`flex items-center justify-center gap-6 mt-6 ${isRtl ? 'flex-row-reverse' : ''}`}>
               <div className="flex items-center gap-2">
                 <div className="w-4 h-4 rounded" style={{ backgroundColor: '#ef4444' }} />
-                <span className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                <span className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-700 dark:text-gray-200'}`}>
                   {t('analysis.pending', { defaultValue: 'Pending' })}
                 </span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-4 h-4 rounded" style={{ backgroundColor: '#10b981' }} />
-                <span className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                <span className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-700 dark:text-gray-200'}`}>
                   {t('analysis.completed', { defaultValue: 'Completed' })}
                 </span>
               </div>
@@ -435,7 +438,7 @@ export default function AnalysisPage() {
                 height={100}
                 interval={0}
                 stroke={isDark ? '#9ca3af' : '#6b7280'}
-                tick={{ 
+                tick={{
                   fill: isDark ? '#9ca3af' : '#6b7280',
                   fontSize: 10,
                   dy: 8,
@@ -443,13 +446,13 @@ export default function AnalysisPage() {
                 }}
                 tickMargin={8}
               />
-              <YAxis 
-                stroke={isDark ? '#9ca3af' : '#6b7280'} 
+              <YAxis
+                stroke={isDark ? '#9ca3af' : '#6b7280'}
                 style={{ fontSize: '12px' }}
                 width={isRtl ? 50 : undefined}
                 orientation={isRtl ? 'right' : 'left'}
                 allowDecimals={false}
-                tick={{ 
+                tick={{
                   fill: isDark ? '#9ca3af' : '#6b7280',
                   fontSize: 12,
                   dx: isRtl ? 10 : 0
@@ -474,13 +477,13 @@ export default function AnalysisPage() {
           <div className={`flex items-center justify-center gap-6 -mt-4 ${isRtl ? 'flex-row-reverse' : ''}`}>
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 rounded" style={{ backgroundColor: '#ef4444' }} />
-              <span className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+              <span className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-700 dark:text-gray-200'}`}>
                 {t('analysis.pending', { defaultValue: 'Pending' })}
               </span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 rounded" style={{ backgroundColor: '#10b981' }} />
-              <span className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+              <span className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-700 dark:text-gray-200'}`}>
                 {t('analysis.completed', { defaultValue: 'Completed' })}
               </span>
             </div>
@@ -507,7 +510,7 @@ export default function AnalysisPage() {
                 textAnchor={isRtl ? 'start' : 'end'}
                 height={80}
                 interval={completionTrends.length > 10 ? Math.floor(completionTrends.length / 7) : 0}
-                tick={{ 
+                tick={{
                   fill: isDark ? '#9ca3af' : '#6b7280',
                   fontSize: 10,
                   dy: 8,
@@ -515,13 +518,13 @@ export default function AnalysisPage() {
                 }}
                 tickMargin={8}
               />
-              <YAxis 
-                stroke={isDark ? '#9ca3af' : '#6b7280'} 
+              <YAxis
+                stroke={isDark ? '#9ca3af' : '#6b7280'}
                 style={{ fontSize: '12px' }}
                 width={isRtl ? 50 : undefined}
                 orientation={isRtl ? 'right' : 'left'}
                 allowDecimals={false}
-                tick={{ 
+                tick={{
                   fill: isDark ? '#9ca3af' : '#6b7280',
                   fontSize: 12,
                   dx: isRtl ? 10 : 0
@@ -553,7 +556,7 @@ export default function AnalysisPage() {
             <div className="flex items-center gap-2">
               <div className="w-6 h-0.5" style={{ backgroundColor: '#10b981' }} />
               <div className="w-2 h-2 rounded-full" style={{ backgroundColor: '#10b981' }} />
-              <span className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+              <span className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-700 dark:text-gray-200'}`}>
                 {t('analysis.tasksCompleted', { defaultValue: 'Tasks Completed' })}
               </span>
             </div>
@@ -648,19 +651,19 @@ export default function AnalysisPage() {
           <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700" dir={isRtl ? 'rtl' : 'ltr'}>
             <thead className="glass-card">
               <tr>
-                <th className={`px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider ${isRtl ? 'text-right' : 'text-left'}`}>
+                <th className={`px-6 py-3 text-xs font-medium text-gray-500 dark:text-white uppercase tracking-wider ${isRtl ? 'text-right' : 'text-left'}`}>
                   {t('analysis.listName', { defaultValue: 'List Name' })}
                 </th>
-                <th className={`px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider ${isRtl ? 'text-right' : 'text-left'}`}>
+                <th className={`px-6 py-3 text-xs font-medium text-gray-500 dark:text-white uppercase tracking-wider ${isRtl ? 'text-right' : 'text-left'}`}>
                   {t('analysis.total', { defaultValue: 'Total' })}
                 </th>
-                <th className={`px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider ${isRtl ? 'text-right' : 'text-left'}`}>
+                <th className={`px-6 py-3 text-xs font-medium text-gray-500 dark:text-white uppercase tracking-wider ${isRtl ? 'text-right' : 'text-left'}`}>
                   {t('analysis.completed', { defaultValue: 'Completed' })}
                 </th>
-                <th className={`px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider ${isRtl ? 'text-right' : 'text-left'}`}>
+                <th className={`px-6 py-3 text-xs font-medium text-gray-500 dark:text-white uppercase tracking-wider ${isRtl ? 'text-right' : 'text-left'}`}>
                   {t('analysis.pending', { defaultValue: 'Pending' })}
                 </th>
-                <th className={`px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider ${isRtl ? 'text-right' : 'text-left'}`}>
+                <th className={`px-6 py-3 text-xs font-medium text-gray-500 dark:text-white uppercase tracking-wider ${isRtl ? 'text-right' : 'text-left'}`}>
                   {t('analysis.progress', { defaultValue: 'Progress' })}
                 </th>
               </tr>
@@ -673,7 +676,7 @@ export default function AnalysisPage() {
                     <td className={`px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white ${isRtl ? 'text-right' : 'text-left'}`}>
                       {item.listName}
                     </td>
-                    <td className={`px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300 ${isRtl ? 'text-right' : 'text-left'}`}>
+                    <td className={`px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-white ${isRtl ? 'text-right' : 'text-left'}`}>
                       {item.total}
                     </td>
                     <td className={`px-6 py-4 whitespace-nowrap text-sm text-green-600 dark:text-green-400 ${isRtl ? 'text-right' : 'text-left'}`}>

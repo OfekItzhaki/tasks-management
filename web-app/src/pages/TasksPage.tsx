@@ -41,6 +41,8 @@ import { cancelAllTaskNotifications } from '../services/notifications.service';
 
 type ListWithSystemFlag = ToDoList & { isSystem?: boolean };
 
+const EMPTY_TASKS: Task[] = [];
+
 export default function TasksPage() {
   const { t, i18n } = useTranslation();
   const isRtl = isRtlLanguage(i18n.language);
@@ -53,7 +55,7 @@ export default function TasksPage() {
   const [listNameDraft, setListNameDraft] = useState('');
   const [selectedTasks, setSelectedTasks] = useState<Set<number>>(new Set());
   const [isBulkMode, setIsBulkMode] = useState(false);
-  const [tasksOrder, setTasksOrder] = useState<Task[]>([]);
+  const [tasksOrder, setTasksOrder] = useState<Task[]>(EMPTY_TASKS);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(25);
 
@@ -128,7 +130,7 @@ export default function TasksPage() {
   });
 
   const {
-    data: tasks = [],
+    data: tasks = EMPTY_TASKS,
     isLoading,
     isError,
     error,
@@ -150,8 +152,8 @@ export default function TasksPage() {
       // Sort by order field to maintain backend order
       const sorted = [...tasks].sort((a, b) => a.order - b.order);
       setTasksOrder(sorted);
-    } else {
-      setTasksOrder([]);
+    } else if (tasksOrder.length > 0) {
+      setTasksOrder(EMPTY_TASKS);
     }
     // Reset to first page when tasks change
     setCurrentPage(1);
@@ -675,7 +677,7 @@ export default function TasksPage() {
                     setIsBulkMode(false);
                     setSelectedTasks(new Set());
                   }}
-                  className="px-3 py-1 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
+                  className="px-3 py-1 text-xs font-medium text-gray-700 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
                 >
                   {t('common.cancel')}
                 </button>
@@ -718,7 +720,7 @@ export default function TasksPage() {
                     setIsEditingListName(false);
                     setListNameDraft(list?.name ?? '');
                   }}
-                  className="inline-flex justify-center rounded-md bg-gray-100 px-3 py-2 text-sm font-medium text-gray-900 hover:bg-gray-200"
+                  className="inline-flex justify-center rounded-md bg-gray-100 px-3 py-2 text-sm font-medium text-gray-900 dark:text-white hover:bg-gray-200"
                 >
                   {t('common.cancel')}
                 </button>
@@ -763,7 +765,7 @@ export default function TasksPage() {
         >
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-12 sm:items-end">
             <div className="sm:col-span-10">
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-semibold text-gray-700 dark:text-white mb-2">
                 {t('tasks.form.descriptionLabel')}
               </label>
               <input
@@ -870,7 +872,7 @@ export default function TasksPage() {
                     t('tasks.deleteTaskConfirm', { description: task.description }),
                   );
                   if (!shouldDelete) return;
-                  
+
                   // Queue the mutation asynchronously - UI already updated optimistically
                   // Use setTimeout(0) to yield to event loop immediately
                   setTimeout(() => {
@@ -1047,7 +1049,7 @@ export default function TasksPage() {
                               t('tasks.deleteTaskConfirm', { description: task.description }),
                             );
                             if (!shouldDelete) return;
-                            
+
                             // Queue asynchronously to prevent blocking
                             setTimeout(() => {
                               deleteTaskMutation.mutate({ id: task.id });
