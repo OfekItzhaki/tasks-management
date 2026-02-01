@@ -89,7 +89,7 @@ export default function Layout() {
                   className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-200 ${
                     themeMode === 'light'
                       ? 'bg-primary-500 text-white shadow-md shadow-primary-500/30'
-                      : 'text-gray-600 dark:text-gray-300 hover:bg-white/50 dark:hover:bg-gray-800/50'
+                      : 'text-gray-600 dark:text-white hover:bg-white/50 dark:hover:bg-gray-800/50'
                   }`}
                 >
                   {t('nav.theme.light')}
@@ -99,7 +99,7 @@ export default function Layout() {
                   className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-200 ${
                     themeMode === 'dark'
                       ? 'bg-primary-500 text-white shadow-md shadow-primary-500/30'
-                      : 'text-gray-600 dark:text-gray-300 hover:bg-white/50 dark:hover:bg-gray-800/50'
+                      : 'text-gray-600 dark:text-white hover:bg-white/50 dark:hover:bg-gray-800/50'
                   }`}
                 >
                   {t('nav.theme.dark')}
@@ -109,7 +109,7 @@ export default function Layout() {
                   className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-200 ${
                     themeMode === 'auto'
                       ? 'bg-primary-500 text-white shadow-md shadow-primary-500/30'
-                      : 'text-gray-600 dark:text-gray-300 hover:bg-white/50 dark:hover:bg-gray-800/50'
+                      : 'text-gray-600 dark:text-white hover:bg-white/50 dark:hover:bg-gray-800/50'
                   }`}
                 >
                   {t('nav.theme.auto')}

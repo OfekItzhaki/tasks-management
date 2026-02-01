@@ -69,7 +69,7 @@ export default function LoginPage() {
           )}
           <div className="space-y-4">
             <div>
-              <label htmlFor="email" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+              <label htmlFor="email" className="block text-sm font-semibold text-gray-700 dark:text-white mb-2">
                 {t('login.emailPlaceholder')}
               </label>
               <input
@@ -85,7 +85,7 @@ export default function LoginPage() {
               />
             </div>
             <div>
-              <label htmlFor="password" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+              <label htmlFor="password" className="block text-sm font-semibold text-gray-700 dark:text-white mb-2">
                 {t('login.passwordPlaceholder')}
               </label>
               <div className="relative">

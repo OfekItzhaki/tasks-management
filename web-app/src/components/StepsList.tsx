@@ -84,7 +84,7 @@ export default function StepsList({
         >
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-12 sm:items-end">
             <div className="sm:col-span-10">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label className="block text-sm font-medium text-gray-700 dark:text-white">
                 {t('taskDetails.form.descriptionLabel')}
               </label>
               <input

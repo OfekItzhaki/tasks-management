@@ -32,7 +32,7 @@ export default function TaskEditForm({
   return (
     <div className="premium-card p-6 mb-6 space-y-6">
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        <label className="block text-sm font-medium text-gray-700 dark:text-white mb-2">
           {t('taskDetails.form.descriptionLabel')}
         </label>
         <input
@@ -45,7 +45,7 @@ export default function TaskEditForm({
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        <label className="block text-sm font-medium text-gray-700 dark:text-white mb-2">
           {t('taskDetails.dueDate', { defaultValue: 'Due Date' })}
         </label>
         <input

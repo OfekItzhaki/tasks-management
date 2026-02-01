@@ -4,10 +4,10 @@ export default function ErrorFallback({ error, resetErrorBoundary }: FallbackPro
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <div className="max-w-lg w-full bg-white rounded-lg shadow p-6">
-        <h1 className="text-xl font-semibold text-gray-900">
+        <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
           Something went wrong
         </h1>
-        <p className="mt-2 text-sm text-gray-700">
+        <p className="mt-2 text-sm text-gray-700 dark:text-gray-200">
           The app hit an unexpected error. You can try reloading the UI.
         </p>
 
@@ -24,7 +24,7 @@ export default function ErrorFallback({ error, resetErrorBoundary }: FallbackPro
           </button>
           <button
             onClick={() => window.location.reload()}
-            className="inline-flex justify-center rounded-md bg-gray-200 px-4 py-2 text-sm font-medium text-gray-900 hover:bg-gray-300"
+            className="inline-flex justify-center rounded-md bg-gray-200 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white hover:bg-gray-300"
           >
             Reload page
           </button>

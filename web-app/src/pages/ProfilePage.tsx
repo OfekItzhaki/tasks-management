@@ -97,7 +97,7 @@ export default function ProfilePage() {
         <div className="space-y-4">
           {/* Profile Picture */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-white mb-2">
               {t('profile.profilePicture')}
             </label>
             <div className="relative inline-block">
@@ -168,19 +168,19 @@ export default function ProfilePage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('profile.email')}</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-white">{t('profile.email')}</label>
             <p className="mt-1 text-sm text-gray-900 dark:text-white">{user.email}</p>
           </div>
 
           {user.name && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('profile.name')}</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-white">{t('profile.name')}</label>
               <p className="mt-1 text-sm text-gray-900 dark:text-white">{user.name}</p>
             </div>
           )}
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            <label className="block text-sm font-medium text-gray-700 dark:text-white">
               {t('profile.emailVerified')}
             </label>
             <div className="mt-1 flex items-center gap-2 flex-wrap" dir={isRtl ? 'rtl' : 'ltr'} style={{ direction: isRtl ? 'rtl' : 'ltr' }}>
@@ -208,7 +208,7 @@ export default function ProfilePage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            <label className="block text-sm font-medium text-gray-700 dark:text-white">
               {t('profile.memberSince')}
             </label>
             <p className="mt-1 text-sm text-gray-900 dark:text-white" dir={isRtl ? 'rtl' : 'ltr'}>
