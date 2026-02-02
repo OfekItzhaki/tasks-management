@@ -1,5 +1,5 @@
 import { StyleSheet, Platform } from 'react-native';
-import { lightColors } from '../../store/useThemeStore';
+import { lightColors } from '../../constants/colors';
 
 export const createTaskDetailsStyles = (colors: typeof lightColors) => StyleSheet.create({
   container: {

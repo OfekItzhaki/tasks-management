@@ -17,8 +17,18 @@ export const API_CONFIG = {
     : 'https://tasksmanagement-lv54.onrender.com'),
 };
 
+/**
+ * Get the full API URL for an endpoint
+ * Automatically adds /api/v1 if not present in the baseURL
+ */
 export const getApiUrl = (endpoint: string): string => {
-  const base = API_CONFIG.baseURL.replace(/\/$/, ''); // Remove trailing slash
+  let base = API_CONFIG.baseURL.replace(/\/$/, ''); // Remove trailing slash
+
+  // Ensure architecture matches backend (with api/v1 prefix)
+  if (!base.includes('/api/v1')) {
+    base = `${base}/api/v1`;
+  }
+
   const path = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
   return `${base}${path}`;
 };
@@ -32,13 +42,13 @@ if (typeof __DEV__ !== 'undefined' && __DEV__) {
  * Helper for assets that are outside /api/v1 (like /uploads)
  */
 export const getAssetUrl = (path: string): string => {
-  const root = API_CONFIG.baseURL.split('/api/v1')[0];
-  const cleanPath = path.startsWith('/') ? path : `/${path}`;
+  let root = API_CONFIG.baseURL.replace(/\/$/, '');
 
-  // If no /api/v1 found (fallback), just use base
-  if (API_CONFIG.baseURL.indexOf('/api/v1') === -1) {
-    return `${API_CONFIG.baseURL.replace(/\/$/, '')}${cleanPath}`;
+  // If base contains /api/v1, strip it to get the root
+  if (root.includes('/api/v1')) {
+    root = root.split('/api/v1')[0];
   }
 
+  const cleanPath = path.startsWith('/') ? path : `/${path}`;
   return `${root}${cleanPath}`;
 };

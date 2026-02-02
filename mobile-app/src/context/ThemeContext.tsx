@@ -1,5 +1,7 @@
-import React, { createContext, useContext } from 'react';
-import { useThemeStore, lightColors, darkColors } from '../store/useThemeStore';
+import React, { createContext, useContext, useMemo } from 'react';
+import { useThemeStore } from '../store/useThemeStore';
+import { lightColors, darkColors } from '../constants/colors';
+
 export { lightColors, darkColors };
 
 type ThemeMode = 'light' | 'dark' | 'auto';
@@ -9,7 +11,7 @@ interface ThemeContextType {
   themeMode: ThemeMode;
   setThemeMode: (mode: ThemeMode) => void;
   isDark: boolean;
-  colors: any; // Simplified for the context bridge
+  colors: typeof lightColors;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
@@ -17,20 +19,23 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const { themeMode, setThemeMode, getTheme, getColors, isDark: checkIsDark } = useThemeStore();
 
-  const colors = getColors();
-  const theme = getTheme();
-  const isDark = checkIsDark();
+  // Use useMemo to ensure we always have a valid colors object even if the store is re-hydrating
+  const themeContextValue = useMemo(() => {
+    const theme = getTheme();
+    const isDark = checkIsDark();
+    const colors = getColors() || (isDark ? darkColors : lightColors);
+
+    return {
+      theme,
+      themeMode,
+      setThemeMode,
+      isDark,
+      colors,
+    };
+  }, [themeMode, setThemeMode, getTheme, getColors, checkIsDark]);
 
   return (
-    <ThemeContext.Provider
-      value={{
-        theme,
-        themeMode,
-        setThemeMode,
-        isDark,
-        colors,
-      }}
-    >
+    <ThemeContext.Provider value={themeContextValue}>
       {children}
     </ThemeContext.Provider>
   );
