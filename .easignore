@@ -1,0 +1,19 @@
+# 1. Deny everything by default
+*
+
+# 2. Allow only the mobile app and its shared dependency
+!mobile-app/
+!frontend-services/
+
+# 3. Allow root configuration files
+!package.json
+!package-lock.json
+
+# 4. Standard mobile exclusions (Inside allow-listed folders)
+mobile-app/android/
+mobile-app/ios/
+mobile-app/node_modules/
+mobile-app/.expo/
+mobile-app/dist/
+frontend-services/node_modules/
+frontend-services/dist/
