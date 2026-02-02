@@ -1,7 +1,7 @@
-# Deny everything
+# Exclude everything by default
 *
 
-# Allow directories to be traversed
+# Allow directories to be discovered
 !*/
 
 # Allow specific project folders and their contents
@@ -12,11 +12,15 @@
 !package.json
 !package-lock.json
 
-# Exclude build artifacts inside allowed folders
-mobile-app/android/
-mobile-app/ios/
-mobile-app/node_modules/
-mobile-app/.expo/
-mobile-app/dist/
-frontend-services/node_modules/
-frontend-services/dist/
+# Standard exclusions (apply everywhere)
+**/node_modules/
+**/android/
+**/ios/
+**/.expo/
+**/dist/
+**/build/
+
+# Explicitly exclude other monorepo apps just in case
+todo-backend/
+web-app/
+mobile-build-isolated/
