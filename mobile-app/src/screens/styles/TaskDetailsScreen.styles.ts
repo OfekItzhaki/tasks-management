@@ -110,7 +110,7 @@ export const createTaskDetailsStyles = (colors: typeof lightColors) => StyleShee
   },
   headerTop: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
+    alignItems: 'center',
   },
   checkbox: {
     width: 28,
@@ -458,6 +458,7 @@ export const createTaskDetailsStyles = (colors: typeof lightColors) => StyleShee
     padding: 0,
     paddingBottom: Platform.OS === 'ios' ? 44 : 28,
     maxHeight: '85%',
+    flex: 1,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: -12 },
     shadowOpacity: 0.3,

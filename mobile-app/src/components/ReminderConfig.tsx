@@ -107,8 +107,8 @@ export default function ReminderConfigComponent({
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <View style={styles.sectionIconRow}>
+      <View style={[styles.header, { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 16 }]}>
+        <View style={[styles.sectionIconRow, { marginBottom: 0 }]}>
           <View style={[styles.iconContainer, { width: 36, height: 36, marginRight: 12 }]}>
             <Ionicons name="notifications-outline" size={20} color="#a855f7" />
           </View>
@@ -118,7 +118,7 @@ export default function ReminderConfigComponent({
           style={styles.addButton}
           onPress={addReminder}
         >
-          <Text style={styles.addButtonText}>+ Add Reminder</Text>
+          <Text style={styles.addButtonText}>+ Add</Text>
         </TouchableOpacity>
       </View>
 
