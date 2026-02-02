@@ -35,7 +35,7 @@ import { FileUploadInterceptor } from './interceptors/file-upload.interceptor';
 @ApiTags('Users')
 @Controller('users')
 class UsersController {
-  constructor(private userService: UsersService) {}
+  constructor(private userService: UsersService) { }
 
   @Post()
   @ApiOperation({ summary: 'Register a new user' })
@@ -130,11 +130,11 @@ class UsersController {
       throw new BadRequestException('No file uploaded');
     }
 
-    // Generate URL for the uploaded file
-    const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
-    const fileUrl = `${baseUrl}/uploads/${file.filename}`;
+    // Generate relative path for the uploaded file
+    // Storing relative paths is better for multi-platform (web/mobile) and environments (dev/prod)
+    const fileUrl = `/uploads/${file.filename}`;
 
-    // Update user profile with new picture URL
+    // Update user profile with new picture relative path
     return this.userService.updateUser(
       id,
       { profilePicture: fileUrl },

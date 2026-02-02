@@ -4,7 +4,7 @@ import { useMutation } from '@tanstack/react-query';
 import { useAuth } from '../context/AuthContext';
 import { useTranslation } from 'react-i18next';
 import { BUILD_INFO } from '../utils/buildInfo';
-import { isRtlLanguage } from '@tasks-management/frontend-services';
+import { isRtlLanguage, getApiUrl } from '@tasks-management/frontend-services';
 import { usersService } from '@tasks-management/frontend-services';
 import { authService } from '../services/auth.service';
 import toast from 'react-hot-toast';
@@ -113,7 +113,23 @@ export default function ProfilePage() {
                     src={
                       filePreview
                         ? filePreview // File preview is already a data URL, no cache busting needed
-                        : `${user.profilePicture}?t=${user.updatedAt ? new Date(user.updatedAt).getTime() : Date.now()}`
+                        : (() => {
+                          let url = user.profilePicture || '';
+
+                          // If it's a relative path
+                          if (url.startsWith('/uploads')) {
+                            url = getApiUrl(url);
+                          }
+                          // If it's an absolute URL but contains localhost (legacy data fix)
+                          else if (url.includes('localhost') || url.includes('127.0.0.1')) {
+                            const parts = url.split('/uploads/');
+                            if (parts.length > 1) {
+                              url = getApiUrl(`/uploads/${parts[1]}`);
+                            }
+                          }
+
+                          return `${url}${url.includes('?') ? '&' : '?'}t=${user.updatedAt ? new Date(user.updatedAt).getTime() : Date.now()}`;
+                        })()
                     }
                     alt={t('profile.profilePicture')}
                     className="w-20 h-20 rounded-full object-cover border-2 border-primary-500/30 dark:border-primary-500/30 transition-opacity group-hover:opacity-75 shadow-lg"
@@ -128,9 +144,8 @@ export default function ProfilePage() {
                   />
                 )}
                 <div
-                  className={`w-20 h-20 rounded-full flex items-center justify-center border-2 border-primary-500/30 dark:border-primary-500/30 transition-opacity group-hover:opacity-75 shadow-lg bg-gradient-to-br from-primary-500 to-purple-500 ${
-                    filePreview || user.profilePicture ? 'hidden' : ''
-                  }`}
+                  className={`w-20 h-20 rounded-full flex items-center justify-center border-2 border-primary-500/30 dark:border-primary-500/30 transition-opacity group-hover:opacity-75 shadow-lg bg-gradient-to-br from-primary-500 to-purple-500 ${filePreview || user.profilePicture ? 'hidden' : ''
+                    }`}
                   style={{ display: filePreview || user.profilePicture ? 'none' : 'flex' }}
                 >
                   <span className="text-3xl font-bold text-white">

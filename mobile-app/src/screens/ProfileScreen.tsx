@@ -25,6 +25,7 @@ import { usersService } from '../services/users.service';
 import { authService } from '../services/auth.service';
 import { isRtlLanguage } from '@tasks-management/frontend-services';
 import { handleApiError, isAuthError } from '../utils/errorHandler';
+import { getApiUrl } from '../config/api';
 
 export default function ProfileScreen() {
   const navigation = useNavigation();
@@ -433,8 +434,8 @@ export default function ProfileScreen() {
 
   return (
     <View style={styles.container}>
-      <ScrollView 
-        style={styles.content} 
+      <ScrollView
+        style={styles.content}
         contentContainerStyle={styles.scrollContent}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
@@ -471,11 +472,28 @@ export default function ProfileScreen() {
                 {user.profilePicture && !imageError ? (
                   <Image
                     key={`${user.id}-${user.profilePicture}-${user.updatedAt}`}
-                    source={{ 
-                      uri: `${user.profilePicture}${user.profilePicture.includes('?') ? '&' : '?'}v=${user.updatedAt ? new Date(user.updatedAt).getTime() : Date.now()}` 
+                    source={{
+                      uri: (() => {
+                        let url = user.profilePicture || '';
+
+                        // If it's a relative path
+                        if (url.startsWith('/uploads')) {
+                          url = getApiUrl(url);
+                        }
+                        // If it's an absolute URL but contains localhost (legacy data fix)
+                        else if (url.includes('localhost') || url.includes('127.0.0.1')) {
+                          const parts = url.split('/uploads/');
+                          if (parts.length > 1) {
+                            url = getApiUrl(`/uploads/${parts[1]}`);
+                          }
+                        }
+
+                        return `${url}${url.includes('?') ? '&' : '?'}v=${user.updatedAt ? new Date(user.updatedAt).getTime() : Date.now()}`;
+                      })()
                     }}
                     style={styles.profilePicture}
-                    onError={() => {
+                    onError={(e) => {
+                      console.log('Image load error:', e.nativeEvent.error);
                       setImageError(true);
                     }}
                     onLoad={() => {
