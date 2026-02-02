@@ -18,7 +18,7 @@
       "node": "20.19.4",
       "env": {
         "NODE_ENV": "production",
-        "EXPO_PUBLIC_API_URL": "https://tasksmanagement-lv54.onrender.com"
+        "EXPO_PUBLIC_API_URL": "https://tasksmanagement-lv54.onrender.com/api/v1"
       },
       "android": {
         "buildType": "apk"
@@ -29,7 +29,7 @@
       "node": "20.19.4",
       "env": {
         "NODE_ENV": "production",
-        "EXPO_PUBLIC_API_URL": "https://tasksmanagement-lv54.onrender.com"
+        "EXPO_PUBLIC_API_URL": "https://tasksmanagement-lv54.onrender.com/api/v1"
       },
       "android": {
         "buildType": "app-bundle"
