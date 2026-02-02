@@ -1,12 +1,34 @@
 import React from 'react';
 import { View, ActivityIndicator, StyleSheet, Platform } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, LinkingOptions } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import * as Linking from 'expo-linking';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
+
+// ... screens imports ...
+
+const prefix = Linking.createURL('/');
+
+const linking: LinkingOptions<RootStackParamList> = {
+  prefixes: [prefix, 'tasks-management://'],
+  config: {
+    screens: {
+      Main: {
+        screens: {
+          Lists: 'lists',
+          Analysis: 'analysis',
+          Profile: 'profile',
+        },
+      },
+      Tasks: 'tasks/:listId',
+      TaskDetails: 'task-details/:taskId',
+    },
+  },
+};
 
 // Screens
 import LoginScreen from '../screens/LoginScreen';
@@ -37,7 +59,7 @@ const Tab = createBottomTabNavigator<MainTabParamList>();
 function MainTabs() {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
-  
+
   return (
     <Tab.Navigator
       screenOptions={{
@@ -115,7 +137,7 @@ export default function AppNavigator() {
   }
 
   return (
-    <NavigationContainer>
+    <NavigationContainer linking={linking}>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {isAuthenticated ? (
           <>

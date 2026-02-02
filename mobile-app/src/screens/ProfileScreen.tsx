@@ -26,6 +26,7 @@ import { authService } from '../services/auth.service';
 import { isRtlLanguage } from '@tasks-management/frontend-services';
 import { handleApiError, isAuthError } from '../utils/errorHandler';
 import { getApiUrl } from '../config/api';
+import { SmartImage } from '../components/common/SmartImage';
 
 export default function ProfileScreen() {
   const navigation = useNavigation();
@@ -469,8 +470,8 @@ export default function ProfileScreen() {
               disabled={uploading}
             >
               <View style={styles.profilePictureWrapper}>
-                {user.profilePicture && !imageError ? (
-                  <Image
+                {user.profilePicture ? (
+                  <SmartImage
                     key={`${user.id}-${user.profilePicture}-${user.updatedAt}`}
                     source={{
                       uri: (() => {
