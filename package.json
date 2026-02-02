@@ -3,7 +3,6 @@
   "private": true,
   "description": "Tasks Management monorepo",
   "scripts": {
-    "start": "npm start --prefix web-app",
     "prepare": "husky"
   },
   "devDependencies": {
