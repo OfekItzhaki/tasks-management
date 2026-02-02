@@ -10,13 +10,19 @@
     "watch": "tsc --watch",
     "postinstall": "node scripts/build-if-needed.js"
   },
-  "keywords": ["tasks", "todo", "api", "client"],
+  "keywords": [
+    "tasks",
+    "todo",
+    "api",
+    "client"
+  ],
   "author": "",
   "license": "UNLICENSED",
   "devDependencies": {
     "@types/node": "^22.19.0",
     "typescript": "^5.7.2"
+  },
+  "dependencies": {
+    "zod": "^4.3.6"
   }
 }
-
-

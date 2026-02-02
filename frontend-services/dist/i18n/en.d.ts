@@ -188,6 +188,7 @@ declare const _default: {
     readonly reminders: {
         readonly title: "Reminders";
         readonly add: "Add";
+        readonly addBtn: "Add Reminder";
         readonly empty: "No reminders set";
         readonly edit: "Edit";
         readonly configure: "Configure Reminder";

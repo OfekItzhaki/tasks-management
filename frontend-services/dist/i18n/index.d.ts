@@ -190,6 +190,7 @@ export declare const resources: {
             readonly reminders: {
                 readonly title: "Reminders";
                 readonly add: "Add";
+                readonly addBtn: "Add Reminder";
                 readonly empty: "No reminders set";
                 readonly edit: "Edit";
                 readonly configure: "Configure Reminder";
@@ -405,6 +406,7 @@ export declare const resources: {
             readonly reminders: {
                 readonly title: "תזכורות";
                 readonly add: "הוסף";
+                readonly addBtn: "הוסף תזכורת";
                 readonly empty: "לא הוגדרו תזכורות";
                 readonly edit: "ערוך";
                 readonly configure: "הגדר תזכורת";

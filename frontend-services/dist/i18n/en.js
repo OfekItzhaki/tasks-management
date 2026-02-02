@@ -187,7 +187,8 @@ export default {
     },
     reminders: {
         title: 'Reminders',
-        add: 'Add',
+        add: 'Add', // Keep for backward compatibility if needed
+        addBtn: 'Add Reminder',
         empty: 'No reminders set',
         edit: 'Edit',
         configure: 'Configure Reminder',

@@ -188,6 +188,7 @@ declare const _default: {
     readonly reminders: {
         readonly title: "תזכורות";
         readonly add: "הוסף";
+        readonly addBtn: "הוסף תזכורת";
         readonly empty: "לא הוגדרו תזכורות";
         readonly edit: "ערוך";
         readonly configure: "הגדר תזכורת";
