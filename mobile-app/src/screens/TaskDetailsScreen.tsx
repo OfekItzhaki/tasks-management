@@ -12,6 +12,7 @@ import {
   Platform,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
 import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
@@ -39,6 +40,8 @@ import { isRepeatingTask as checkIsRepeatingTask } from '../utils/taskHelpers';
 import { useTheme } from '../context/ThemeContext';
 import { useThemedStyles } from '../utils/useThemedStyles';
 
+import { createTaskDetailsStyles } from './styles/TaskDetailsScreen.styles';
+
 type TaskDetailsRouteProp = RouteProp<RootStackParamList, 'TaskDetails'>;
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -47,555 +50,8 @@ export default function TaskDetailsScreen() {
   const navigation = useNavigation<NavigationProp>();
   const { taskId } = route.params;
   const { colors } = useTheme();
-  const styles = useThemedStyles((colors) => ({
-    container: {
-      flex: 1,
-      backgroundColor: colors.surface,
-    },
-    screenHeader: {
-      backgroundColor: colors.card,
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      padding: 24,
-      paddingTop: Platform.OS === 'ios' ? 60 : 45,
-      paddingBottom: 24,
-      borderBottomWidth: 0,
-      shadowColor: colors.shadow,
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.15,
-      shadowRadius: 16,
-      elevation: 8,
-      position: 'relative',
-      overflow: 'hidden',
-    },
-    headerGradient: {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      height: '50%',
-      opacity: 0.08,
-    },
-    backButton: {
-      padding: 12,
-      borderRadius: 14,
-      backgroundColor: colors.primary + '15',
-    },
-    backButtonText: {
-      fontSize: 17,
-      color: colors.primary,
-      fontWeight: '800',
-      letterSpacing: 0.2,
-    },
-    screenTitle: {
-      fontSize: 32,
-      fontWeight: '900',
-      color: colors.primary,
-      letterSpacing: -1,
-      textShadowColor: colors.primary + '33',
-      textShadowOffset: { width: 0, height: 2 },
-      textShadowRadius: 4,
-      textAlign: 'center',
-      flex: 1,
-    },
-    headerSpacer: {
-      width: 60,
-    },
-    center: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: colors.surface,
-    },
-    scrollView: {
-      flex: 1,
-    },
-    scrollContent: {
-      padding: 20,
-      paddingBottom: Platform.OS === 'ios' ? 50 : 40,
-    },
-    header: {
-      backgroundColor: colors.card,
-      borderRadius: 24,
-      padding: 24,
-      marginBottom: 20,
-      shadowColor: colors.primary,
-      shadowOffset: { width: 0, height: 6 },
-      shadowOpacity: 0.12,
-      shadowRadius: 16,
-      elevation: 8,
-      borderWidth: 1.5,
-      borderColor: colors.border,
-    },
-    headerTop: {
-      flexDirection: 'row',
-      alignItems: 'flex-start',
-    },
-    checkbox: {
-      width: 26,
-      height: 26,
-      borderRadius: 13,
-      borderWidth: 2.5,
-      borderColor: colors.primary,
-      marginRight: 14,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    checkboxCompleted: {
-      backgroundColor: colors.primary,
-    },
-    checkmark: {
-      color: '#fff',
-      fontSize: 16,
-      fontWeight: 'bold',
-    },
-    headerText: {
-      flex: 1,
-    },
-    title: {
-      fontSize: 26,
-      fontWeight: '800',
-      color: colors.text,
-      letterSpacing: -0.4,
-    },
-    titleCompleted: {
-      textDecorationLine: 'line-through',
-      color: colors.textSecondary,
-    },
-    completionCountBadge: {
-      fontSize: 13,
-      color: colors.success,
-      fontWeight: '600',
-      backgroundColor: colors.success + '20',
-      paddingHorizontal: 12,
-      paddingVertical: 6,
-      borderRadius: 14,
-      marginTop: 10,
-      alignSelf: 'flex-start',
-    },
-    editButton: {
-      marginTop: 18,
-      paddingVertical: 14,
-      paddingHorizontal: 24,
-      backgroundColor: colors.primary,
-      borderRadius: 16,
-      alignSelf: 'flex-start',
-      shadowColor: colors.primary,
-      shadowOffset: { width: 0, height: 6 },
-      shadowOpacity: 0.4,
-      shadowRadius: 12,
-      elevation: 8,
-    },
-    editButtonText: {
-      color: '#fff',
-      fontSize: 16,
-      fontWeight: '700',
-      letterSpacing: 0.3,
-    },
-    editInput: {
-      fontSize: 24,
-      fontWeight: '800',
-      color: colors.text,
-      borderBottomWidth: 2.5,
-      borderBottomColor: colors.primary,
-      paddingBottom: 10,
-      paddingTop: 6,
-      letterSpacing: -0.3,
-    },
-    section: {
-      backgroundColor: colors.card,
-      borderRadius: 24,
-      padding: 24,
-      marginBottom: 20,
-      shadowColor: colors.primary,
-      shadowOffset: { width: 0, height: 6 },
-      shadowOpacity: 0.12,
-      shadowRadius: 16,
-      elevation: 8,
-      borderWidth: 1.5,
-      borderColor: colors.border,
-    },
-    sectionHeader: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: 16,
-    },
-    sectionTitle: {
-      fontSize: 20,
-      fontWeight: '700',
-      color: colors.text,
-      letterSpacing: -0.3,
-    },
-    progressText: {
-      fontSize: 15,
-      color: colors.textSecondary,
-      fontWeight: '600',
-    },
-    progressBar: {
-      height: 10,
-      backgroundColor: colors.border,
-      borderRadius: 5,
-      marginBottom: 18,
-      overflow: 'hidden',
-    },
-    progressFill: {
-      height: '100%',
-      backgroundColor: colors.primary,
-      borderRadius: 5,
-    },
-    infoRow: {
-      flexDirection: 'row',
-      marginBottom: 12,
-    },
-    infoLabel: {
-      fontSize: 15,
-      fontWeight: '600',
-      color: colors.textSecondary,
-      marginRight: 12,
-      minWidth: 100,
-    },
-    infoValue: {
-      fontSize: 15,
-      color: colors.text,
-      flex: 1,
-      fontWeight: '500',
-    },
-    datePickerContainer: {
-      flex: 1,
-    },
-    stepItem: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingVertical: 14,
-      borderBottomWidth: 1,
-      borderBottomColor: colors.border,
-    },
-    stepItemCompleted: {
-      opacity: 0.6,
-    },
-    stepCheckbox: {
-      width: 22,
-      height: 22,
-      borderRadius: 11,
-      borderWidth: 2.5,
-      borderColor: colors.primary,
-      marginRight: 14,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    stepContent: {
-      flex: 1,
-    },
-    stepText: {
-      fontSize: 17,
-      color: colors.text,
-      fontWeight: '500',
-    },
-    stepTextCompleted: {
-      textDecorationLine: 'line-through',
-      color: colors.textSecondary,
-    },
-    stepActions: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginLeft: 8,
-      gap: 8,
-    },
-    stepEditButton: {
-      padding: 8,
-    },
-    stepEditButtonText: {
-      fontSize: 16,
-      color: colors.primary,
-      fontWeight: '600',
-    },
-    stepDeleteButton: {
-      padding: 8,
-    },
-    stepDeleteButtonText: {
-      fontSize: 16,
-      color: colors.error,
-      fontWeight: '600',
-    },
-    stepEditContainer: {
-      flex: 1,
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginLeft: 8,
-    },
-    stepEditInput: {
-      flex: 1,
-      fontSize: 16,
-      color: colors.text,
-      borderWidth: 2,
-      borderColor: colors.primary,
-      borderRadius: 10,
-      padding: 10,
-      marginRight: 10,
-      backgroundColor: colors.surface,
-    },
-    stepEditSaveButton: {
-      width: 36,
-      height: 36,
-      borderRadius: 18,
-      backgroundColor: colors.success,
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginRight: 8,
-      shadowColor: colors.success,
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.3,
-      shadowRadius: 4,
-      elevation: 4,
-    },
-    stepEditSaveText: {
-      color: '#fff',
-      fontSize: 18,
-      fontWeight: 'bold',
-    },
-    stepEditCancelButton: {
-      width: 36,
-      height: 36,
-      borderRadius: 18,
-      backgroundColor: colors.error,
-      justifyContent: 'center',
-      alignItems: 'center',
-      shadowColor: colors.error,
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.3,
-      shadowRadius: 4,
-      elevation: 4,
-    },
-    stepEditCancelText: {
-      color: '#fff',
-      fontSize: 16,
-      fontWeight: 'bold',
-    },
-    emptyText: {
-      fontSize: 15,
-      color: colors.textSecondary,
-      fontStyle: 'italic',
-      textAlign: 'center',
-      paddingVertical: 24,
-    },
-    emptyStepsContainer: {
-      paddingVertical: 24,
-      alignItems: 'center',
-    },
-    emptyStepsIcon: {
-      fontSize: 52,
-      marginBottom: 16,
-      opacity: 0.3,
-      color: colors.textSecondary,
-    },
-    emptyStepsText: {
-      fontSize: 17,
-      color: colors.textSecondary,
-      fontWeight: '600',
-      marginBottom: 6,
-    },
-    emptyStepsSubtext: {
-      fontSize: 14,
-      color: colors.textSecondary,
-      textAlign: 'center',
-      opacity: 0.7,
-    },
-    addStepButton: {
-      marginTop: 16,
-      paddingVertical: 14,
-      paddingHorizontal: 20,
-      backgroundColor: colors.surface,
-      borderRadius: 14,
-      alignItems: 'center',
-      borderWidth: 2,
-      borderColor: colors.primary,
-    },
-    addStepButtonText: {
-      color: colors.primary,
-      fontSize: 15,
-      fontWeight: '700',
-      letterSpacing: 0.2,
-    },
-    editActions: {
-      flexDirection: 'row',
-      gap: 12,
-      marginTop: 20,
-    },
-    actionButton: {
-      flex: 1,
-      paddingVertical: 18,
-      borderRadius: 16,
-      alignItems: 'center',
-      justifyContent: 'center',
-      minHeight: 56,
-    },
-    cancelButton: {
-      backgroundColor: colors.surface,
-      borderWidth: 2,
-      borderColor: colors.border,
-    },
-    cancelButtonText: {
-      color: colors.textSecondary,
-      fontSize: 17,
-      fontWeight: '700',
-      letterSpacing: 0.2,
-    },
-    saveButton: {
-      backgroundColor: colors.primary,
-      shadowColor: colors.primary,
-      shadowOffset: { width: 0, height: 6 },
-      shadowOpacity: 0.4,
-      shadowRadius: 12,
-      elevation: 8,
-    },
-    saveButtonText: {
-      color: '#fff',
-      fontSize: 17,
-      fontWeight: '800',
-      letterSpacing: 0.3,
-    },
-    modalOverlay: {
-      flex: 1,
-      backgroundColor: 'rgba(0, 0, 0, 0.65)',
-      justifyContent: 'flex-end',
-    },
-    modalContent: {
-      backgroundColor: colors.card,
-      borderTopLeftRadius: 32,
-      borderTopRightRadius: 32,
-      padding: 0,
-      paddingBottom: Platform.OS === 'ios' ? 40 : 24,
-      maxHeight: '80%',
-      shadowColor: colors.shadow,
-      shadowOffset: { width: 0, height: -8 },
-      shadowOpacity: 0.3,
-      shadowRadius: 24,
-      elevation: 25,
-      overflow: 'hidden',
-    },
-    modalTitle: {
-      fontSize: 32,
-      fontWeight: '900',
-      marginBottom: 0,
-      padding: 28,
-      paddingBottom: 20,
-      color: colors.text,
-      letterSpacing: -0.5,
-      borderBottomWidth: 1,
-      borderBottomColor: colors.border,
-      backgroundColor: colors.surface,
-    },
-    input: {
-      borderWidth: 2,
-      borderColor: colors.border,
-      borderRadius: 16,
-      padding: 18,
-      fontSize: 17,
-      marginHorizontal: 24,
-      marginTop: 24,
-      marginBottom: 20,
-      backgroundColor: colors.surface,
-      minHeight: 56,
-      color: colors.text,
-      fontWeight: '500',
-      shadowColor: colors.shadow,
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.05,
-      shadowRadius: 4,
-      elevation: 2,
-    },
-    modalButtons: {
-      flexDirection: 'row',
-      gap: 12,
-      paddingHorizontal: 24,
-      paddingTop: 8,
-      paddingBottom: 0,
-    },
-    modalButton: {
-      flex: 1,
-      paddingVertical: 18,
-      borderRadius: 16,
-      alignItems: 'center',
-      justifyContent: 'center',
-      minHeight: 56,
-    },
-    submitButton: {
-      backgroundColor: colors.primary,
-      shadowColor: colors.primary,
-      shadowOffset: { width: 0, height: 6 },
-      shadowOpacity: 0.4,
-      shadowRadius: 12,
-      elevation: 8,
-    },
-    submitButtonText: {
-      color: '#fff',
-      fontSize: 17,
-      fontWeight: '800',
-      letterSpacing: 0.3,
-    },
-    errorText: {
-      fontSize: 17,
-      color: colors.error,
-      fontWeight: '600',
-    },
-    remindersList: {
-      flex: 1,
-      marginTop: 6,
-    },
-    reminderDisplayItem: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: 10,
-      paddingVertical: 8,
-    },
-    reminderDisplayText: {
-      fontSize: 15,
-      color: colors.text,
-      lineHeight: 22,
-      flex: 1,
-      fontWeight: '500',
-    },
-    alarmToggleButton: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      padding: 10,
-      paddingHorizontal: 14,
-      marginLeft: 8,
-      borderRadius: 12,
-      backgroundColor: colors.surface,
-      borderWidth: 2,
-      borderColor: colors.border,
-      minWidth: 80,
-      justifyContent: 'center',
-    },
-    alarmToggleButtonActive: {
-      backgroundColor: colors.primary + '15',
-      borderColor: colors.primary,
-      borderWidth: 2,
-    },
-    alarmToggleIcon: {
-      fontSize: 20,
-      marginRight: 6,
-      color: colors.textSecondary,
-    },
-    alarmToggleIconActive: {
-      fontSize: 20,
-      color: colors.primary,
-    },
-    alarmToggleText: {
-      fontSize: 12,
-      fontWeight: '700',
-      color: colors.textSecondary,
-      textTransform: 'uppercase',
-    },
-    alarmToggleTextActive: {
-      color: colors.primary,
-      fontWeight: '700',
-    },
-  }));
+  const styles = useThemedStyles(createTaskDetailsStyles);
+
 
   const [task, setTask] = useState<Task | null>(null);
   const [steps, setSteps] = useState<Step[]>([]);
@@ -651,7 +107,7 @@ export default function TaskDetailsScreen() {
         taskData.specificDayOfWeek,
         taskData.dueDate || undefined,
         taskData.reminderConfig,
-      );
+      ) as ReminderConfig[];
 
       const everyDayReminders = convertedReminders.filter(r => r.timeframe === ReminderTimeframe.EVERY_DAY);
       setDisplayEveryDayReminders(everyDayReminders);
@@ -786,7 +242,7 @@ export default function TaskDetailsScreen() {
         task.reminderDaysBefore,
         task.specificDayOfWeek,
         task.dueDate || undefined,
-      );
+      ) as ReminderConfig[];
       setEditReminders(convertedReminders);
     }
     setIsEditing(false);
@@ -893,7 +349,7 @@ export default function TaskDetailsScreen() {
         task.specificDayOfWeek,
         task.dueDate || undefined,
         task.reminderConfig,
-      );
+      ) as ReminderConfig[];
 
       // Apply updated alarm states to all reminders
       const updatedAlarmStates = { ...reminderAlarmStates, [reminderId]: newAlarmState };
@@ -981,16 +437,16 @@ export default function TaskDetailsScreen() {
 
   // Check if task has repeating reminders (based on task properties, not list type)
   // A task is repeating if it has weekly reminders (specificDayOfWeek) or daily reminders (client-side)
-  const isRepeatingTask = checkIsRepeatingTask(task, displayEveryDayReminders);
+  const isRepeatingTask = checkIsRepeatingTask(task as any, displayEveryDayReminders);
 
   // Prepare display reminders
   const displayReminders = !isEditing ? (() => {
     const raw = convertBackendToReminders(
       task.reminderDaysBefore,
       task.specificDayOfWeek,
-      task.dueDate || undefined,
+      (task.dueDate || undefined) as any,
       task.reminderConfig,
-    );
+    ) as ReminderConfig[];
     return raw.map(r => {
       const matchingReminder = editReminders.find(er => er.id === r.id);
       return {
@@ -1015,7 +471,7 @@ export default function TaskDetailsScreen() {
           style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
-          <Text style={styles.backButtonText}>← Back</Text>
+          <Ionicons name="chevron-back" size={24} color={colors.primary} />
         </TouchableOpacity>
         <Text style={styles.screenTitle}>Task Details</Text>
         <View style={styles.headerSpacer} />

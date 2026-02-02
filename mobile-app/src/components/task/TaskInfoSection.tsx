@@ -5,7 +5,9 @@ import type { ReminderConfig } from '@tasks-management/frontend-services';
 import { formatReminderDisplay } from '@tasks-management/frontend-services';
 import DatePicker from '../DatePicker';
 import { formatDate } from '../../utils/helpers';
-import { styles } from '../../screens/styles/TaskDetailsScreen.styles';
+import { createTaskDetailsStyles } from '../../screens/styles/TaskDetailsScreen.styles';
+import { Ionicons } from '@expo/vector-icons';
+import { useThemedStyles } from '../../utils/useThemedStyles';
 
 interface TaskInfoSectionProps {
   task: Task;
@@ -26,29 +28,40 @@ export function TaskInfoSection({
   reminderAlarmStates,
   onToggleReminderAlarm,
 }: TaskInfoSectionProps) {
+  const styles = useThemedStyles(createTaskDetailsStyles);
   return (
     <View style={styles.section}>
-      <View style={styles.infoRow}>
-        <Text style={styles.infoLabel}>Due Date:</Text>
-        {isEditing ? (
-          <View style={styles.datePickerContainer}>
-            <DatePicker
-              value={editDueDate}
-              onChange={onEditDueDateChange}
-              placeholder="No due date"
-            />
-          </View>
-        ) : (
-          <Text style={styles.infoValue}>
-            {task.dueDate ? formatDate(task.dueDate) : 'No due date'}
-          </Text>
-        )}
+      <View style={styles.sectionIconRow}>
+        <View style={styles.iconContainer}>
+          <Ionicons name="calendar-outline" size={24} color="#6366f1" />
+        </View>
+        <View>
+          <Text style={styles.infoLabel}>Due Date</Text>
+          {isEditing ? (
+            <View style={styles.datePickerContainer}>
+              <DatePicker
+                value={editDueDate}
+                onChange={onEditDueDateChange}
+                placeholder="No due date"
+              />
+            </View>
+          ) : (
+            <Text style={styles.infoValue}>
+              {task.dueDate ? formatDate(task.dueDate) : 'No due date'}
+            </Text>
+          )}
+        </View>
       </View>
 
       {/* Display Reminders - only show when NOT editing */}
       {!isEditing && displayReminders.length > 0 && (
-        <View style={styles.infoRow}>
-          <Text style={styles.infoLabel}>Reminders:</Text>
+        <View style={{ marginTop: 24 }}>
+          <View style={styles.sectionIconRow}>
+            <View style={styles.iconContainer}>
+              <Ionicons name="notifications-outline" size={24} color="#a855f7" />
+            </View>
+            <Text style={styles.infoLabel}>Reminders</Text>
+          </View>
           <View style={styles.remindersList}>
             {displayReminders.map((reminder) => (
               <View key={reminder.id} style={styles.reminderDisplayItem}>
@@ -63,12 +76,12 @@ export function TaskInfoSection({
                   onPress={() => onToggleReminderAlarm(reminder.id)}
                   activeOpacity={0.7}
                 >
-                  <Text style={[
-                    styles.alarmToggleIcon,
-                    reminderAlarmStates[reminder.id] && styles.alarmToggleIconActive
-                  ]}>
-                    {reminderAlarmStates[reminder.id] ? '🔔' : '🔕'}
-                  </Text>
+                  <Ionicons
+                    name={reminderAlarmStates[reminder.id] ? "notifications" : "notifications-off"}
+                    size={18}
+                    color={reminderAlarmStates[reminder.id] ? "#6366f1" : "#64748b"}
+                    style={{ marginRight: 6 }}
+                  />
                   <Text style={[
                     styles.alarmToggleText,
                     reminderAlarmStates[reminder.id] && styles.alarmToggleTextActive

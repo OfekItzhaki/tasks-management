@@ -1,7 +1,10 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, TextInput } from 'react-native';
 import { Task } from '../../types';
-import { styles } from '../../screens/styles/TaskDetailsScreen.styles';
+import { createTaskDetailsStyles } from '../../screens/styles/TaskDetailsScreen.styles';
+import { Ionicons } from '@expo/vector-icons';
+import { useTheme } from '../../context/ThemeContext';
+import { useThemedStyles } from '../../utils/useThemedStyles';
 
 interface TaskHeaderProps {
   task: Task;
@@ -24,6 +27,8 @@ export function TaskHeader({
   completionCount = 0,
   isRepeatingTask = false,
 }: TaskHeaderProps) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createTaskDetailsStyles);
   const isCompleted = Boolean(task.completed);
 
   return (
@@ -33,7 +38,7 @@ export function TaskHeader({
           style={[styles.checkbox, isCompleted && styles.checkboxCompleted]}
           onPress={onToggleTask}
         >
-          {isCompleted && <Text style={styles.checkmark}>✓</Text>}
+          {isCompleted && <Ionicons name="checkmark" size={20} color="#fff" />}
         </TouchableOpacity>
         <View style={styles.headerText}>
           {isEditing ? (
@@ -65,7 +70,8 @@ export function TaskHeader({
           style={styles.editButton}
           onPress={onEditPress}
         >
-          <Text style={styles.editButtonText}>Edit</Text>
+          <Ionicons name="create-outline" size={18} color="#fff" style={{ marginRight: 8 }} />
+          <Text style={styles.editButtonText}>Edit Task</Text>
         </TouchableOpacity>
       )}
     </View>

@@ -2,7 +2,9 @@ import React from 'react';
 import { View, Text, TouchableOpacity, TextInput } from 'react-native';
 import { Step } from '../../types';
 import { showConfirmDialog } from '../common/ConfirmDialog';
-import { styles } from '../../screens/styles/TaskDetailsScreen.styles';
+import { createTaskDetailsStyles } from '../../screens/styles/TaskDetailsScreen.styles';
+import { Ionicons } from '@expo/vector-icons';
+import { useThemedStyles } from '../../utils/useThemedStyles';
 
 interface StepsListProps {
   steps: Step[];
@@ -29,6 +31,7 @@ export function StepsList({
   onDeleteStep,
   onAddStepPress,
 }: StepsListProps) {
+  const styles = useThemedStyles(createTaskDetailsStyles);
   const completedSteps = steps.filter((s) => Boolean(s.completed)).length;
   const totalSteps = steps.length;
   const stepsProgress = totalSteps > 0 ? (completedSteps / totalSteps) * 100 : 0;
@@ -64,7 +67,7 @@ export function StepsList({
 
       {steps.length === 0 ? (
         <View style={styles.emptyStepsContainer}>
-          <Text style={styles.emptyStepsIcon}>✓</Text>
+          <Ionicons name="list-outline" size={64} color="#64748b" style={{ opacity: 0.3 }} />
           <Text style={styles.emptyStepsText}>No steps yet</Text>
           <Text style={styles.emptyStepsSubtext}>
             Break down your task into smaller steps
@@ -74,7 +77,7 @@ export function StepsList({
         steps.map((step) => {
           const stepCompleted = Boolean(step.completed);
           const isEditingStep = editingStepId === step.id;
-          
+
           return (
             <View
               key={step.id}
@@ -87,9 +90,9 @@ export function StepsList({
                 style={styles.stepCheckbox}
                 onPress={() => onToggleStep(step)}
               >
-                {stepCompleted && <Text style={styles.checkmark}>✓</Text>}
+                {stepCompleted && <Ionicons name="checkmark" size={16} color="#6366f1" />}
               </TouchableOpacity>
-              
+
               {isEditingStep ? (
                 <View style={styles.stepEditContainer}>
                   <TextInput
@@ -104,13 +107,13 @@ export function StepsList({
                     style={styles.stepEditSaveButton}
                     onPress={onSaveStepEdit}
                   >
-                    <Text style={styles.stepEditSaveText}>✓</Text>
+                    <Ionicons name="checkmark" size={20} color="#fff" />
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={styles.stepEditCancelButton}
                     onPress={onCancelStepEdit}
                   >
-                    <Text style={styles.stepEditCancelText}>✕</Text>
+                    <Ionicons name="close" size={20} color="#fff" />
                   </TouchableOpacity>
                 </View>
               ) : (
@@ -133,13 +136,13 @@ export function StepsList({
                       style={styles.stepEditButton}
                       onPress={() => onEditStep(step)}
                     >
-                      <Text style={styles.stepEditButtonText}>✏️</Text>
+                      <Ionicons name="create-outline" size={22} color="#6366f1" />
                     </TouchableOpacity>
                     <TouchableOpacity
                       style={styles.stepDeleteButton}
                       onPress={() => handleDeleteStep(step)}
                     >
-                      <Text style={styles.stepDeleteButtonText}>🗑️</Text>
+                      <Ionicons name="trash-outline" size={22} color="#ef4444" />
                     </TouchableOpacity>
                   </View>
                 </>

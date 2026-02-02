@@ -30,6 +30,7 @@ export interface ToDoList {
   isSystem: boolean; // System lists (like "Finished Tasks") cannot be deleted
   createdAt: string;
   updatedAt: string;
+  deletedAt?: string | null;
 }
 
 export interface Task {
@@ -47,6 +48,7 @@ export interface Task {
   reminderConfig?: any; // JSON field for storing reminder configurations
   createdAt: string;
   updatedAt: string;
+  deletedAt?: string | null;
   todoList?: ToDoList;
 }
 
