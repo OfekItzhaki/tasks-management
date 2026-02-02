@@ -1,26 +1,18 @@
-# Exclude everything by default
-*
+# Exclude other monorepo apps
+/todo-backend/
+/web-app/
+/mobile-build-isolated/
 
-# Allow directories to be discovered
-!*/
+# Exclude root level overhead
+/.github/
+/.husky/
+/scripts/
+/instructions/
 
-# Allow specific project folders and their contents
-!mobile-app/**
-!frontend-services/**
-
-# Allow root config files
-!package.json
-!package-lock.json
-
-# Standard exclusions (apply everywhere)
-**/node_modules/
-**/android/
-**/ios/
-**/.expo/
-**/dist/
-**/build/
-
-# Explicitly exclude other monorepo apps just in case
-todo-backend/
-web-app/
-mobile-build-isolated/
+# Standard build artifacts (exclude everywhere)
+node_modules/
+android/
+ios/
+.expo/
+dist/
+build/
