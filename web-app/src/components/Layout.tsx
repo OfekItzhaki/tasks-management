@@ -5,14 +5,14 @@ import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from 'react-i18next';
 import { useMemo, useCallback, useState } from 'react';
 import { supportedLanguages } from '../i18n';
-import { isRtlLanguage } from '@tasks-management/frontend-services';
+import { isRtlLanguage, getAssetUrl } from '@tasks-management/frontend-services';
 import ErrorFallback from './ErrorFallback';
 
 export default function Layout() {
   const { user, logout } = useAuth();
   const { themeMode, setThemeMode } = useTheme();
   const { t, i18n } = useTranslation();
-  
+
   // Memoize RTL calculation to prevent recalculation on every render
   const isRtl = useMemo(() => isRtlLanguage(i18n.language), [i18n.language]);
 
@@ -49,9 +49,14 @@ export default function Layout() {
     }
     // Reset error state when picture URL changes
     setImageError(false);
-    // Add cache-busting query parameter - use updatedAt if available, otherwise use current time
-    // This ensures the browser fetches a fresh image when the picture changes
-    const baseUrl = user.profilePicture.split('?')[0]; // Remove any existing query params
+
+    let url = user.profilePicture;
+    if (url.startsWith('/uploads')) {
+      url = getAssetUrl(url);
+    }
+
+    // Add cache-busting query parameter
+    const baseUrl = url.split('?')[0];
     const timestamp = user.updatedAt ? new Date(user.updatedAt).getTime() : Date.now();
     return `${baseUrl}?v=${timestamp}`;
   }, [user?.profilePicture, user?.updatedAt]);
@@ -86,31 +91,28 @@ export default function Layout() {
               <div className={`flex items-center ${isRtl ? 'space-x-reverse space-x-1' : 'space-x-1'} glass-card rounded-xl p-1`}>
                 <button
                   onClick={() => setThemeMode('light')}
-                  className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-200 ${
-                    themeMode === 'light'
-                      ? 'bg-primary-500 text-white shadow-md shadow-primary-500/30'
-                      : 'text-gray-600 dark:text-white hover:bg-white/50 dark:hover:bg-gray-800/50'
-                  }`}
+                  className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-200 ${themeMode === 'light'
+                    ? 'bg-primary-500 text-white shadow-md shadow-primary-500/30'
+                    : 'text-gray-600 dark:text-white hover:bg-white/50 dark:hover:bg-gray-800/50'
+                    }`}
                 >
                   {t('nav.theme.light')}
                 </button>
                 <button
                   onClick={() => setThemeMode('dark')}
-                  className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-200 ${
-                    themeMode === 'dark'
-                      ? 'bg-primary-500 text-white shadow-md shadow-primary-500/30'
-                      : 'text-gray-600 dark:text-white hover:bg-white/50 dark:hover:bg-gray-800/50'
-                  }`}
+                  className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-200 ${themeMode === 'dark'
+                    ? 'bg-primary-500 text-white shadow-md shadow-primary-500/30'
+                    : 'text-gray-600 dark:text-white hover:bg-white/50 dark:hover:bg-gray-800/50'
+                    }`}
                 >
                   {t('nav.theme.dark')}
                 </button>
                 <button
                   onClick={() => setThemeMode('auto')}
-                  className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-200 ${
-                    themeMode === 'auto'
-                      ? 'bg-primary-500 text-white shadow-md shadow-primary-500/30'
-                      : 'text-gray-600 dark:text-white hover:bg-white/50 dark:hover:bg-gray-800/50'
-                  }`}
+                  className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-200 ${themeMode === 'auto'
+                    ? 'bg-primary-500 text-white shadow-md shadow-primary-500/30'
+                    : 'text-gray-600 dark:text-white hover:bg-white/50 dark:hover:bg-gray-800/50'
+                    }`}
                 >
                   {t('nav.theme.auto')}
                 </button>
@@ -146,9 +148,8 @@ export default function Layout() {
                   />
                 ) : null}
                 <div
-                  className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold text-white bg-gradient-to-br from-primary-500 to-purple-500 border-2 border-primary-500/30 group-hover:border-primary-500/50 transition-all ${
-                    profilePictureUrl && !imageError ? 'hidden' : ''
-                  }`}
+                  className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold text-white bg-gradient-to-br from-primary-500 to-purple-500 border-2 border-primary-500/30 group-hover:border-primary-500/50 transition-all ${profilePictureUrl && !imageError ? 'hidden' : ''
+                    }`}
                   style={{ display: profilePictureUrl && !imageError ? 'none' : 'flex' }}
                 >
                   {userInitial}

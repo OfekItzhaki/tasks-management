@@ -17,7 +17,7 @@ export * from './types';
 export * from './i18n';
 
 // Export config
-export { API_CONFIG, getApiUrl } from './config';
+export { API_CONFIG, getApiUrl, getAssetUrl } from './config';
 
 // Export storage utilities
 export { TokenStorage } from './utils/storage';

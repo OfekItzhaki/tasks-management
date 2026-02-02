@@ -25,7 +25,7 @@ import { usersService } from '../services/users.service';
 import { authService } from '../services/auth.service';
 import { isRtlLanguage } from '@tasks-management/frontend-services';
 import { handleApiError, isAuthError } from '../utils/errorHandler';
-import { getApiUrl } from '../config/api';
+import { getApiUrl, getAssetUrl } from '../config/api';
 import { SmartImage } from '../components/common/SmartImage';
 
 export default function ProfileScreen() {
@@ -479,13 +479,13 @@ export default function ProfileScreen() {
 
                         // If it's a relative path
                         if (url.startsWith('/uploads')) {
-                          url = getApiUrl(url);
+                          url = getAssetUrl(url);
                         }
                         // If it's an absolute URL but contains localhost (legacy data fix)
                         else if (url.includes('localhost') || url.includes('127.0.0.1')) {
                           const parts = url.split('/uploads/');
                           if (parts.length > 1) {
-                            url = getApiUrl(`/uploads/${parts[1]}`);
+                            url = getAssetUrl(`/uploads/${parts[1]}`);
                           }
                         }
 
