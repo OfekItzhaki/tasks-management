@@ -1,4 +1,9 @@
-import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -85,19 +90,24 @@ export default function TasksPage() {
       ]);
 
       queryClient.setQueryData<ListWithSystemFlag>(['list', id], (old) =>
-        old ? { ...old, ...data, updatedAt: new Date().toISOString() } : old,
+        old ? { ...old, ...data, updatedAt: new Date().toISOString() } : old
       );
       queryClient.setQueryData<ListWithSystemFlag[]>(['lists'], (old = []) =>
         old.map((l) =>
-          l.id === id ? { ...l, ...data, updatedAt: new Date().toISOString() } : l,
-        ),
+          l.id === id
+            ? { ...l, ...data, updatedAt: new Date().toISOString() }
+            : l
+        )
       );
 
       return { previousList, previousLists };
     },
     onError: (err, _vars, ctx) => {
       if (ctx?.previousList) {
-        queryClient.setQueryData(['list', ctx.previousList.id], ctx.previousList);
+        queryClient.setQueryData(
+          ['list', ctx.previousList.id],
+          ctx.previousList
+        );
       }
       if (ctx?.previousLists) {
         queryClient.setQueryData(['lists'], ctx.previousLists);
@@ -123,7 +133,7 @@ export default function TasksPage() {
         'lists',
       ]);
       queryClient.setQueryData<ListWithSystemFlag[]>(['lists'], (old = []) =>
-        old.filter((l) => l.id !== id),
+        old.filter((l) => l.id !== id)
       );
       return { previousLists };
     },
@@ -140,7 +150,12 @@ export default function TasksPage() {
     },
   });
 
-  const createTaskMutation = useMutation<Task, ApiError, CreateTaskDto, { previousTasks?: Task[] }>({
+  const createTaskMutation = useMutation<
+    Task,
+    ApiError,
+    CreateTaskDto,
+    { previousTasks?: Task[] }
+  >({
     mutationFn: (data) =>
       tasksService.createTask(numericListId as number, data),
     onMutate: async (data) => {
@@ -158,6 +173,7 @@ export default function TasksPage() {
         id: tempId,
         description: data.description,
         completed: false,
+        completedAt: null,
         todoListId: numericListId,
         order: Date.now(),
         dueDate: null,
@@ -188,7 +204,9 @@ export default function TasksPage() {
     },
     onSettled: async () => {
       if (numericListId) {
-        await queryClient.invalidateQueries({ queryKey: ['tasks', numericListId] });
+        await queryClient.invalidateQueries({
+          queryKey: ['tasks', numericListId],
+        });
       }
     },
   });
@@ -208,7 +226,7 @@ export default function TasksPage() {
         numericListId,
       ]);
       queryClient.setQueryData<Task[]>(['tasks', numericListId], (old = []) =>
-        old.filter((t) => t.id !== id),
+        old.filter((t) => t.id !== id)
       );
       return { previousTasks };
     },
@@ -223,7 +241,9 @@ export default function TasksPage() {
     },
     onSettled: async () => {
       if (numericListId) {
-        await queryClient.invalidateQueries({ queryKey: ['tasks', numericListId] });
+        await queryClient.invalidateQueries({
+          queryKey: ['tasks', numericListId],
+        });
       }
     },
   });
@@ -243,7 +263,7 @@ export default function TasksPage() {
         numericListId,
       ]);
       queryClient.setQueryData<Task[]>(['tasks', numericListId], (old = []) =>
-        old.filter((t) => t.id !== id),
+        old.filter((t) => t.id !== id)
       );
       return { previousTasks };
     },
@@ -257,12 +277,16 @@ export default function TasksPage() {
       toast.success(t('tasks.restored'));
       // Task moved to original list; refresh that list if we know it.
       if (typeof restored.todoListId === 'number') {
-        await queryClient.invalidateQueries({ queryKey: ['tasks', restored.todoListId] });
+        await queryClient.invalidateQueries({
+          queryKey: ['tasks', restored.todoListId],
+        });
       }
     },
     onSettled: async () => {
       if (numericListId) {
-        await queryClient.invalidateQueries({ queryKey: ['tasks', numericListId] });
+        await queryClient.invalidateQueries({
+          queryKey: ['tasks', numericListId],
+        });
       }
     },
   });
@@ -282,7 +306,7 @@ export default function TasksPage() {
         numericListId,
       ]);
       queryClient.setQueryData<Task[]>(['tasks', numericListId], (old = []) =>
-        old.filter((t) => t.id !== id),
+        old.filter((t) => t.id !== id)
       );
       return { previousTasks };
     },
@@ -297,7 +321,9 @@ export default function TasksPage() {
     },
     onSettled: async () => {
       if (numericListId) {
-        await queryClient.invalidateQueries({ queryKey: ['tasks', numericListId] });
+        await queryClient.invalidateQueries({
+          queryKey: ['tasks', numericListId],
+        });
       }
     },
   });
@@ -322,7 +348,7 @@ export default function TasksPage() {
       // (We still cancel in-flight queries afterwards to avoid stale overwrites.)
       if (typeof numericListId === 'number') {
         queryClient.setQueryData<Task[]>(['tasks', numericListId], (old = []) =>
-          old.map((t) => (t.id === id ? { ...t, ...data, updatedAt: now } : t)),
+          old.map((t) => (t.id === id ? { ...t, ...data, updatedAt: now } : t))
         );
       }
 
@@ -355,7 +381,9 @@ export default function TasksPage() {
     },
     onSettled: async (_data, _err, vars) => {
       if (typeof numericListId === 'number') {
-        await queryClient.invalidateQueries({ queryKey: ['tasks', numericListId] });
+        await queryClient.invalidateQueries({
+          queryKey: ['tasks', numericListId],
+        });
       }
       await queryClient.invalidateQueries({ queryKey: ['task', vars.id] });
     },
@@ -422,7 +450,9 @@ export default function TasksPage() {
                 <button
                   type="button"
                   disabled={
-                    updateListMutation.isPending || !list || !listNameDraft.trim()
+                    updateListMutation.isPending ||
+                    !list ||
+                    !listNameDraft.trim()
                   }
                   onClick={() => {
                     if (!list) return;
@@ -433,7 +463,7 @@ export default function TasksPage() {
                           toast.success(t('tasks.listUpdated'));
                           setIsEditingListName(false);
                         },
-                      },
+                      }
                     );
                   }}
                   className="inline-flex justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -475,7 +505,7 @@ export default function TasksPage() {
               disabled={deleteListMutation.isPending}
               onClick={() => {
                 const ok = window.confirm(
-                  t('tasks.deleteListConfirm', { name: list.name }),
+                  t('tasks.deleteListConfirm', { name: list.name })
                 );
                 if (!ok) return;
                 deleteListMutation.mutate({ id: list.id });
@@ -493,8 +523,11 @@ export default function TasksPage() {
           className="bg-white rounded-lg border p-4 mb-6"
           onSubmit={(e) => {
             e.preventDefault();
-            if (!newTaskDescription.trim() || !numericListId || isFinishedList) return;
-            createTaskMutation.mutate({ description: newTaskDescription.trim() });
+            if (!newTaskDescription.trim() || !numericListId || isFinishedList)
+              return;
+            createTaskMutation.mutate({
+              description: newTaskDescription.trim(),
+            });
           }}
         >
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-12 sm:items-end">
@@ -520,7 +553,9 @@ export default function TasksPage() {
                 }
                 className="inline-flex flex-1 justify-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {createTaskMutation.isPending ? t('common.loading') : t('common.create')}
+                {createTaskMutation.isPending
+                  ? t('common.loading')
+                  : t('common.create')}
               </button>
               <button
                 type="button"
@@ -616,7 +651,9 @@ export default function TasksPage() {
                       onClick={(e) => {
                         e.stopPropagation();
                         const ok = window.confirm(
-                          t('tasks.restoreConfirm', { description: task.description }),
+                          t('tasks.restoreConfirm', {
+                            description: task.description,
+                          })
                         );
                         if (!ok) return;
                         restoreTaskMutation.mutate({ id: task.id });
@@ -631,7 +668,9 @@ export default function TasksPage() {
                       onClick={(e) => {
                         e.stopPropagation();
                         const ok = window.confirm(
-                          t('tasks.deleteForeverConfirm', { description: task.description }),
+                          t('tasks.deleteForeverConfirm', {
+                            description: task.description,
+                          })
                         );
                         if (!ok) return;
                         permanentDeleteTaskMutation.mutate({ id: task.id });
@@ -648,7 +687,9 @@ export default function TasksPage() {
                     onClick={(e) => {
                       e.stopPropagation();
                       const ok = window.confirm(
-                        t('tasks.deleteTaskConfirm', { description: task.description }),
+                        t('tasks.deleteTaskConfirm', {
+                          description: task.description,
+                        })
                       );
                       if (!ok) return;
                       deleteTaskMutation.mutate({ id: task.id });
