@@ -199,7 +199,6 @@ export default function ListsPage() {
             </span>
           </button>
         )}
-
         {lists.map((list, index) => (
           <Link
             key={list.id}
@@ -242,7 +241,6 @@ export default function ListsPage() {
                 </svg>
               </div>
             </div>
-
             {/* Accent Bar */}
             <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-accent-primary to-accent-secondary rounded-b-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
           </Link>
