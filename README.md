@@ -1,5 +1,5 @@
 # Horizon Tasks
-> by **Horizon Labs** 🧪
+> by **Ofek Labs** 🧪
 
 ## Overview
 **Horizon Tasks** is a powerful, full-stack task management solution designed to help you organize your life with clarity and precision. Built with a modern tech stack, it seamlessly syncs across Web and Mobile.
