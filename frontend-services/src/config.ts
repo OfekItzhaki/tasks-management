@@ -4,8 +4,6 @@ const getApiBaseUrl = (): string => {
 
   if (typeof process !== 'undefined') {
     // 1. Direct access for Vite's static replacement (define in vite.config.ts)
-    // We use bracket notation to handle Hermes/Expo without crashing, 
-    // but Vite needs clear strings to replace.
     const pEnv = process.env as any;
     const vUrl = pEnv['VITE_API_URL'];
     const aUrl = pEnv['API_BASE_URL'];
