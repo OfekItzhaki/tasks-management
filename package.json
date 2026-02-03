@@ -3,9 +3,14 @@
   "private": true,
   "description": "Tasks Management monorepo",
   "scripts": {
+    "start": "concurrently \"npm run dev:backend\" \"npm run dev:web\" \"npm run dev:mobile\"",
+    "dev:backend": "npm start --prefix todo-backend",
+    "dev:web": "npm start --prefix web-app",
+    "dev:mobile": "npm start --prefix mobile-app",
     "prepare": "husky"
   },
   "devDependencies": {
+    "concurrently": "^9.2.1",
     "eslint": "^9.17.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",

@@ -28,7 +28,7 @@ export default {
     edit: 'Edit',
   },
   login: {
-    welcome: 'Welcome to Horizon Tasks',
+    title: 'Sign in to Horizon Tasks',
     emailPlaceholder: 'Email address',
     passwordPlaceholder: 'Password',
     signIn: 'Sign in',
@@ -121,7 +121,7 @@ export default {
     about: 'About',
     version: 'Version',
     credits: 'Credits',
-    creditsValue: 'Tasks Management team',
+    creditsValue: 'Horizon Tasks team',
     sourceCode: 'Source code',
     openRepo: 'Open repo',
   },

@@ -9,7 +9,7 @@ services:
     region: oregon
     plan: free
     rootDir: todo-backend
-    buildCommand: NODE_ENV=development npm ci && npx prisma generate && npm run build
+    buildCommand: cd ../frontend-services && npm ci && npm run build && cd ../todo-backend && NODE_ENV=development npm ci && npx prisma generate && npm run build
     startCommand: npm run start:prod
     healthCheckPath: /api/v1/healthz
     envVars:
@@ -31,7 +31,7 @@ services:
     region: oregon
     plan: free
     rootDir: web-app
-    buildCommand: npm ci && npm run build
+    buildCommand: cd ../frontend-services && npm ci && npm run build && cd ../web-app && npm ci && npm run build
     staticPublishPath: dist
     envVars:
       - key: VITE_API_URL

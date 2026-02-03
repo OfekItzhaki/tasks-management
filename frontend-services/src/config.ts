@@ -1,10 +1,16 @@
 // Get API base URL - works in both Node.js and browser environments
 const getApiBaseUrl = (): string => {
-  // Node.js environment
-  if (typeof process !== 'undefined' && process.env && process.env.API_BASE_URL) {
-    return process.env.API_BASE_URL;
+  // We use process.env as the universal bridge. 
+  // - Node/Jest: works natively
+  // - Expo: works natively
+  // - Vite: we polyfill this in vite.config.ts
+  if (typeof process !== 'undefined' && process.env) {
+    const env = process.env;
+    if (env.EXPO_PUBLIC_API_URL) return env.EXPO_PUBLIC_API_URL;
+    if (env.API_BASE_URL) return env.API_BASE_URL;
+    if ((env as any).VITE_API_URL) return (env as any).VITE_API_URL;
   }
-  // Browser environment - use default (can be overridden via Vite env vars in web-app)
+
   return 'http://localhost:3000';
 };
 

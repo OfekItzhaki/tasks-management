@@ -28,7 +28,7 @@ export default {
     edit: 'ערוך',
   },
   login: {
-    title: 'התחברות למנהל המשימות',
+    title: 'התחברות ל-Horizon Tasks',
     emailPlaceholder: 'כתובת אימייל',
     passwordPlaceholder: 'סיסמה',
     signIn: 'התחבר',
