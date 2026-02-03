@@ -35,9 +35,7 @@ describe('ListsPage (integration)', () => {
     render(<ListsPage />);
     await waitFor(
       () => {
-        expect(
-          screen.getByRole('button', { name: /Create new list/i })
-        ).toBeInTheDocument();
+        expect(screen.getByText(/New List/i)).toBeInTheDocument();
       },
       { timeout: 5000 }
     );
@@ -75,13 +73,11 @@ describe('ListsPage (integration)', () => {
     render(<ListsPage />);
     await waitFor(
       () => {
-        expect(
-          screen.getByRole('button', { name: /Create new list/i })
-        ).toBeInTheDocument();
+        expect(screen.getByText(/New List/i)).toBeInTheDocument();
       },
       { timeout: 5000 }
     );
-    await user.click(screen.getByRole('button', { name: /Create new list/i }));
+    await user.click(screen.getByText(/New List/i));
     const nameInput = await screen.findByPlaceholderText(
       /e\.g\. Groceries|name/i
     );

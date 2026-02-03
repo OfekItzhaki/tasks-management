@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTranslation } from 'react-i18next';
 import { BUILD_INFO } from '../utils/buildInfo';
@@ -83,6 +84,12 @@ export default function ProfilePage() {
   return (
     <div className="max-w-4xl mx-auto pb-20">
       <div className="mb-8">
+        <Link
+          to="/lists"
+          className="inline-flex items-center gap-2 text-accent hover:text-accent/80 font-semibold text-sm transition-all mb-6"
+        >
+          ← {t('tasks.backToLists')}
+        </Link>
         <h1 className="text-4xl font-bold text-primary tracking-tight">
           {t('profile.title')}
         </h1>

@@ -22,7 +22,6 @@ import {
 } from '@dnd-kit/sortable';
 import { tasksService } from '../services/tasks.service';
 import { listsService } from '../services/lists.service';
-import FloatingActionButton from '../components/FloatingActionButton';
 import Skeleton from '../components/Skeleton';
 import { useTranslation } from 'react-i18next';
 import {
@@ -641,6 +640,32 @@ export default function TasksPage() {
           className="space-y-4 animate-slide-up"
           style={{ animationDelay: '0.2s' }}
         >
+          {/* Add Task Button - Always First */}
+          {!showCreate && !isBulkMode && !isFinishedList && (
+            <button
+              onClick={() => setShowCreate(true)}
+              className="w-full h-16 rounded-2xl border-2 border-dashed border-border-subtle hover:border-accent hover:bg-accent/5 flex items-center justify-center gap-3 transition-all duration-200 group"
+            >
+              <div className="w-8 h-8 rounded-full bg-hover group-hover:bg-accent group-hover:text-white flex items-center justify-center transition-all">
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 4v16m8-8H4"
+                  />
+                </svg>
+              </div>
+              <span className="text-sm font-semibold uppercase tracking-wider text-tertiary group-hover:text-accent transition-colors">
+                {t('common.createTask', { defaultValue: 'New Task' })}
+              </span>
+            </button>
+          )}
           <SortableContext
             items={sortedTasks.map((t) => t.id)}
             strategy={verticalListSortingStrategy}
@@ -694,14 +719,6 @@ export default function TasksPage() {
             {t('tasks.form.descriptionPlaceholder')}
           </p>
         </div>
-      )}
-
-      {!isBulkMode && (
-        <FloatingActionButton
-          ariaLabel={t('tasks.createFab')}
-          disabled={!numericListId || isFinishedList}
-          onClick={() => setShowCreate(true)}
-        />
       )}
     </div>
   );

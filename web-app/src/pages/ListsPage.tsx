@@ -10,7 +10,6 @@ import {
   ListType,
 } from '@tasks-management/frontend-services';
 import { formatApiError } from '../utils/formatApiError';
-import FloatingActionButton from '../components/FloatingActionButton';
 import Skeleton from '../components/Skeleton';
 import { useTranslation } from 'react-i18next';
 
@@ -173,6 +172,33 @@ export default function ListsPage() {
 
       {/* Lists Grid */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {/* Add List Card - Always First */}
+        {!showCreate && (
+          <button
+            onClick={() => setShowCreate(true)}
+            className="group h-40 rounded-2xl border-2 border-dashed border-border-subtle hover:border-accent hover:bg-accent/5 flex flex-col items-center justify-center transition-all duration-200 animate-slide-up"
+            style={{ animationDelay: '0s' }}
+          >
+            <div className="w-12 h-12 rounded-full bg-hover group-hover:bg-accent group-hover:text-white flex items-center justify-center transition-all mb-3">
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 4v16m8-8H4"
+                />
+              </svg>
+            </div>
+            <span className="text-sm font-semibold uppercase tracking-wider text-tertiary group-hover:text-accent transition-colors">
+              {t('common.createList', { defaultValue: 'New List' })}
+            </span>
+          </button>
+        )}
         {lists.map((list, index) => (
           <Link
             key={list.id}
@@ -199,9 +225,6 @@ export default function ListsPage() {
 
             {/* Footer with Arrow */}
             <div className="flex justify-between items-center">
-              <span className="text-xs font-semibold uppercase tracking-wider text-tertiary group-hover:text-accent transition-colors">
-                {t('common.open')}
-              </span>
               <div className="w-8 h-8 rounded-lg bg-hover group-hover:bg-accent group-hover:text-white flex items-center justify-center transition-all">
                 <svg
                   className="w-4 h-4"
@@ -218,39 +241,10 @@ export default function ListsPage() {
                 </svg>
               </div>
             </div>
-
             {/* Accent Bar */}
             <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-accent-primary to-accent-secondary rounded-b-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
           </Link>
         ))}
-
-        {/* Add List Card */}
-        {!showCreate && (
-          <button
-            onClick={() => setShowCreate(true)}
-            className="group h-40 rounded-2xl border-2 border-dashed border-border-subtle hover:border-accent hover:bg-accent/5 flex flex-col items-center justify-center transition-all duration-200 animate-slide-up"
-            style={{ animationDelay: `${lists.length * 0.05}s` }}
-          >
-            <div className="w-12 h-12 rounded-full bg-hover group-hover:bg-accent group-hover:text-white flex items-center justify-center transition-all mb-3">
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 4v16m8-8H4"
-                />
-              </svg>
-            </div>
-            <span className="text-sm font-semibold uppercase tracking-wider text-tertiary group-hover:text-accent transition-colors">
-              {t('common.createList', { defaultValue: 'New List' })}
-            </span>
-          </button>
-        )}
       </div>
 
       {/* Empty State */}
@@ -259,11 +253,6 @@ export default function ListsPage() {
           <p className="text-lg text-tertiary">{t('lists.empty')}</p>
         </div>
       )}
-
-      <FloatingActionButton
-        ariaLabel={t('lists.createFab')}
-        onClick={() => setShowCreate(true)}
-      />
     </div>
   );
 }

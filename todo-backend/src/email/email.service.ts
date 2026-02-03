@@ -15,7 +15,7 @@ export class EmailService {
 
     await this.mailerService.sendMail({
       to: email,
-      subject: 'Verify your email address',
+      subject: 'Welcome to Horizon Tasks',
       html: `
         <!DOCTYPE html>
         <html>
@@ -26,7 +26,7 @@ export class EmailService {
         </head>
         <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
           <div style="background-color: #f4f4f4; padding: 20px; border-radius: 5px;">
-            <h1 style="color: #4f46e5;">Tasks Management</h1>
+            <h1 style="color: #4f46e5;">Horizon Tasks</h1>
             <h2 style="color: #333;">Verify your email address</h2>
             ${name ? `<p>Hello ${name},</p>` : '<p>Hello,</p>'}
             <p>Thank you for signing up! Please verify your email address by clicking the button below:</p>

@@ -317,12 +317,34 @@ export default function TaskDetailsPage() {
                   </div>
                 </div>
               ) : (
-                <h1
-                  className={`text-4xl font-bold truncate transition-all cursor-pointer hover:text-accent ${task.completed ? 'text-tertiary line-through' : 'text-primary'}`}
-                  onClick={() => !isArchivedTask && setIsEditingTask(true)}
-                >
-                  {task.description}
-                </h1>
+                <div className="flex items-center gap-4 group">
+                  <h1
+                    className={`text-4xl font-bold truncate transition-all ${task.completed ? 'text-tertiary line-through' : 'text-primary'}`}
+                  >
+                    {task.description}
+                  </h1>
+                  {!isArchivedTask && (
+                    <button
+                      onClick={() => setIsEditingTask(true)}
+                      className="p-2 text-tertiary hover:text-accent hover:bg-accent/10 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                      title={t('common.edit')}
+                    >
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                        />
+                      </svg>
+                    </button>
+                  )}
+                </div>
               )}
             </div>
           </div>
@@ -345,191 +367,257 @@ export default function TaskDetailsPage() {
         </div>
 
         {/* Reminders Section */}
-        <section className="mt-12">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-widest flex items-center gap-3">
-              <span className="p-2 bg-primary-50 dark:bg-primary-900/20 text-primary-600 rounded-lg">
-                🔔
-              </span>
-              {t('taskDetails.remindersTitle', { defaultValue: 'Reminders' })}
-            </h2>
-            <button
-              onClick={() => {
-                setEditingReminder(null);
-                setShowReminderEditor(true);
-              }}
-              className="text-primary-600 hover:text-primary-700 font-black uppercase tracking-widest text-xs"
-            >
-              + {t('reminders.add', { defaultValue: 'Add Reminder' })}
-            </button>
-          </div>
+        <section className="mt-8">
+          <div className="premium-card p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-lg font-bold text-primary uppercase tracking-wider flex items-center gap-3">
+                <span className="text-2xl">🔔</span>
+                {t('taskDetails.remindersTitle', { defaultValue: 'Reminders' })}
+              </h2>
+            </div>
 
-          <div className="space-y-3">
-            {reminders.map((reminder) => (
-              <div
-                key={reminder.id}
-                className="group glass-card p-4 flex items-center justify-between hover:bg-white/80 dark:hover:bg-gray-800/80 transition-all cursor-pointer"
+            <div className="space-y-3">
+              {/* Add Reminder Button - Always First */}
+              <button
                 onClick={() => {
-                  setEditingReminder(reminder);
+                  setEditingReminder(null);
                   setShowReminderEditor(true);
                 }}
+                className="w-full p-4 rounded-xl border-2 border-dashed border-border-subtle hover:border-accent hover:bg-accent/5 flex items-center justify-center gap-3 transition-all duration-200 group"
               >
-                <div className="flex items-center gap-3">
-                  <span className="text-xl">⏰</span>
-                  <div>
-                    <p className="text-sm font-bold text-gray-900 dark:text-white">
-                      {formatReminderDisplay(reminder, t)}
-                    </p>
-                    {reminder.location && (
-                      <p className="text-xs text-gray-500 flex items-center gap-1">
-                        📍 {reminder.location}
-                      </p>
-                    )}
-                  </div>
+                <div className="w-8 h-8 rounded-full bg-hover group-hover:bg-accent group-hover:text-white flex items-center justify-center transition-all">
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 4v16m8-8H4"
+                    />
+                  </svg>
                 </div>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleDeleteReminder(reminder.id);
+                <span className="text-sm font-semibold uppercase tracking-wider text-tertiary group-hover:text-accent transition-colors">
+                  {t('reminders.add', { defaultValue: 'Add Reminder' })}
+                </span>
+              </button>
+
+              {reminders.map((reminder) => (
+                <div
+                  key={reminder.id}
+                  className="group bg-surface hover:bg-hover border border-border-subtle hover:border-accent/30 rounded-xl p-4 flex items-center justify-between transition-all cursor-pointer"
+                  onClick={() => {
+                    setEditingReminder(reminder);
+                    setShowReminderEditor(true);
                   }}
-                  className="opacity-0 group-hover:opacity-100 p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"
                 >
-                  🗑️
-                </button>
-              </div>
-            ))}
-            {reminders.length === 0 && (
-              <p className="text-sm text-gray-400 italic text-center py-4 bg-gray-50/50 dark:bg-gray-900/20 rounded-xl border border-dashed border-gray-200 dark:border-gray-800">
-                {t('reminders.noReminders', {
-                  defaultValue: 'No reminders set for this task',
-                })}
-              </p>
-            )}
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center text-accent">
+                      ⏰
+                    </div>
+                    <div>
+                      <p className="font-semibold text-primary">
+                        {formatReminderDisplay(reminder, t)}
+                      </p>
+                      {reminder.location && (
+                        <p className="text-xs text-secondary flex items-center gap-1 mt-0.5">
+                          📍 {reminder.location}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteReminder(reminder.id);
+                    }}
+                    className="opacity-0 group-hover:opacity-100 p-2 text-accent-danger hover:bg-accent-danger/10 rounded-lg transition-all"
+                  >
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              ))}
+            </div>
           </div>
         </section>
 
         {/* Steps Section */}
-        <section className="mt-12">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-widest flex items-center gap-3">
-              <span className="p-2 bg-purple-50 dark:bg-purple-900/20 text-purple-600 rounded-lg">
-                📋
-              </span>
-              {t('taskDetails.stepsTitle')}
-            </h2>
-            <button
-              onClick={() => setShowAddStep(true)}
-              className="text-purple-600 hover:text-purple-700 font-black uppercase tracking-widest text-xs"
-            >
-              + {t('taskDetails.addStep', { defaultValue: 'Add Step' })}
-            </button>
-          </div>
+        <section className="mt-8">
+          <div className="premium-card p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-lg font-bold text-primary uppercase tracking-wider flex items-center gap-3">
+                <span className="text-2xl">📋</span>
+                {t('taskDetails.stepsTitle')}
+              </h2>
+            </div>
 
-          <div className="space-y-3">
-            {task.steps
-              ?.sort((a, b) => a.order - b.order)
-              .map((step) => (
-                <div
-                  key={step.id}
-                  className="group glass-card p-4 flex items-center justify-between animate-fade-in"
+            <div className="space-y-3">
+              {/* Add Step Button - Always First */}
+              {!showAddStep && (
+                <button
+                  onClick={() => setShowAddStep(true)}
+                  className="w-full p-4 rounded-xl border-2 border-dashed border-border-subtle hover:border-accent hover:bg-accent/5 flex items-center justify-center gap-3 transition-all duration-200 group"
                 >
-                  <div className="flex items-center gap-4 flex-1 min-w-0">
-                    <input
-                      type="checkbox"
-                      checked={step.completed}
-                      onChange={() =>
-                        updateStepMutation.mutate({
-                          task,
-                          stepId: step.id,
-                          data: { completed: !step.completed },
-                        })
-                      }
-                      className="w-5 h-5 rounded text-purple-600 focus:ring-purple-500 border-gray-300"
-                    />
-                    {editingStepId === step.id ? (
-                      <input
-                        value={stepDescriptionDraft}
-                        onChange={(e) =>
-                          setStepDescriptionDraft(e.target.value)
-                        }
-                        autoFocus
-                        onBlur={() => {
-                          if (
-                            stepDescriptionDraft.trim() &&
-                            stepDescriptionDraft !== step.description
-                          ) {
-                            updateStepMutation.mutate({
-                              task,
-                              stepId: step.id,
-                              data: {
-                                description: stepDescriptionDraft.trim(),
-                              },
-                            });
-                          }
-                          setEditingStepId(null);
-                        }}
-                        className="flex-1 bg-transparent border-b border-purple-500 focus:outline-none text-gray-900 dark:text-white"
+                  <div className="w-8 h-8 rounded-full bg-hover group-hover:bg-accent group-hover:text-white flex items-center justify-center transition-all">
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 4v16m8-8H4"
                       />
-                    ) : (
-                      <span
-                        className={`flex-1 truncate cursor-pointer ${step.completed ? 'text-gray-400 line-through' : 'text-gray-900 dark:text-white font-medium'}`}
-                        onClick={() => {
-                          setEditingStepId(step.id);
-                          setStepDescriptionDraft(step.description);
-                        }}
-                      >
-                        {step.description}
-                      </span>
-                    )}
+                    </svg>
                   </div>
-                  <button
-                    onClick={() =>
-                      deleteStepMutation.mutate({ task, id: step.id })
-                    }
-                    className="opacity-0 group-hover:opacity-100 p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"
-                  >
-                    🗑️
-                  </button>
-                </div>
-              ))}
-          </div>
+                  <span className="text-sm font-semibold uppercase tracking-wider text-tertiary group-hover:text-accent transition-colors">
+                    {t('taskDetails.addStep', { defaultValue: 'Add Step' })}
+                  </span>
+                </button>
+              )}
 
-          {showAddStep && (
-            <form
-              className="mt-4 animate-slide-up"
-              onSubmit={(e) => {
-                e.preventDefault();
-                if (newStepDescription.trim())
-                  createStepMutation.mutate({
-                    task,
-                    data: { description: newStepDescription.trim() },
-                  });
-              }}
-            >
-              <input
-                value={newStepDescription}
-                onChange={(e) => setNewStepDescription(e.target.value)}
-                autoFocus
-                placeholder={t('taskDetails.form.descriptionPlaceholder')}
-                className="w-full bg-gray-50 dark:bg-[#0a0a0a] border border-gray-200 dark:border-[#2a2a2a] rounded-xl px-4 py-3 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
-              />
-              <div className="flex gap-2 mt-3 justify-end">
-                <button
-                  type="submit"
-                  className="px-6 py-2 bg-purple-600 text-white rounded-xl text-xs font-black uppercase tracking-widest"
+              {showAddStep && (
+                <form
+                  className="animate-fade-in mb-4 p-4 rounded-xl border border-accent/20 bg-accent/5"
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    if (newStepDescription.trim())
+                      createStepMutation.mutate({
+                        task,
+                        data: { description: newStepDescription.trim() },
+                      });
+                  }}
                 >
-                  {t('common.create')}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowAddStep(false)}
-                  className="px-6 py-2 bg-gray-100 dark:bg-[#2a2a2a] text-gray-900 dark:text-white rounded-xl text-xs font-black uppercase tracking-widest"
-                >
-                  {t('common.cancel')}
-                </button>
-              </div>
-            </form>
-          )}
+                  <input
+                    value={newStepDescription}
+                    onChange={(e) => setNewStepDescription(e.target.value)}
+                    autoFocus
+                    placeholder={t('taskDetails.form.descriptionPlaceholder')}
+                    className="premium-input w-full mb-3"
+                  />
+                  <div className="flex gap-2 justify-end">
+                    <button type="submit" className="premium-button">
+                      {t('common.create')}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setShowAddStep(false)}
+                      className="px-6 py-2 bg-hover border border-border-subtle text-primary rounded-xl text-xs font-bold uppercase tracking-wide"
+                    >
+                      {t('common.cancel')}
+                    </button>
+                  </div>
+                </form>
+              )}
+
+              {task.steps
+                ?.sort((a, b) => a.order - b.order)
+                .map((step) => (
+                  <div
+                    key={step.id}
+                    className="group bg-surface hover:bg-hover border border-border-subtle rounded-xl p-4 flex items-center justify-between transition-all animate-fade-in"
+                  >
+                    <div className="flex items-center gap-4 flex-1 min-w-0">
+                      <input
+                        type="checkbox"
+                        checked={step.completed}
+                        onChange={() =>
+                          updateStepMutation.mutate({
+                            task,
+                            stepId: step.id,
+                            data: { completed: !step.completed },
+                          })
+                        }
+                        className="w-5 h-5 rounded text-accent focus:ring-accent/20 border-border-subtle"
+                      />
+                      {editingStepId === step.id ? (
+                        <input
+                          value={stepDescriptionDraft}
+                          onChange={(e) =>
+                            setStepDescriptionDraft(e.target.value)
+                          }
+                          autoFocus
+                          onBlur={() => {
+                            if (
+                              stepDescriptionDraft.trim() &&
+                              stepDescriptionDraft !== step.description
+                            ) {
+                              updateStepMutation.mutate({
+                                task,
+                                stepId: step.id,
+                                data: {
+                                  description: stepDescriptionDraft.trim(),
+                                },
+                              });
+                            }
+                            setEditingStepId(null);
+                          }}
+                          className="flex-1 bg-transparent border-b border-accent focus:outline-none text-primary"
+                        />
+                      ) : (
+                        <span
+                          className={`flex-1 truncate cursor-pointer ${step.completed ? 'text-tertiary line-through' : 'text-primary font-medium'}`}
+                          onClick={() => {
+                            setEditingStepId(step.id);
+                            setStepDescriptionDraft(step.description);
+                          }}
+                        >
+                          {step.description}
+                        </span>
+                      )}
+                    </div>
+                    <button
+                      onClick={() =>
+                        deleteStepMutation.mutate({ task, id: step.id })
+                      }
+                      className="opacity-0 group-hover:opacity-100 p-2 text-accent-danger hover:bg-accent-danger/10 rounded-lg transition-all"
+                    >
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                ))}
+
+              {task.steps?.length === 0 && !showAddStep && (
+                <div className="text-center py-8 border-2 border-dashed border-border-subtle rounded-xl">
+                  <p className="text-sm text-tertiary">
+                    {t('taskDetails.noSteps', {
+                      defaultValue: 'No steps added',
+                    })}
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
         </section>
       </div>
 
