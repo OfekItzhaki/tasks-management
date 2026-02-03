@@ -3,9 +3,11 @@ const getApiBaseUrl = (): string => {
   let url = 'http://localhost:3000';
 
   if (typeof process !== 'undefined' && process.env) {
-    if (process.env.EXPO_PUBLIC_API_URL) url = process.env.EXPO_PUBLIC_API_URL;
-    else if (process.env.API_BASE_URL) url = process.env.API_BASE_URL;
-    else if ((process.env as any).VITE_API_URL) url = (process.env as any).VITE_API_URL;
+    // Use bracket notation to bypass aggressive Expo transformations in Node/Jest environments
+    const env = process.env as any;
+    if (env['EXPO_PUBLIC_API_URL']) url = env['EXPO_PUBLIC_API_URL'];
+    else if (env['API_BASE_URL']) url = env['API_BASE_URL'];
+    else if (env['VITE_API_URL']) url = env['VITE_API_URL'];
   }
 
   // Ensure /api/v1 prefix is present if it's a prod/render/custom URL
