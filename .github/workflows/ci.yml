@@ -105,7 +105,15 @@ jobs:
           cache: 'npm'
           cache-dependency-path: mobile-app/package-lock.json
 
-      - name: Install dependencies
+      - name: Install frontend-services dependencies
+        run: npm ci
+        working-directory: frontend-services
+
+      - name: Build frontend-services
+        run: npm run build
+        working-directory: frontend-services
+
+      - name: Install mobile-app dependencies
         run: npm ci
 
       - name: Run tests

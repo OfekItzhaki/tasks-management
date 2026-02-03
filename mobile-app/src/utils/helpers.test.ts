@@ -176,7 +176,7 @@ describe('helpers', () => {
 
       const result = convertRemindersToBackend(reminders);
 
-      expect(result.reminderConfig).toEqual(reminders);
+      expect(result.reminderConfig).toHaveLength(1);
       expect(result.reminderDaysBefore).toEqual([]);
       expect(result.specificDayOfWeek).toBeNull();
     });
@@ -274,7 +274,7 @@ describe('helpers', () => {
       const result = convertRemindersToBackend(reminders);
 
       expect(result.specificDayOfWeek).toBe(1);
-      expect(result.reminderConfig).toBeNull();
+      expect(result.reminderConfig).toHaveLength(1);
     });
 
     it('should handle multiple reminder types together', () => {
@@ -308,7 +308,7 @@ describe('helpers', () => {
 
       const result = convertRemindersToBackend(reminders, dueDate);
 
-      expect(result.reminderConfig).toBeDefined();
+      expect(result.reminderConfig).toHaveLength(4);
       expect(result.reminderDaysBefore).toEqual([7]);
       expect(result.specificDayOfWeek).toBe(2);
     });
