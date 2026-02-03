@@ -42,10 +42,11 @@ export default function Layout() {
                   <Link
                     key={link.to}
                     to={link.to}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${location.pathname.startsWith(link.to)
-                      ? 'bg-accent text-white shadow-sm'
-                      : 'text-secondary hover:text-primary hover:bg-hover'
-                      }`}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                      location.pathname.startsWith(link.to)
+                        ? 'bg-accent text-white shadow-sm'
+                        : 'text-secondary hover:text-primary hover:bg-hover'
+                    }`}
                   >
                     {link.label}
                   </Link>
@@ -61,10 +62,11 @@ export default function Layout() {
                   <button
                     key={mode}
                     onClick={() => setThemeMode(mode)}
-                    className={`p-1.5 rounded-md transition-all ${themeMode === mode
-                      ? 'bg-surface text-accent shadow-sm'
-                      : 'text-tertiary hover:text-secondary'
-                      }`}
+                    className={`p-1.5 rounded-md transition-all ${
+                      themeMode === mode
+                        ? 'bg-surface text-accent shadow-sm'
+                        : 'text-tertiary hover:text-secondary'
+                    }`}
                     title={t(`theme.${mode}`, {
                       defaultValue:
                         mode.charAt(0).toUpperCase() + mode.slice(1),
