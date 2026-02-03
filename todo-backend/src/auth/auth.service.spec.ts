@@ -47,6 +47,7 @@ describe('AuthService', () => {
         email: 'test@example.com',
         passwordHash: 'hashed-password',
         name: 'Test User',
+        emailVerified: true,
       };
 
       mockUsersService.findByEmail.mockResolvedValue(mockUser);
@@ -92,6 +93,7 @@ describe('AuthService', () => {
         id: 1,
         email: 'test@example.com',
         passwordHash: 'hashed-password',
+        emailVerified: true,
       };
 
       mockUsersService.findByEmail.mockResolvedValue(mockUser);
@@ -104,6 +106,22 @@ describe('AuthService', () => {
         service.validateUser('test@example.com', 'wrongpassword'),
       ).rejects.toThrow('Invalid credentials');
     });
+
+    it('should throw UnauthorizedException if email is not verified', async () => {
+      const mockUser = {
+        id: 1,
+        email: 'test@example.com',
+        passwordHash: 'hashed-password',
+        emailVerified: false,
+      };
+
+      mockUsersService.findByEmail.mockResolvedValue(mockUser);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+
+      await expect(
+        service.validateUser('test@example.com', 'password123'),
+      ).rejects.toThrow('Email not verified');
+    });
   });
 
   describe('login', () => {
@@ -113,6 +131,7 @@ describe('AuthService', () => {
         email: 'test@example.com',
         name: 'Test User',
         passwordHash: 'hashed-password',
+        emailVerified: true,
       };
 
       const mockToken = 'jwt-token';
