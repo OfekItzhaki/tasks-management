@@ -8,7 +8,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { EmailService } from '../email/email.service';
-import { User, Prisma, ListType, NotificationFrequency } from '@prisma/client';
+import { User, Prisma, ListType } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 
 type UserWithRelations = Prisma.UserGetPayload<{
@@ -37,7 +37,7 @@ class UsersService {
   constructor(
     private prisma: PrismaService,
     private emailService: EmailService,
-  ) { }
+  ) {}
 
   private sanitizeUser<
     T extends {
@@ -142,13 +142,13 @@ class UsersService {
       type: ListType;
       isSystem?: boolean;
     }> = [
-        { name: 'Daily', type: ListType.DAILY },
-        { name: 'Weekly', type: ListType.WEEKLY },
-        { name: 'Monthly', type: ListType.MONTHLY },
-        { name: 'Yearly', type: ListType.YEARLY },
-        // System list for archived completed tasks (created once per user)
-        { name: 'Finished Tasks', type: ListType.FINISHED, isSystem: true },
-      ];
+      { name: 'Daily', type: ListType.DAILY },
+      { name: 'Weekly', type: ListType.WEEKLY },
+      { name: 'Monthly', type: ListType.MONTHLY },
+      { name: 'Yearly', type: ListType.YEARLY },
+      // System list for archived completed tasks (created once per user)
+      { name: 'Finished Tasks', type: ListType.FINISHED, isSystem: true },
+    ];
 
     await this.prisma.toDoList.createMany({
       data: defaultLists.map((list) => ({
