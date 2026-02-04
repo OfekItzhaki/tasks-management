@@ -8,9 +8,8 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { EmailService } from '../email/email.service';
-import { User, Prisma, ListType } from '@prisma/client';
+import { User, Prisma, ListType, NotificationFrequency } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
-import * as crypto from 'crypto';
 
 type UserWithRelations = Prisma.UserGetPayload<{
   include: {
@@ -71,9 +70,7 @@ class UsersService {
   async getUser(
     id: number,
     requestingUserId: number,
-  ): Promise<
-    Omit<UserWithRelations, 'passwordHash' | 'emailVerificationOtp'>
-  > {
+  ): Promise<Omit<UserWithRelations, 'passwordHash' | 'emailVerificationOtp'>> {
     if (id !== requestingUserId) {
       throw new ForbiddenException('You can only access your own profile');
     }
@@ -174,7 +171,9 @@ class UsersService {
     if (existingUser) {
       if (existingUser.emailVerified) {
         console.log(`initUser: email already verified`);
-        throw new BadRequestException('Email is already registered and verified');
+        throw new BadRequestException(
+          'Email is already registered and verified',
+        );
       }
       console.log(`initUser: updating existing unverified user`);
       // Update existing unverified user with new OTP
@@ -201,7 +200,9 @@ class UsersService {
       },
     });
 
-    console.log(`initUser: user created, id=${user.id}. creating default lists...`);
+    console.log(
+      `initUser: user created, id=${user.id}. creating default lists...`,
+    );
     // Create default lists for the new user
     await this.createDefaultLists(user.id);
     console.log(`initUser: default lists created`);
@@ -263,7 +264,10 @@ class UsersService {
       throw new BadRequestException('Invalid or expired verification code');
     }
 
-    if (user.emailVerificationExpiresAt && user.emailVerificationExpiresAt < new Date()) {
+    if (
+      user.emailVerificationExpiresAt &&
+      user.emailVerificationExpiresAt < new Date()
+    ) {
       throw new BadRequestException('Verification code has expired');
     }
 
@@ -302,7 +306,8 @@ class UsersService {
 
     // Rate Limit: 5 seconds
     if (user.emailVerificationSentAt) {
-      const diff = new Date().getTime() - new Date(user.emailVerificationSentAt).getTime();
+      const diff =
+        new Date().getTime() - new Date(user.emailVerificationSentAt).getTime();
       if (diff < 5000) {
         throw new BadRequestException('Please wait 5 seconds before resending');
       }
@@ -310,10 +315,14 @@ class UsersService {
 
     // Max Attempts: 5
     if (user.emailVerificationAttempts >= 5) {
-      throw new BadRequestException('Too many attempts. Please try again later.');
+      throw new BadRequestException(
+        'Too many attempts. Please try again later.',
+      );
     }
 
-    const emailVerificationOtp = Math.floor(100000 + Math.random() * 900000).toString();
+    const emailVerificationOtp = Math.floor(
+      100000 + Math.random() * 900000,
+    ).toString();
     const expiresAt = new Date();
     expiresAt.setMinutes(expiresAt.getMinutes() + 5);
 
@@ -364,7 +373,7 @@ class UsersService {
       updateData.passwordHash = await bcrypt.hash(data.password, 10);
     }
     if (data.notificationFrequency !== undefined) {
-      updateData.notificationFrequency = data.notificationFrequency as any;
+      updateData.notificationFrequency = data.notificationFrequency;
     }
 
     const user = await this.prisma.user.update({

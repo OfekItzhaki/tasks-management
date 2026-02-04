@@ -5,7 +5,7 @@ import { LoginDto } from './dto/login.dto';
 import {
   RegisterStartDto,
   RegisterVerifyDto,
-  RegisterFinishDto
+  RegisterFinishDto,
 } from './dto/register-multi-step.dto';
 import { ResendVerificationDto } from './dto/resend-verification.dto';
 import UsersService from '../users/users.service';
@@ -17,7 +17,7 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly usersService: UsersService,
-  ) { }
+  ) {}
 
   @Post('login')
   @ApiOperation({ summary: 'Login with email and password' })

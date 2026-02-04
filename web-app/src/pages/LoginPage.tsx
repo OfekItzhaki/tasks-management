@@ -18,6 +18,14 @@ export default function LoginPage() {
   const [regToken, setRegToken] = useState('');
 
   const { login } = useAuth();
+
+  const getErrorMessage = (err: unknown, fallback: string) => {
+    const error = err as ApiError;
+    if (Array.isArray(error.message)) {
+      return error.message.join(', ');
+    }
+    return error.message || fallback;
+  };
   const navigate = useNavigate();
 
   /* ... */
@@ -38,8 +46,8 @@ export default function LoginPage() {
       await authService.resendVerification(email);
       setResendCooldown(5); // 5 seconds cooldown
       setError('');
-    } catch (err: any) {
-      setError(err.message || 'Failed to resend code');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Failed to resend code'));
     } finally {
       setLoading(false);
     }
@@ -56,12 +64,7 @@ export default function LoginPage() {
       await login(credentials);
       navigate('/lists');
     } catch (err: unknown) {
-      const error = err as ApiError;
-      const errorMessage = Array.isArray(error.message)
-        ? error.message.join(', ')
-        : error.message || t('login.failed');
-
-      setError(errorMessage);
+      setError(getErrorMessage(err, t('login.failed')));
     } finally {
       setLoading(false);
     }
@@ -75,8 +78,8 @@ export default function LoginPage() {
     try {
       await authService.registerStart(email);
       setRegStep(2);
-    } catch (err: any) {
-      setError(err.message || 'Failed to start registration');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Failed to start registration'));
     } finally {
       setLoading(false);
     }
@@ -96,8 +99,8 @@ export default function LoginPage() {
       const response = await authService.registerVerify(email, codeToVerify);
       setRegToken(response.registrationToken);
       setRegStep(3);
-    } catch (err: any) {
-      setError(err.message || 'Invalid OTP');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Invalid OTP'));
     } finally {
       setLoading(false);
     }
@@ -105,59 +108,6 @@ export default function LoginPage() {
 
   /* ... */
 
-  {/* Step 2: OTP */ }
-  {
-    isRegistering && regStep === 2 && (
-      <div className="group animate-scale-in">
-        <label
-          htmlFor="otp"
-          className="block text-xs font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2 ml-1 transition-colors group-focus-within:text-violet-600 dark:group-focus-within:text-violet-400"
-        >
-          6-Digit Code
-        </label>
-        <div className="relative">
-          <input
-            id="otp"
-            name="otp"
-            type="text"
-            inputMode="numeric"
-            autoComplete="one-time-code"
-            maxLength={6}
-            required
-            value={otp}
-            onChange={(e) => {
-              const val = e.target.value.replace(/\D/g, '');
-              setOtp(val);
-              if (val.length === 6) {
-                // FIX: Pass value directly to avoid state race condition
-                void handleRegisterVerify(undefined, val);
-              }
-            }}
-            className="premium-input px-11 tracking-[0.5em] text-center font-bold text-lg"
-            placeholder="000000"
-          />
-          <div className="absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400 group-focus-within:text-violet-500 transition-colors">
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-              />
-            </svg>
-          </div>
-        </div>
-        <p className="mt-3 text-center text-[10px] font-bold text-tertiary uppercase tracking-widest animate-pulse">
-          Verifying code...
-        </p>
-      </div>
-    )
-  }
 
   const handleRegisterComplete = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -171,8 +121,8 @@ export default function LoginPage() {
         passwordConfirm,
       });
       navigate('/lists');
-    } catch (err: any) {
-      setError(err.message || 'Registration failed');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Registration failed'));
     } finally {
       setLoading(false);
     }

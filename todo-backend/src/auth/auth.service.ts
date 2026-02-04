@@ -1,4 +1,9 @@
-import { Injectable, Logger, UnauthorizedException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  UnauthorizedException,
+  BadRequestException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import UsersService from '../users/users.service';
@@ -10,7 +15,7 @@ export class AuthService {
   constructor(
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
-  ) { }
+  ) {}
 
   async validateUser(email: string, password: string) {
     const user = await this.usersService.findByEmail(email);
@@ -49,15 +54,24 @@ export class AuthService {
       this.logger.debug(`registerStart: user initialized, id=${user.id}`);
 
       try {
-        await this.usersService.sendOtp(user.email, user.emailVerificationOtp!, user.name || undefined);
+        await this.usersService.sendOtp(
+          user.email,
+          user.emailVerificationOtp!,
+          user.name || undefined,
+        );
       } catch (emailError) {
-        this.logger.warn(`Failed to send OTP email to ${email}, but proceeding: ${emailError.message}`);
+        this.logger.warn(
+          `Failed to send OTP email to ${email}, but proceeding: ${emailError.message}`,
+        );
       }
 
       this.logger.log(`Registration started: email=${email}`);
       return { message: 'OTP sent' };
     } catch (error) {
-      this.logger.error(`registerStart failed for email=${email}:`, error.stack);
+      this.logger.error(
+        `registerStart failed for email=${email}:`,
+        error.stack,
+      );
       throw error;
     }
   }
@@ -68,11 +82,18 @@ export class AuthService {
       throw new BadRequestException('Invalid OTP');
     }
     const now = new Date();
-    if (user.emailVerificationExpiresAt && user.emailVerificationExpiresAt < now) {
+    if (
+      user.emailVerificationExpiresAt &&
+      user.emailVerificationExpiresAt < now
+    ) {
       throw new BadRequestException('OTP expired');
     }
 
-    const payload = { sub: user.id, email: user.email, purpose: 'registration' };
+    const payload = {
+      sub: user.id,
+      email: user.email,
+      purpose: 'registration',
+    };
     return {
       registrationToken: this.jwtService.sign(payload, { expiresIn: '15m' }),
     };
@@ -86,7 +107,10 @@ export class AuthService {
       }
 
       const passwordHash = await bcrypt.hash(password, 10);
-      const user = await this.usersService.setPassword(payload.sub, passwordHash);
+      const user = await this.usersService.setPassword(
+        payload.sub,
+        passwordHash,
+      );
 
       return this.login(user.email, password);
     } catch (e) {

@@ -23,6 +23,7 @@ export interface User {
   name: string | null;
   profilePicture: string | null;
   emailVerified: boolean;
+  notificationFrequency: NotificationFrequency;
   createdAt: string;
   updatedAt: string;
 }

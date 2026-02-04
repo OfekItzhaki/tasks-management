@@ -7,6 +7,7 @@ import {
   IsEnum,
 } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
+import { NotificationFrequency } from '@prisma/client';
 
 export class UpdateUserDto {
   @ApiPropertyOptional({
@@ -50,6 +51,6 @@ export class UpdateUserDto {
     example: 'DAILY',
   })
   @IsOptional()
-  @IsEnum(['NONE', 'DAILY', 'WEEKLY'])
-  notificationFrequency?: string;
+  @IsEnum(NotificationFrequency)
+  notificationFrequency?: NotificationFrequency;
 }

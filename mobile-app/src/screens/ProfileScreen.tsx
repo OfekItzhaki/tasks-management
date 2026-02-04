@@ -23,7 +23,7 @@ import { useTheme } from '../context/ThemeContext';
 import { useThemedStyles } from '../utils/useThemedStyles';
 import { usersService } from '../services/users.service';
 import { authService } from '../services/auth.service';
-import { isRtlLanguage } from '@tasks-management/frontend-services';
+import { isRtlLanguage, NotificationFrequency } from '@tasks-management/frontend-services';
 import { handleApiError, isAuthError } from '../utils/errorHandler';
 import { getApiUrl, getAssetUrl } from '../config/api';
 import { SmartImage } from '../components/common/SmartImage';
