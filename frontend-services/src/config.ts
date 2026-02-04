@@ -71,19 +71,10 @@ export const getAssetUrl = (path: string): string => {
 
   const root = API_CONFIG.baseURL.split('/api/v1')[0].replace(/\/$/, '');
 
-  // Normalize current path: ensure it starts with /uploads/ if it's just a filename
-  let cleanPath = path.replace(/\\/g, '/'); // Normalize backslashes just in case
+  // Normalize path and strip any existing /uploads/ or uploads/ prefix
+  let cleanPath = path.replace(/\\/g, '/');
+  cleanPath = cleanPath.replace(/^(\/)?uploads\//, '');
+  cleanPath = cleanPath.replace(/^\//, '');
 
-  if (!cleanPath.startsWith('/') && !cleanPath.includes('/uploads/')) {
-    cleanPath = `/uploads/${cleanPath}`;
-  } else if (!cleanPath.startsWith('/')) {
-    cleanPath = `/${cleanPath}`;
-  }
-
-  // Ensure path starts with /uploads/ if it doesn't already
-  if (!cleanPath.startsWith('/uploads/')) {
-    cleanPath = `/uploads${cleanPath.startsWith('/') ? '' : '/'}${cleanPath.replace(/^\//, '')}`;
-  }
-
-  return `${root}${cleanPath}`;
+  return `${root}/uploads/${cleanPath}`;
 };
