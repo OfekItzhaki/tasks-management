@@ -7,12 +7,14 @@ import {
   usersService,
   authService,
   getAssetUrl,
+  isRtlLanguage,
 } from '@tasks-management/frontend-services';
 import Skeleton from '../components/Skeleton';
 
 export default function ProfilePage() {
   const { user, loading, refreshUser } = useAuth();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isRtl = isRtlLanguage(i18n.language);
   const [uploading, setUploading] = useState(false);
   const [resendingVerify, setResendingVerify] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -86,9 +88,10 @@ export default function ProfilePage() {
       <div className="mb-8">
         <Link
           to="/lists"
-          className="inline-flex items-center gap-2 text-accent hover:text-accent/80 font-semibold text-sm transition-all mb-6"
+          className={`inline-flex items-center gap-2 text-accent hover:text-accent/80 font-semibold text-sm transition-all mb-6 ${isRtl ? 'flex-row-reverse' : ''}`}
         >
-          ← {t('tasks.backToLists')}
+          <span className={isRtl ? 'rotate-180' : ''}>←</span>
+          {t('tasks.backToLists')}
         </Link>
         <h1 className="text-4xl font-bold text-primary tracking-tight">
           {t('profile.title')}

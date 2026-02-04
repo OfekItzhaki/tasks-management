@@ -113,11 +113,13 @@ export default function AnalyticsPage() {
       className={`space-y-6 animate-fade-in ${isRtl ? 'rtl' : ''}`}
       dir={isRtl ? 'rtl' : 'ltr'}
     >
-      <div className="mb-6">
-        <Link to="/lists" className="text-accent hover:underline font-medium">
-          {t('tasks.backToLists')}
-        </Link>
-      </div>
+      <Link
+        to="/lists"
+        className={`inline-flex items-center gap-2 text-accent hover:underline font-medium ${isRtl ? 'flex-row-reverse' : ''}`}
+      >
+        <span className={isRtl ? 'rotate-180' : ''}>←</span>
+        {t('tasks.backToLists')}
+      </Link>
       <div className="mb-8">
         <h1 className="text-4xl font-bold text-primary tracking-tight">
           {t('analysis.title')}

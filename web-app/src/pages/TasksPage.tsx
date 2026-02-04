@@ -453,8 +453,9 @@ export default function TasksPage() {
       <div className="mb-8 animate-slide-up">
         <Link
           to="/lists"
-          className="inline-flex items-center gap-2 text-accent hover:text-accent/80 font-semibold text-sm transition-all"
+          className={`inline-flex items-center gap-2 text-accent hover:text-accent/80 font-semibold text-sm transition-all ${isRtl ? 'flex-row-reverse' : ''}`}
         >
+          <span className={isRtl ? 'rotate-180' : ''}>←</span>
           {t('tasks.backToLists')}
         </Link>
       </div>

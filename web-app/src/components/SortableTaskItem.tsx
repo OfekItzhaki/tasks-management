@@ -53,14 +53,14 @@ export function SortableTaskItem({
     <div
       ref={setNodeRef}
       style={style}
-      className={`group premium-card p-4 flex items-center gap-4 transition-all duration-300 ${isRtl ? 'flex-row-reverse' : ''} ${
+      className={`group vibrant-hover-card p-5 mt-4 flex items-center gap-5 transition-all duration-300 ${isRtl ? 'flex-row-reverse' : ''} ${
         isBulkMode
           ? isSelected
-            ? 'ring-2 ring-primary-500 shadow-glow bg-primary-50/50 dark:bg-primary-900/20'
-            : 'hover:shadow-premium cursor-pointer'
+            ? 'ring-2 ring-accent shadow-glow bg-accent/5'
+            : 'hover:bg-hover cursor-pointer'
           : isDragging
-            ? 'cursor-grabbing opacity-60 scale-95 shadow-2xl z-50'
-            : 'hover:shadow-premium cursor-pointer'
+            ? 'cursor-grabbing opacity-60 scale-[1.02] shadow-xl z-50 ring-2 ring-accent'
+            : 'cursor-pointer'
       }`}
       onClick={(e) => {
         e.stopPropagation();
@@ -87,10 +87,22 @@ export function SortableTaskItem({
       {/* Selection Checkbox (Bulk Mode) */}
       {isBulkMode && (
         <div
-          className={`shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${isSelected ? 'bg-primary-500 border-primary-500 shadow-glow scale-110' : 'border-gray-300 dark:border-gray-600'}`}
+          className={`shrink-0 w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${isSelected ? 'bg-accent border-accent shadow-lg scale-110' : 'border-border-strong bg-surface'}`}
         >
           {isSelected && (
-            <span className="text-white text-xs font-bold">✓</span>
+            <svg
+              className="w-4 h-4 text-white"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={3}
+                d="M5 13l4 4L19 7"
+              />
+            </svg>
           )}
         </div>
       )}
@@ -102,10 +114,26 @@ export function SortableTaskItem({
             e.stopPropagation();
             onToggleComplete();
           }}
-          className={`shrink-0 w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${isCompletedRow ? 'bg-green-500 border-green-500 shadow-glow-green' : 'border-gray-300 dark:border-gray-600 hover:border-primary-500'}`}
+          className={`shrink-0 w-7 h-7 rounded-xl border-2 flex items-center justify-center transition-all ${
+            isCompletedRow
+              ? 'bg-accent-success border-accent-success shadow-lg'
+              : 'border-border-strong hover:border-accent bg-surface hover:scale-105 active:scale-95'
+          }`}
         >
           {isCompletedRow && (
-            <span className="text-white text-xs font-bold">✓</span>
+            <svg
+              className="w-4 h-4 text-white"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={3}
+                d="M5 13l4 4L19 7"
+              />
+            </svg>
           )}
         </button>
       )}
@@ -115,23 +143,15 @@ export function SortableTaskItem({
         <div
           {...attributes}
           {...listeners}
-          className="shrink-0 cursor-grab active:cursor-grabbing p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded opacity-40 group-hover:opacity-100 transition-opacity"
+          className="shrink-0 cursor-grab active:cursor-grabbing p-1.5 hover:bg-hover rounded-lg opacity-20 group-hover:opacity-100 transition-all"
           onClick={(e) => e.stopPropagation()}
         >
           <svg
-            width="12"
-            height="18"
-            viewBox="0 0 12 18"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            className="text-gray-400"
+            className="w-5 h-5 text-tertiary"
+            viewBox="0 0 24 24"
+            fill="currentColor"
           >
-            <circle cx="2" cy="2" r="1.5" fill="currentColor" />
-            <circle cx="2" cy="9" r="1.5" fill="currentColor" />
-            <circle cx="2" cy="16" r="1.5" fill="currentColor" />
-            <circle cx="10" cy="2" r="1.5" fill="currentColor" />
-            <circle cx="10" cy="9" r="1.5" fill="currentColor" />
-            <circle cx="10" cy="16" r="1.5" fill="currentColor" />
+            <path d="M10 4a2 2 0 110 4 2 2 0 010-4zm4 0a2 2 0 110 4 2 2 0 010-4zm-4 6a2 2 0 110 4 2 2 0 010-4zm4 0a2 2 0 110 4 2 2 0 010-4zm-4 6a2 2 0 110 4 2 2 0 010-4zm4 0a2 2 0 110 4 2 2 0 010-4z" />
           </svg>
         </div>
       )}
@@ -139,21 +159,49 @@ export function SortableTaskItem({
       {/* Task Content */}
       <div className={`flex-1 min-w-0 ${isRtl ? 'text-right' : 'text-left'}`}>
         <p
-          className={`text-base font-medium truncate transition-all ${isCompletedRow ? 'text-gray-400 dark:text-gray-500 line-through' : 'text-gray-900 dark:text-white'}`}
+          className={`text-lg font-semibold truncate transition-all duration-300 ${isCompletedRow ? 'text-tertiary line-through' : 'text-primary'}`}
         >
           {task.description}
         </p>
-        <div className="flex items-center gap-3 mt-1">
+        <div className="flex items-center gap-4 mt-2">
           {task.dueDate && (
-            <span className="text-xs text-primary-600 dark:text-primary-400 flex items-center gap-1">
-              📅 {new Date(task.dueDate).toLocaleDateString()}
-            </span>
+            <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-accent/5 text-[10px] font-bold uppercase tracking-wider text-accent border border-accent/10">
+              <svg
+                className="w-3 h-3"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                />
+              </svg>
+              {new Date(task.dueDate).toLocaleDateString(undefined, {
+                month: 'short',
+                day: 'numeric',
+              })}
+            </div>
           )}
           {task.steps && task.steps.length > 0 && (
-            <span className="text-xs text-gray-400 dark:text-gray-500 flex items-center gap-1">
-              📋 {task.steps.filter((s) => s.completed).length}/
-              {task.steps.length}
-            </span>
+            <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-surface border border-border-subtle text-[10px] font-bold uppercase tracking-wider text-secondary">
+              <svg
+                className="w-3 h-3"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
+                />
+              </svg>
+              {task.steps.filter((s) => s.completed).length}/{task.steps.length}
+            </div>
           )}
         </div>
       </div>
@@ -161,7 +209,7 @@ export function SortableTaskItem({
       {/* Action Buttons */}
       {!isBulkMode && (
         <div
-          className={`flex items-center gap-2 transition-opacity ${isDragging ? 'opacity-0' : 'opacity-0 group-hover:opacity-100'}`}
+          className={`flex items-center gap-2 transition-all duration-300 ${isDragging ? 'opacity-0' : 'opacity-0 group-hover:opacity-100 translate-x-2 group-hover:translate-x-0'}`}
           onClick={(e) => e.stopPropagation()}
         >
           {isDeleted ? (
@@ -171,20 +219,44 @@ export function SortableTaskItem({
                   e.stopPropagation();
                   onRestore();
                 }}
-                className="p-2 text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors"
+                className="p-2.5 text-accent hover:bg-accent/10 rounded-xl transition-all"
                 title={t('tasks.restore')}
               >
-                🔄
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                  />
+                </svg>
               </button>
               <button
                 onClick={(e) => {
                   e.stopPropagation();
                   onPermanentDelete();
                 }}
-                className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                className="p-2.5 text-accent-danger hover:bg-accent-danger/10 rounded-xl transition-all"
                 title={t('tasks.deleteForever')}
               >
-                🗑️
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                  />
+                </svg>
               </button>
             </>
           ) : (
@@ -193,10 +265,22 @@ export function SortableTaskItem({
                 e.stopPropagation();
                 onDelete();
               }}
-              className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+              className="p-2.5 text-accent-danger hover:bg-accent-danger/10 rounded-xl transition-all hover:scale-110 active:scale-95"
               title={t('tasks.delete')}
             >
-              🗑️
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                />
+              </svg>
             </button>
           )}
         </div>

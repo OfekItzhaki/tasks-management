@@ -64,7 +64,7 @@ export default {
     },
   },
   tasks: {
-    backToLists: '← Back to Lists',
+    backToLists: 'Back to Lists',
     defaultTitle: 'Tasks',
     renameTitle: 'Click to rename',
     deleteList: 'Delete list',
@@ -99,7 +99,7 @@ export default {
     deleteForeverFailed: 'Failed to delete task forever',
   },
   taskDetails: {
-    backToTasks: '← Back to Tasks',
+    backToTasks: 'Back to Tasks',
     clickToEdit: 'Click to edit',
     loadFailed: 'Failed to load task',
     notFound: 'Task not found',

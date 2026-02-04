@@ -64,7 +64,7 @@ export default {
     },
   },
   tasks: {
-    backToLists: '← חזרה לרשימות',
+    backToLists: 'חזרה לרשימות',
     defaultTitle: 'משימות',
     renameTitle: 'לחץ כדי לשנות שם',
     deleteList: 'מחק רשימה',
@@ -99,7 +99,7 @@ export default {
     deleteForeverFailed: 'מחיקה לצמיתות נכשלה',
   },
   taskDetails: {
-    backToTasks: '← חזרה למשימות',
+    backToTasks: 'חזרה למשימות',
     clickToEdit: 'לחץ כדי לערוך',
     loadFailed: 'טעינת המשימה נכשלה',
     notFound: 'המשימה לא נמצאה',
