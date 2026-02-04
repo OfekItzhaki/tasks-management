@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { LoginDto, ApiError } from '@tasks-management/frontend-services';
 import { useTranslation } from 'react-i18next';
-import { authService } from '../services/auth.service';
 
 export default function LoginPage() {
   const { t } = useTranslation();
@@ -11,8 +10,6 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
-  const [isNotVerified, setIsNotVerified] = useState(false);
-  const [resending, setResending] = useState(false);
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -20,7 +17,6 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    setIsNotVerified(false);
     setLoading(true);
 
     try {
@@ -33,28 +29,9 @@ export default function LoginPage() {
         ? error.message.join(', ')
         : error.message || t('login.failed');
 
-      if (errorMessage.toLowerCase().includes('not verified')) {
-        setIsNotVerified(true);
-        setError(t('login.notVerified'));
-      } else {
-        setError(errorMessage);
-      }
+      setError(errorMessage);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleResendVerification = async () => {
-    if (!email) return;
-    try {
-      setResending(true);
-      await authService.resendVerification(email);
-      alert(t('login.verificationResent'));
-    } catch (err) {
-      console.error('Failed to resend verification:', err);
-      alert(t('login.verificationFailed'));
-    } finally {
-      setResending(false);
     }
   };
 
@@ -96,7 +73,7 @@ export default function LoginPage() {
           <form className="space-y-6" onSubmit={handleSubmit}>
             {error && (
               <div
-                className={`p-4 rounded-2xl flex items-start gap-3 animate-scale-in ${isNotVerified ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20' : 'bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20'}`}
+                className="p-4 rounded-2xl flex items-start gap-3 animate-scale-in bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20"
                 role="alert"
               >
                 <svg
@@ -114,18 +91,6 @@ export default function LoginPage() {
                 </svg>
                 <div className="flex-1">
                   <p className="text-sm font-bold">{error}</p>
-                  {isNotVerified && (
-                    <button
-                      type="button"
-                      onClick={handleResendVerification}
-                      disabled={resending}
-                      className="mt-2 text-xs font-black uppercase tracking-widest text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 transition-colors disabled:opacity-50"
-                    >
-                      {resending
-                        ? t('common.loading')
-                        : t('login.resendVerification')}
-                    </button>
-                  )}
                 </div>
               </div>
             )}
