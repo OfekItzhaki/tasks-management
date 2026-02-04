@@ -1,4 +1,10 @@
 // User Types
+export enum NotificationFrequency {
+  NONE = 'NONE',
+  DAILY = 'DAILY',
+  WEEKLY = 'WEEKLY',
+}
+
 export interface User {
   id: number;
   email: string;
@@ -22,6 +28,7 @@ export interface UpdateUserDto {
   name?: string;
   profilePicture?: string;
   password?: string;
+  notificationFrequency?: NotificationFrequency;
 }
 
 // Auth Types
@@ -32,7 +39,7 @@ export interface LoginDto {
 
 export interface LoginResponse {
   accessToken: string;
-  user: Omit<User, 'passwordHash' | 'emailVerificationToken'>;
+  user: Omit<User, 'passwordHash' | 'emailVerificationOtp'>;
 }
 
 // List Types
