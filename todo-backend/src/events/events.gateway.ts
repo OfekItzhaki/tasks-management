@@ -7,8 +7,7 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { JwtService } from '@nestjs/jwt';
-import { Logger, UseGuards } from '@nestjs/common';
-import { WsJwtGuard } from './ws-jwt.guard';
+import { Logger } from '@nestjs/common';
 
 @WebSocketGateway({
     cors: {
@@ -19,8 +18,9 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @WebSocketServer()
     server: Server;
 
-    private logger = new Logger('EventsGateway');
+    private readonly logger = new Logger('EventsGateway');
     private userSockets = new Map<string, string[]>(); // userId -> socketIds
+    private userPresence = new Map<string, string>(); // socketId -> listId
 
     constructor(private readonly jwtService: JwtService) { }
 
@@ -59,7 +59,33 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
                 this.userSockets.delete(userId);
             }
         }
+
+        // Clean up presence if they were in a list
+        const listId = this.userPresence.get(client.id);
+        if (listId) {
+            this.userPresence.delete(client.id);
+            this.server.to(`list:${listId}`).emit('user-left-list', { userId, listId });
+        }
+
         this.logger.log(`Client disconnected: ${client.id}`);
+    }
+
+    @SubscribeMessage('enter-list')
+    handleEnterList(client: Socket, listId: string) {
+        const userId = client.data.userId;
+        client.join(`list:${listId}`);
+        this.userPresence.set(client.id, listId);
+        this.logger.log(`User ${userId} entered list ${listId}`);
+        this.server.to(`list:${listId}`).emit('user-entered-list', { userId, listId });
+    }
+
+    @SubscribeMessage('leave-list')
+    handleLeaveList(client: Socket, listId: string) {
+        const userId = client.data.userId;
+        client.leave(`list:${listId}`);
+        this.userPresence.delete(client.id);
+        this.logger.log(`User ${userId} left list ${listId}`);
+        this.server.to(`list:${listId}`).emit('user-left-list', { userId, listId });
     }
 
     @SubscribeMessage('ping')
@@ -78,7 +104,7 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     // Broadcaster
-    broadcast(event: string, data: any) {
+    broadcast(event: string, data: unknown) {
         this.server.emit(event, data);
     }
 }

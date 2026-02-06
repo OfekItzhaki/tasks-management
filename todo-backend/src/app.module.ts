@@ -1,9 +1,10 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { CqrsModule } from '@nestjs/cqrs';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { ScheduleModule } from '@nestjs/schedule';
+import { BullModule } from '@nestjs/bullmq';
 import { SentryModule, SentryGlobalFilter } from '@sentry/nestjs/setup';
 import { PrismaClientExceptionFilter } from './common/filters/prisma-exception.filter';
 import AppService from './app.service';
@@ -37,6 +38,17 @@ import { validate } from './config/env.validation';
       { name: 'long', ttl: 60000, limit: 100 },
     ]),
     ScheduleModule.forRoot(),
+    BullModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (config: ConfigService) => ({
+        connection: {
+          host: config.get('REDIS_HOST'),
+          port: config.get('REDIS_PORT'),
+          password: config.get('REDIS_PASSWORD'),
+        },
+      }),
+      inject: [ConfigService],
+    }),
     PrismaModule,
     EmailModule,
     UsersModule,

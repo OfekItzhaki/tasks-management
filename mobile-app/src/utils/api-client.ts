@@ -47,6 +47,10 @@ const createApiClient = (): AxiosInstance => {
     },
   );
 
+  // Flag to prevent multiple refresh calls
+  let isRefreshing = false;
+  let refreshPromise: Promise<any> | null = null;
+
   // Response interceptor: Normalize data and handle errors
   client.interceptors.response.use(
     (response) => {
@@ -57,21 +61,62 @@ const createApiClient = (): AxiosInstance => {
       return response;
     },
     async (error: AxiosError) => {
+      const originalRequest = error.config;
+
       if (error.response) {
         const statusCode = error.response.status;
         const serverMessage = (error.response.data as any)?.message;
-        
-        // Handle 401 Unauthorized - clear auth and redirect to login
-        if (statusCode === 401) {
-          // Clear token and user storage
-          await TokenStorage.removeToken();
-          await UserStorage.removeUser();
-          // The AuthContext will detect the user is null and redirect to login
-          if (__DEV__) {
-            console.log('Unauthorized - cleared token and user storage');
+
+        // Handle 401 Unauthorized - attempt refresh except for login/refresh paths
+        if (
+          statusCode === 401 &&
+          originalRequest &&
+          !originalRequest.url?.includes('/auth/login') &&
+          !originalRequest.url?.includes('/auth/refresh')
+        ) {
+          if (!isRefreshing) {
+            isRefreshing = true;
+            // Attempt to refresh the token using a separate call to avoid interceptor loop
+            refreshPromise = (async () => {
+              try {
+                const response = await axios.post(
+                  getApiUrl('/auth/refresh'),
+                  {},
+                  { withCredentials: true },
+                );
+                const newToken = response.data.accessToken;
+                await TokenStorage.setToken(newToken);
+                return newToken;
+              } catch (refreshError) {
+                // Refresh failed - clear everything
+                await TokenStorage.removeToken();
+                await UserStorage.removeUser();
+                throw refreshError;
+              } finally {
+                isRefreshing = false;
+                refreshPromise = null;
+              }
+            })();
+          }
+
+          try {
+            const token = await refreshPromise;
+            // Update original request header and retry
+            if (originalRequest.headers) {
+              originalRequest.headers.Authorization = `Bearer ${token}`;
+            }
+            return client(originalRequest);
+          } catch (retryError) {
+            return Promise.reject(retryError);
           }
         }
-        
+
+        // If it was a 401 on login or refresh, or if refresh effort failed
+        if (statusCode === 401) {
+          await TokenStorage.removeToken();
+          await UserStorage.removeUser();
+        }
+
         // Provide user-friendly messages for common HTTP errors
         let message: string;
         switch (statusCode) {
@@ -112,7 +157,7 @@ const createApiClient = (): AxiosInstance => {
         }
         // Network error - server not reachable
         throw new ApiError(
-          0, 
+          0,
           'Unable to connect to server. Please check your internet connection and try again later.',
         );
       } else {

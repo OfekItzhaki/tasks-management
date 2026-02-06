@@ -17,3 +17,21 @@
 | `frontend-services`| Shared API client, types, **reminders module**  |
 | `web-app`          | React + Vite SPA                                |
 | `mobile-app`       | React Native + Expo                             |
+
+## Local Development (Getting Started)
+
+To get the project running locally for demoing or testing:
+
+1. **Prerequisites**: Ensure you have [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed.
+2. **Setup Infrastructure**: Run the following command in the root directory to spin up the Database and Redis:
+   ```bash
+   docker-compose up -d
+   ```
+3. **Configure Backend**:
+   - `cd todo-backend`
+   - `cp .env.example .env`
+   - Fill in your `CLOUDINARY` credentials (see `.env.example`).
+   - Run `npm install` and `npx prisma migrate dev`.
+4. **Run Services**:
+   - Start backend: `npm run dev`
+   - Start web-app: `cd ../web-app && npm run dev`

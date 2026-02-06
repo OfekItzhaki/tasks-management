@@ -163,6 +163,16 @@ export interface ListShare {
   toDoList?: ToDoList;
 }
 
+export interface TrashResponse {
+  lists: ToDoList[];
+  tasks: Task[];
+}
+
+export interface UpdateProfilePictureResponse {
+  message: string;
+  profilePicture: string;
+}
+
 // API Error Types
 export interface ApiError {
   statusCode: number;

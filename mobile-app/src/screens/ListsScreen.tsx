@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -14,6 +14,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { listsService } from '../services/lists.service';
 import { ToDoList, CreateTodoListDto } from '../types';
@@ -286,53 +287,59 @@ export default function ListsScreen() {
       letterSpacing: 0.3,
     },
   }));
-  const [lists, setLists] = useState<ToDoList[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
+  const queryClient = useQueryClient();
   const [showAddModal, setShowAddModal] = useState(false);
   const [newListName, setNewListName] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingList, setEditingList] = useState<ToDoList | null>(null);
   const [editListName, setEditListName] = useState('');
 
-  useEffect(() => {
-    loadLists();
-  }, []);
+  const {
+    data: lists = [],
+    isLoading: loading,
+    isRefetching: refreshing,
+    refetch: loadLists,
+  } = useQuery({
+    queryKey: ['lists'],
+    queryFn: () => listsService.getAll(),
+  });
 
-  // Reload when screen comes into focus
+  const createListMutation = useMutation({
+    mutationFn: (data: CreateTodoListDto) => listsService.create(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['lists'] });
+      setNewListName('');
+      setShowAddModal(false);
+    },
+    onError: (error) => handleApiError(error, 'Failed to create list'),
+  });
+
+  const updateListMutation = useMutation({
+    mutationFn: ({ id, data }: { id: number; data: { name: string } }) =>
+      listsService.update(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['lists'] });
+      setEditingList(null);
+      setEditListName('');
+    },
+    onError: (error) => handleApiError(error, 'Failed to update list'),
+  });
+
+  const deleteListMutation = useMutation({
+    mutationFn: (id: number) => listsService.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['lists'] });
+    },
+    onError: (error) => handleApiError(error, 'Failed to delete list'),
+  });
+
   useFocusEffect(
     React.useCallback(() => {
       loadLists();
-
-      // Reschedule all reminders to sync with backend (including web-app changes)
-      // This runs in the background and doesn't block the UI
-      rescheduleAllReminders().catch((error) => {
-        if (__DEV__) {
-          console.error('Error rescheduling reminders:', error);
-        }
-        // Silently fail - don't interrupt user experience
-      });
-    }, [])
+    }, [loadLists])
   );
 
-  const loadLists = async () => {
-    try {
-      const data = await listsService.getAll();
-      setLists(data || []);
-    } catch (error: any) {
-      console.error('Error loading lists:', error);
-      // Silently ignore auth errors - the navigation will handle redirect to login
-      if (!isAuthError(error)) {
-        handleApiError(error, 'Unable to load lists. Please try again later.');
-      }
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  };
-
   const onRefresh = () => {
-    setRefreshing(true);
     loadLists();
   };
 
@@ -352,27 +359,14 @@ export default function ListsScreen() {
 
   const handleSaveEdit = async () => {
     if (!editingList) return;
-
     if (!editListName.trim()) {
       Alert.alert('Validation Error', 'Please enter a list name before saving.');
       return;
     }
-
-    setIsSubmitting(true);
-    try {
-      await listsService.update(editingList.id, {
-        name: editListName.trim(),
-      });
-      setEditingList(null);
-      setEditListName('');
-      setShowAddModal(false);
-      loadLists();
-      // Success feedback - UI update is visible, no alert needed
-    } catch (error: any) {
-      handleApiError(error, 'Failed to update list. Please try again.');
-    } finally {
-      setIsSubmitting(false);
-    }
+    updateListMutation.mutate({
+      id: editingList.id,
+      data: { name: editListName.trim() },
+    });
   };
 
   const handleAddList = async () => {
@@ -380,28 +374,11 @@ export default function ListsScreen() {
       handleSaveEdit();
       return;
     }
-
     if (!newListName.trim()) {
       Alert.alert('Validation Error', 'Please enter a list name before saving.');
       return;
     }
-
-    setIsSubmitting(true);
-    try {
-      const listData: CreateTodoListDto = {
-        name: newListName.trim(),
-      };
-
-      await listsService.create(listData);
-      setNewListName('');
-      setShowAddModal(false);
-      loadLists();
-      // Success feedback - UI update is visible, no alert needed
-    } catch (error: any) {
-      handleApiError(error, 'Unable to create list. Please try again.');
-    } finally {
-      setIsSubmitting(false);
-    }
+    createListMutation.mutate({ name: newListName.trim() });
   };
 
   const handleDeleteList = (list: ToDoList) => {
@@ -413,14 +390,7 @@ export default function ListsScreen() {
         {
           text: 'Delete',
           style: 'destructive',
-          onPress: async () => {
-            try {
-              await listsService.delete(list.id);
-              loadLists();
-            } catch (error: any) {
-              handleApiError(error, 'Unable to delete list. Please try again.');
-            }
-          },
+          onPress: () => deleteListMutation.mutate(list.id),
         },
       ],
     );
@@ -550,9 +520,9 @@ export default function ListsScreen() {
               <TouchableOpacity
                 style={[styles.modalButton, styles.submitButton]}
                 onPress={handleAddList}
-                disabled={isSubmitting}
+                disabled={createListMutation.isPending || updateListMutation.isPending}
               >
-                {isSubmitting ? (
+                {createListMutation.isPending || updateListMutation.isPending ? (
                   <ActivityIndicator color="#fff" />
                 ) : (
                   <Text style={styles.submitButtonText}>

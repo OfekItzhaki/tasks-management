@@ -1,8 +1,11 @@
-import { getApiUrl, API_CONFIG } from '../config';
+import { getApiUrl } from '../config';
 import { TokenStorage } from './storage';
 import { ApiError } from '../types';
 
 export class ApiClient {
+  private isRefreshing = false;
+  private refreshPromise: Promise<any> | null = null;
+
   private async request<T>(
     method: string,
     path: string,
@@ -11,42 +14,36 @@ export class ApiClient {
     const url = getApiUrl(path);
     const token = TokenStorage.getToken();
 
-    // Extract headers and method from options to prevent them from overriding our defaults
     const { headers: optionsHeaders, method: optionsMethod, ...restOptions } = options;
-
-    // Check if body is FormData
     const isFormData = restOptions.body instanceof FormData;
 
-    // Build headers: start with defaults, merge user-provided headers, then add auth
     const headers: Record<string, string> = {
       ...(optionsHeaders as Record<string, string>),
     };
 
-    // Only set Content-Type to JSON if not FormData and not already set
-    // Browser will automatically set Content-Type with boundary for FormData
     if (!isFormData && !headers['Content-Type']) {
       headers['Content-Type'] = 'application/json';
     } else if (isFormData && headers['Content-Type']) {
-      // Remove Content-Type if it's set for FormData (browser will set it with boundary)
       delete headers['Content-Type'];
     }
 
-    // Authorization header should always be added if token exists (takes precedence)
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
     }
 
-    // Build config: method parameter always takes precedence, then our headers, then rest of options
     const config: RequestInit = {
       ...restOptions,
-      method, // Method parameter always takes precedence over options.method
-      headers, // Our carefully built headers take precedence over options.headers
+      method,
+      headers,
     };
 
     try {
       const response = await fetch(url, config);
 
-      // Handle empty responses (204 No Content)
+      if (response.status === 401 && path !== '/auth/login' && path !== '/auth/refresh') {
+        return this.handleUnauthorized<T>(method, path, options);
+      }
+
       if (response.status === 204) {
         return undefined as unknown as T;
       }
@@ -56,7 +53,6 @@ export class ApiClient {
         const text = await response.text();
         data = text ? JSON.parse(text) : null;
       } catch (parseError) {
-        // Handle invalid JSON responses
         if (parseError instanceof SyntaxError) {
           throw {
             statusCode: response.status,
@@ -78,25 +74,72 @@ export class ApiClient {
 
       return data;
     } catch (error) {
-      // If it's already an ApiError, rethrow it
       if (error && typeof error === 'object' && 'statusCode' in error) {
         throw error;
       }
-      
-      // Handle network errors
+
       if (error instanceof TypeError && error.message === 'Failed to fetch') {
         throw {
           statusCode: 0,
           message: 'Network error: Could not connect to the server',
         } as ApiError;
       }
-      
-      // Handle any other errors (including SyntaxError from JSON parsing)
+
       throw {
         statusCode: 0,
         message: error instanceof Error ? error.message : 'An unexpected error occurred',
       } as ApiError;
     }
+  }
+
+  private async handleUnauthorized<T>(
+    method: string,
+    path: string,
+    options: RequestInit,
+  ): Promise<T> {
+    if (!this.isRefreshing) {
+      this.isRefreshing = true;
+      this.refreshPromise = this.refreshToken();
+    }
+
+    try {
+      await this.refreshPromise;
+      this.isRefreshing = false;
+      this.refreshPromise = null;
+      return this.request<T>(method, path, options);
+    } catch (refreshError) {
+      this.isRefreshing = false;
+      this.refreshPromise = null;
+      TokenStorage.removeToken();
+      // We don't redirect here to keep the service pure, 
+      // but we throw so the UI can handle it
+      throw refreshError;
+    }
+  }
+
+  private async refreshToken(): Promise<any> {
+    const url = getApiUrl('/auth/refresh');
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      // Refresh token is in an HttpOnly cookie, so no body/auth header needed
+      // but we need to include credentials
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      throw {
+        statusCode: response.status,
+        message: 'Session expired',
+        error: 'REFRESH_TOKEN_EXPIRED',
+      } as ApiError;
+    }
+
+    const data = await response.json();
+    TokenStorage.setToken(data.accessToken);
+    return data;
   }
 
   async get<T>(path: string, options?: RequestInit): Promise<T> {
@@ -124,5 +167,3 @@ export class ApiClient {
 }
 
 export const apiClient = new ApiClient();
-
-

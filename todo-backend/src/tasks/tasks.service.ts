@@ -34,7 +34,7 @@ export class TasksService {
   ) {
     await this.taskAccess.ensureListAccess(todoListId, ownerId, ShareRole.EDITOR);
 
-    const task = await (this.prisma.task as any).create({
+    const task = await this.prisma.task.create({
       data: {
         description: createTaskDto.description,
         dueDate: createTaskDto.dueDate,
@@ -58,10 +58,10 @@ export class TasksService {
   async findAll(userId: string, todoListId?: string) {
     // If loading from a daily list, check if tasks need to be reset
     if (todoListId) {
-      const list = await (this.prisma.toDoList as any).findFirst({
+      const list = await this.prisma.toDoList.findFirst({
         where: { id: todoListId, deletedAt: null },
       });
-      if ((list as any)?.type === ListType.DAILY) {
+      if (list?.type === ListType.DAILY) {
         // Check and reset daily tasks if needed (in case cron didn't run)
         await this.taskScheduler.checkAndResetDailyTasksIfNeeded();
       }
@@ -82,7 +82,7 @@ export class TasksService {
       where.todoListId = todoListId;
     }
 
-    return (this.prisma.task as any).findMany({
+    return this.prisma.task.findMany({
       where,
       include: {
         steps: {
@@ -132,7 +132,7 @@ export class TasksService {
       finalSpecificDayOfWeek !== undefined &&
       (task as any).completionCount > 0;
 
-    const updated = await (this.prisma.task as any).update({
+    const updated = await this.prisma.task.update({
       where: { id },
       data: {
         description: updateTaskDto.description,
@@ -157,7 +157,7 @@ export class TasksService {
   async remove(id: string, userId: string) {
     const task = await this.taskAccess.findTaskForUser(id, userId, ShareRole.EDITOR);
 
-    const result = await (this.prisma.task as any).update({
+    const result = await this.prisma.task.update({
       where: { id },
       data: {
         deletedAt: new Date(),
@@ -168,7 +168,7 @@ export class TasksService {
   }
 
   async getTasksByDate(userId: string, date: Date = new Date()) {
-    const allTasks = await (this.prisma.task as any).findMany({
+    const allTasks = await this.prisma.task.findMany({
       where: {
         deletedAt: null,
         completed: false,
@@ -195,7 +195,7 @@ export class TasksService {
   }
 
   async getTasksWithReminders(userId: string, date: Date = new Date()) {
-    const allTasks = await (this.prisma.task as any).findMany({
+    const allTasks = await this.prisma.task.findMany({
       where: {
         deletedAt: null,
         completed: false,
@@ -245,7 +245,7 @@ export class TasksService {
 
     // Case 1: Task was soft-deleted
     if (task.deletedAt) {
-      const restored = await (this.prisma.task as any).update({
+      const restored = await this.prisma.task.update({
         where: { id },
         data: { deletedAt: null },
         include: {
@@ -263,7 +263,7 @@ export class TasksService {
         throw new BadRequestException('Original list information not available');
       }
 
-      const originalList = await (this.prisma.toDoList as any).findFirst({
+      const originalList = await this.prisma.toDoList.findFirst({
         where: {
           id: (task as any).originalListId,
           ownerId,
@@ -275,7 +275,7 @@ export class TasksService {
         throw new BadRequestException('Original list no longer exists');
       }
 
-      const restored = await (this.prisma.task as any).update({
+      const restored = await this.prisma.task.update({
         where: { id },
         data: {
           todoListId: (task as any).originalListId,
@@ -319,8 +319,8 @@ export class TasksService {
       );
     }
 
-    await (this.prisma.step as any).deleteMany({ where: { taskId: id } });
-    await (this.prisma.task as any).delete({ where: { id } });
+    await this.prisma.step.deleteMany({ where: { taskId: id } });
+    await this.prisma.task.delete({ where: { id } });
 
     this.logger.log(`Task permanently deleted: taskId=${id} userId=${ownerId}`);
     return { message: 'Task permanently deleted' };

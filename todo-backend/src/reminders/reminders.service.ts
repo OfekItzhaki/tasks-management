@@ -1,6 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { TasksService } from '../tasks/tasks.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { EventsGateway } from '../events/events.gateway';
+import { EmailService } from '../email/email.service';
 
 export interface ReminderNotification {
   taskId: string;
@@ -25,14 +27,17 @@ type TaskWithList = {
 
 @Injectable()
 export class RemindersService {
+  private readonly logger = new Logger(RemindersService.name);
+
   constructor(
     private readonly tasksService: TasksService,
     private readonly prisma: PrismaService,
+    private readonly eventsGateway: EventsGateway,
+    private readonly emailService: EmailService,
   ) { }
 
   /**
    * Get reminders for a specific date and format them as notifications
-   * Returns structured data that front-end can use for push notifications
    */
   async getReminderNotifications(
     ownerId: string,
@@ -45,17 +50,15 @@ export class RemindersService {
 
     const notifications: ReminderNotification[] = [];
 
-    (tasksWithReminders as any).forEach((task: TaskWithList) => {
-      // Support both old single value and new array format
+    (tasksWithReminders as TaskWithList[]).forEach((task) => {
       const reminderDaysArray = Array.isArray(task.reminderDaysBefore)
         ? task.reminderDaysBefore
         : task.reminderDaysBefore
-          ? [task.reminderDaysBefore]
+          ? [task.reminderDaysBefore as number]
           : [1];
 
       const dueDate = this.calculateTaskDueDate(task, date);
 
-      // Create a notification for each reminder day that matches today
       reminderDaysArray.forEach((reminderDays) => {
         const reminderTargetDate = new Date(dueDate!);
         reminderTargetDate.setDate(reminderTargetDate.getDate() - reminderDays);
@@ -91,7 +94,35 @@ export class RemindersService {
   }
 
   /**
-   * Get reminders for a date range (useful for scheduling notifications)
+   * Send reminders to user via multi-channel
+   */
+  async sendReminders(userId: string, notifications: ReminderNotification[]): Promise<void> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { email: true, notificationFrequency: true },
+    });
+
+    if (!user) return;
+
+    for (const notification of notifications) {
+      // 1. Push via WebSocket (Real-time)
+      this.eventsGateway.sendToUser(userId, 'task-reminder', notification);
+
+      // 2. Fallback to email if user has notifications enabled
+      // Note: We could be more granular here based on user preferences
+      if (user.notificationFrequency !== 'NONE') {
+        await this.emailService.sendReminderEmail(
+          user.email,
+          notification.taskDescription,
+          notification.message,
+          notification.title,
+        );
+      }
+    }
+  }
+
+  /**
+   * Get reminders for a date range
    */
   async getRemindersForDateRange(
     ownerId: string,
@@ -110,7 +141,6 @@ export class RemindersService {
       currentDate.setDate(currentDate.getDate() + 1);
     }
 
-    // Remove duplicates (same task might appear on multiple days)
     const uniqueReminders = new Map<string, ReminderNotification>();
     allReminders.forEach((reminder) => {
       if (!uniqueReminders.has(reminder.taskId)) {
@@ -139,7 +169,6 @@ export class RemindersService {
       return dueDate;
     }
 
-    // For list-based tasks
     const list = task.todoList;
     switch (list.type) {
       case 'WEEKLY': {

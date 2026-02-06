@@ -16,6 +16,15 @@ export class AuthService {
   }
 
   /**
+   * Refresh access token
+   */
+  async refresh(): Promise<LoginResponse> {
+    const response = await apiClient.post<LoginResponse>('/auth/refresh');
+    TokenStorage.setToken(response.accessToken);
+    return response;
+  }
+
+  /**
    * Logout (removes token from storage)
    */
   logout(): void {
@@ -90,5 +99,3 @@ export class AuthService {
 }
 
 export const authService = new AuthService();
-
-

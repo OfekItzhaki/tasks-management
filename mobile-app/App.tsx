@@ -99,17 +99,29 @@ function AppContent() {
 }
 
 import ErrorBoundary from './src/components/common/ErrorBoundary';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 30_000,
+      retry: 1,
+    },
+  },
+});
 
 export default function App() {
   return (
     <ErrorBoundary>
-      <SafeAreaProvider>
-        <ThemeProvider>
-          <AuthProvider>
-            <AppContent />
-          </AuthProvider>
-        </ThemeProvider>
-      </SafeAreaProvider>
+      <QueryClientProvider client={queryClient}>
+        <SafeAreaProvider>
+          <ThemeProvider>
+            <AuthProvider>
+              <AppContent />
+            </AuthProvider>
+          </ThemeProvider>
+        </SafeAreaProvider>
+      </QueryClientProvider>
     </ErrorBoundary>
   );
 }

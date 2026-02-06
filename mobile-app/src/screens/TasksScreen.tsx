@@ -15,15 +15,17 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import { Platform, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
+import { useNavigation, useFocusEffect, RouteProp, useRoute } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { tasksService } from '../services/tasks.service';
+import { getSocket } from '../utils/socket';
 import { Task, CreateTaskDto, ListType } from '../types';
 import type { ReminderConfig } from '@tasks-management/frontend-services';
 import ReminderConfigComponent from '../components/ReminderConfig';
 import DatePicker from '../components/DatePicker';
-import { scheduleTaskReminders, cancelAllTaskNotifications } from '../services/notifications.service';
+import { scheduleTaskReminders, cancelAllTaskNotifications, rescheduleAllReminders } from '../services/notifications.service';
 import { ReminderTimesStorage, ReminderAlarmsStorage } from '../utils/storage';
 import { convertRemindersToBackend } from '@tasks-management/frontend-services';
 import { formatDate } from '../utils/helpers';
@@ -51,38 +53,86 @@ export default function TasksScreen() {
   };
   // Check if this is the archived list
   const isArchivedList = listType === ListType.FINISHED;
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
+  const queryClient = useQueryClient();
   const [showAddModal, setShowAddModal] = useState(false);
   const [newTaskDescription, setNewTaskDescription] = useState('');
   const [newTaskDueDate, setNewTaskDueDate] = useState('');
   const [taskReminders, setTaskReminders] = useState<ReminderConfig[]>([]);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [sortBy, setSortBy] = useState<'default' | 'dueDate' | 'completed' | 'alphabetical'>('default');
   const [showSortMenu, setShowSortMenu] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [allTasks, setAllTasks] = useState<Task[]>([]);
 
-  const loadTasks = async () => {
-    try {
-      const data = await tasksService.getAll(listId);
-      // Ensure all boolean fields are properly typed
-      const normalizedTasks = data.map((task) => ({
-        ...task,
-        completed: Boolean(task.completed),
-      }));
-      setAllTasks(normalizedTasks);
-    } catch (error: any) {
-      // Silently ignore auth errors - the navigation will handle redirect to login
-      if (!isAuthError(error)) {
-        handleApiError(error, 'Unable to load tasks. Please try again later.');
+  // Fetch tasks with TanStack Query
+  const {
+    data: allTasks = [],
+    isLoading: loading,
+    isRefetching: refreshing,
+    refetch: loadTasks,
+  } = useQuery({
+    queryKey: ['tasks', listId],
+    queryFn: () => tasksService.getAll(listId),
+    select: (data) => data.map(task => ({ ...task, completed: Boolean(task.completed) })),
+  });
+
+  const toggleTaskMutation = useMutation({
+    mutationFn: (task: Task) => tasksService.update(task.id, { completed: !task.completed }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tasks', listId] });
+      rescheduleAllReminders();
+    },
+    onError: (error) => handleApiError(error, 'Failed to update task'),
+  });
+
+  const addTaskMutation = useMutation({
+    mutationFn: (data: CreateTaskDto) => tasksService.create(listId, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tasks', listId] });
+      setNewTaskDescription('');
+      setNewTaskDueDate('');
+      setTaskReminders([]);
+      setShowAddModal(false);
+    },
+    onError: (error) => handleApiError(error, 'Failed to add task'),
+  });
+
+  const deleteTaskMutation = useMutation({
+    mutationFn: (id: number) => tasksService.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tasks', listId] });
+    },
+    onError: (error) => handleApiError(error, 'Failed to delete task'),
+  });
+
+  // Real-time Presence: Join/Leave room
+  useEffect(() => {
+    let socketInstance: any;
+
+    const setupSocket = async () => {
+      socketInstance = await getSocket();
+      socketInstance.emit('enter-list', { listId });
+
+      // Listen for presence updates (just log for now, can be used for UI)
+      socketInstance.on('presence-update', (data: any) => {
+        if (__DEV__) console.log('Presence update:', data);
+      });
+    };
+
+    setupSocket();
+
+    return () => {
+      if (socketInstance) {
+        socketInstance.emit('leave-list', { listId });
+        socketInstance.off('presence-update');
       }
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  };
+    };
+  }, [listId]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      loadTasks();
+      rescheduleAllReminders().catch(() => { });
+    }, [loadTasks])
+  );
 
   const applyFilter = (tasksToFilter: Task[]): Task[] => {
     if (!searchQuery.trim()) {
@@ -94,12 +144,13 @@ export default function TasksScreen() {
     );
   };
 
-  const applySorting = (tasksToSort: Task[]) => {
-    const sorted = [...tasksToSort];
+
+  const filteredAndSortedTasks = React.useMemo(() => {
+    let result = applyFilter(allTasks);
 
     switch (sortBy) {
       case 'dueDate':
-        sorted.sort((a, b) => {
+        result.sort((a, b) => {
           if (!a.dueDate && !b.dueDate) return 0;
           if (!a.dueDate) return 1;
           if (!b.dueDate) return -1;
@@ -107,60 +158,26 @@ export default function TasksScreen() {
         });
         break;
       case 'completed':
-        sorted.sort((a, b) => {
+        result.sort((a, b) => {
           if (a.completed === b.completed) return 0;
           return a.completed ? 1 : -1;
         });
         break;
       case 'alphabetical':
-        sorted.sort((a, b) => a.description.localeCompare(b.description));
+        result.sort((a, b) => a.description.localeCompare(b.description));
         break;
       default:
-        // Keep original order (by order field)
-        sorted.sort((a, b) => a.order - b.order);
+        result.sort((a, b) => a.order - b.order);
     }
-
-    setTasks(sorted);
-  };
-
-  useEffect(() => {
-    loadTasks();
-  }, [listId]);
-
-  useEffect(() => {
-    const filtered = applyFilter(allTasks);
-    applySorting(filtered);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchQuery, sortBy, allTasks]);
+    return result;
+  }, [allTasks, searchQuery, sortBy]);
 
   const onRefresh = () => {
-    setRefreshing(true);
     loadTasks();
   };
 
-  const toggleTask = async (task: Task) => {
-    const currentCompleted = Boolean(task.completed);
-    const newCompleted = !currentCompleted;
-
-    // Optimistic update - update UI immediately
-    setAllTasks(prevTasks =>
-      prevTasks.map(t =>
-        t.id === task.id ? { ...t, completed: newCompleted } : t
-      )
-    );
-
-    try {
-      await tasksService.update(task.id, { completed: newCompleted });
-      // No need to reload - optimistic update already applied
-    } catch (error: any) {
-      // Revert on error
-      setAllTasks(prevTasks =>
-        prevTasks.map(t =>
-          t.id === task.id ? { ...t, completed: currentCompleted } : t
-        )
-      );
-      handleApiError(error, 'Unable to update task. Please try again.');
-    }
+  const toggleTask = (task: Task) => {
+    toggleTaskMutation.mutate(task);
   };
 
   const handleAddTask = async () => {
@@ -169,83 +186,29 @@ export default function TasksScreen() {
       return;
     }
 
-    setIsSubmitting(true);
-    try {
-      const taskData: CreateTaskDto = {
-        description: newTaskDescription.trim(),
-      };
+    const taskData: CreateTaskDto = {
+      description: newTaskDescription.trim(),
+    };
 
-      // Add due date if provided
-      let dueDateStr: string | undefined;
-      if (newTaskDueDate.trim()) {
-        // Convert date string to ISO format
-        const date = new Date(newTaskDueDate);
-        if (!isNaN(date.getTime())) {
-          dueDateStr = date.toISOString();
-          taskData.dueDate = dueDateStr;
-        }
+    let dueDateStr: string | undefined;
+    if (newTaskDueDate.trim()) {
+      const date = new Date(newTaskDueDate);
+      if (!isNaN(date.getTime())) {
+        dueDateStr = date.toISOString();
+        taskData.dueDate = dueDateStr;
       }
-
-      // Convert reminders to backend format
-      if (taskReminders.length > 0) {
-        const reminderData = convertRemindersToBackend(taskReminders, dueDateStr);
-        // Always set reminderDaysBefore - use the converted value or empty array
-        // Only set it if we actually have reminders to process
-        if (reminderData.reminderDaysBefore !== undefined) {
-          taskData.reminderDaysBefore = reminderData.reminderDaysBefore;
-        } else {
-          // If no reminderDaysBefore in result, set empty array to clear any existing reminders
-          taskData.reminderDaysBefore = [];
-        }
-        // Set specificDayOfWeek if provided
-        if (reminderData.specificDayOfWeek !== undefined && reminderData.specificDayOfWeek !== null) {
-          taskData.specificDayOfWeek = reminderData.specificDayOfWeek;
-        } else {
-          taskData.specificDayOfWeek = undefined;
-        }
-      } else {
-        taskData.reminderDaysBefore = [];
-        taskData.specificDayOfWeek = undefined;
-      }
-
-      const createdTask = await tasksService.create(listId, taskData);
-
-      // Store reminder times for all reminders (backend doesn't store times)
-      const reminderTimes: Record<string, string> = {};
-      taskReminders.forEach(reminder => {
-        if (reminder.time && reminder.time !== '09:00') {
-          // Only store if time is different from default
-          reminderTimes[reminder.id] = reminder.time;
-        }
-      });
-
-      if (Object.keys(reminderTimes).length > 0) {
-        await ReminderTimesStorage.setTimesForTask(createdTask.id, reminderTimes);
-      }
-
-      setNewTaskDescription('');
-      setNewTaskDueDate('');
-      setTaskReminders([]);
-      setShowAddModal(false);
-
-      // Schedule notifications for reminders (include all reminders)
-      if (taskReminders.length > 0) {
-        await scheduleTaskReminders(
-          createdTask.id,
-          createdTask.description,
-          taskReminders,
-          dueDateStr || null,
-        );
-      }
-
-      // Reload tasks to refresh daily reminders state
-      await loadTasks();
-      // Success feedback - UI update is visible, no alert needed
-    } catch (error: any) {
-      handleApiError(error, 'Unable to create task. Please try again.');
-    } finally {
-      setIsSubmitting(false);
     }
+
+    if (taskReminders.length > 0) {
+      const reminderData = convertRemindersToBackend(taskReminders, dueDateStr);
+      taskData.reminderDaysBefore = reminderData.reminderDaysBefore || [];
+      taskData.specificDayOfWeek = reminderData.specificDayOfWeek ?? undefined;
+    } else {
+      taskData.reminderDaysBefore = [];
+      taskData.specificDayOfWeek = undefined;
+    }
+
+    addTaskMutation.mutate(taskData);
   };
 
   const handleDeleteTask = (task: Task) => {
@@ -257,18 +220,11 @@ export default function TasksScreen() {
         {
           text: 'Delete',
           style: 'destructive',
-          onPress: async () => {
-            try {
-              // Cancel all notifications for this task
-              await cancelAllTaskNotifications(task.id);
-              // Clean up client-side storage for this task
-              await ReminderTimesStorage.removeTimesForTask(task.id);
-              await ReminderAlarmsStorage.removeAlarmsForTask(task.id);
-              await tasksService.delete(task.id);
-              loadTasks();
-            } catch (error: any) {
-              handleApiError(error, 'Unable to delete task. Please try again.');
-            }
+          onPress: () => {
+            cancelAllTaskNotifications(task.id);
+            ReminderTimesStorage.removeTimesForTask(task.id);
+            ReminderAlarmsStorage.removeAlarmsForTask(task.id);
+            deleteTaskMutation.mutate(task.id);
           },
         },
       ],
@@ -353,7 +309,7 @@ export default function TasksScreen() {
           </TouchableOpacity>
           <View style={{ flex: 1, alignItems: 'center' }}>
             <Text style={styles.title}>{listName}</Text>
-            <Text style={styles.taskCount}>{tasks.length} task{tasks.length !== 1 ? 's' : ''}</Text>
+            <Text style={styles.taskCount}>{filteredAndSortedTasks.length} task{filteredAndSortedTasks.length !== 1 ? 's' : ''}</Text>
           </View>
           <View style={{ width: 40 }} />
         </View>
@@ -377,7 +333,7 @@ export default function TasksScreen() {
       </View>
 
       <FlatList
-        data={tasks}
+        data={filteredAndSortedTasks}
         keyExtractor={(item) => item.id.toString()}
         showsVerticalScrollIndicator={true}
         refreshControl={
@@ -400,7 +356,7 @@ export default function TasksScreen() {
             </Text>
           </View>
         }
-        contentContainerStyle={tasks.length === 0 ? styles.emptyContainer : styles.listContentContainer}
+        contentContainerStyle={filteredAndSortedTasks.length === 0 ? styles.emptyContainer : styles.listContentContainer}
       />
 
       {/* Floating Action Button */}
@@ -478,9 +434,9 @@ export default function TasksScreen() {
               <TouchableOpacity
                 style={[styles.modalButton, styles.submitButton]}
                 onPress={handleAddTask}
-                disabled={isSubmitting}
+                disabled={addTaskMutation.isPending}
               >
-                {isSubmitting ? (
+                {addTaskMutation.isPending ? (
                   <ActivityIndicator color="#fff" />
                 ) : (
                   <Text style={styles.submitButtonText}>Add Task</Text>

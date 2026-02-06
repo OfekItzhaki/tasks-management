@@ -1,0 +1,31 @@
+services:
+  # Database - PostgreSQL
+  postgres:
+    image: postgres:15-alpine
+    container_name: horizon-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres_password
+      POSTGRES_DB: horizon_tasks
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - horizon-network
+
+  # Redis - for BullMQ Background Jobs
+  redis:
+    image: redis:7-alpine
+    container_name: horizon-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - horizon-network
+
+networks:
+  horizon-network:
+    driver: bridge
+
+volumes:
+  postgres_data:

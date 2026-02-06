@@ -1,4 +1,4 @@
-import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Query, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
@@ -6,7 +6,6 @@ import {
   ApiBearerAuth,
   ApiQuery,
 } from '@nestjs/swagger';
-import { QueryBus } from '@nestjs/cqrs';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import {
   CurrentUser,
@@ -15,13 +14,19 @@ import {
 import { GetTodoListsQuery } from '../todo-lists/queries/get-todo-lists.query';
 import { GetTasksQuery } from '../tasks/queries/get-tasks.query';
 import { GetTrashQuery } from './queries/get-trash.query';
+import { CommandBus, QueryBus } from '@nestjs/cqrs';
+import { UpdateProfilePictureCommand } from './commands/update-profile-picture.command';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @ApiTags('Me')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @Controller('me')
 export class MeController {
-  constructor(private readonly queryBus: QueryBus) { }
+  constructor(
+    private readonly queryBus: QueryBus,
+    private readonly commandBus: CommandBus,
+  ) { }
 
   @Get('lists')
   @ApiOperation({ summary: 'Get my lists (alias for GET /todo-lists)' })
@@ -51,5 +56,16 @@ export class MeController {
   @ApiResponse({ status: 200, description: 'Returns all soft-deleted items' })
   getTrash(@CurrentUser() user: CurrentUserPayload) {
     return this.queryBus.execute(new GetTrashQuery(user.userId));
+  }
+
+  @Post('profile-picture')
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiOperation({ summary: 'Update profile picture' })
+  @ApiResponse({ status: 200, description: 'Profile picture updated successfully' })
+  updateProfilePicture(
+    @CurrentUser() user: CurrentUserPayload,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    return this.commandBus.execute(new UpdateProfilePictureCommand(user.userId, file));
   }
 }
