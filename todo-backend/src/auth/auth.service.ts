@@ -18,7 +18,7 @@ export class AuthService {
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
     private readonly prisma: PrismaService,
-  ) {}
+  ) { }
 
   async validateUser(email: string, password: string) {
     const user = await this.usersService.findByEmail(email);
@@ -210,6 +210,53 @@ export class AuthService {
     } catch (e) {
       if (e instanceof BadRequestException) throw e;
       throw new BadRequestException('Invalid or expired registration token');
+    }
+  }
+
+  async forgotPassword(email: string) {
+    return this.usersService.generatePasswordResetOtp(email);
+  }
+
+  async verifyResetOtp(email: string, otp: string) {
+    const user = await this.usersService.verifyPasswordResetOtp(email, otp);
+
+    const payload = {
+      sub: user.id,
+      email: user.email,
+      purpose: 'password_reset',
+    };
+
+    return {
+      resetToken: this.jwtService.sign(payload, { expiresIn: '15m' }),
+    };
+  }
+
+  async resetPassword(email: string, token: string, password: string) {
+    try {
+      const payload = this.jwtService.verify<{
+        sub: string;
+        purpose: string;
+        email: string;
+      }>(token);
+
+      if (payload.purpose !== 'password_reset' || payload.email !== email) {
+        throw new BadRequestException('Invalid token');
+      }
+
+      const passwordHash = await bcrypt.hash(password, 10);
+      await this.prisma.user.update({
+        where: { id: payload.sub },
+        data: {
+          passwordHash,
+          passwordResetOtp: null,
+          passwordResetExpiresAt: null,
+        },
+      });
+
+      return { message: 'Password reset successful' };
+    } catch (e) {
+      if (e instanceof BadRequestException) throw e;
+      throw new BadRequestException('Invalid or expired reset token');
     }
   }
 }

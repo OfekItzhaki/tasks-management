@@ -12,6 +12,12 @@ import {
 import { Response, Request } from 'express';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
+import { CurrentUser, CurrentUserPayload } from './current-user.decorator';
+import {
+  ForgotPasswordDto,
+  VerifyResetOtpDto,
+  ResetPasswordDto,
+} from './dto/forgot-password.dto';
 import { LoginDto } from './dto/login.dto';
 import {
   RegisterStartDto,
@@ -22,7 +28,6 @@ import { ResendVerificationDto } from './dto/resend-verification.dto';
 import UsersService from '../users/users.service';
 import { BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { JwtAuthGuard } from './jwt-auth.guard';
-import { CurrentUser, CurrentUserPayload } from './current-user.decorator';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -30,7 +35,7 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly usersService: UsersService,
-  ) {}
+  ) { }
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
@@ -163,5 +168,32 @@ export class AuthController {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { refreshToken, ...rest } = result;
     return rest;
+  }
+
+  @Post('forgot-password')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Request password reset OTP' })
+  @ApiResponse({ status: 200, description: 'OTP sent if user exists' })
+  async forgotPassword(@Body() dto: ForgotPasswordDto) {
+    return this.authService.forgotPassword(dto.email);
+  }
+
+  @Post('reset-password/verify')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Verify reset OTP and return reset token' })
+  @ApiResponse({ status: 200, description: 'OTP verified, returns reset token' })
+  async verifyReset(@Body() dto: VerifyResetOtpDto) {
+    return this.authService.verifyResetOtp(dto.email, dto.otp);
+  }
+
+  @Post('reset-password/finish')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Reset password using reset token' })
+  @ApiResponse({ status: 200, description: 'Password reset successful' })
+  async resetPassword(@Body() dto: ResetPasswordDto) {
+    if (dto.password !== dto.passwordConfirm) {
+      throw new BadRequestException('Passwords do not match');
+    }
+    return this.authService.resetPassword(dto.email, dto.token, dto.password);
   }
 }

@@ -96,6 +96,46 @@ export class AuthService {
     TokenStorage.setToken(response.accessToken);
     return response;
   }
+
+  /**
+   * Request password reset OTP
+   */
+  async forgotPassword(email: string): Promise<{ message: string }> {
+    return apiClient.post<{ message: string }>('/auth/forgot-password', {
+      email,
+    });
+  }
+
+  /**
+   * Verify reset OTP
+   */
+  async verifyResetOtp(
+    email: string,
+    otp: string,
+  ): Promise<{ resetToken: string }> {
+    return apiClient.post<{ resetToken: string }>(
+      '/auth/reset-password/verify',
+      {
+        email,
+        otp,
+      },
+    );
+  }
+
+  /**
+   * Finish password reset
+   */
+  async resetPassword(data: {
+    email: string;
+    token: string;
+    password: string;
+    passwordConfirm: string;
+  }): Promise<{ message: string }> {
+    return apiClient.post<{ message: string }>(
+      '/auth/reset-password/finish',
+      data,
+    );
+  }
 }
 
 export const authService = new AuthService();

@@ -37,7 +37,7 @@ class UsersService {
   constructor(
     private prisma: PrismaService,
     private emailService: EmailService,
-  ) {}
+  ) { }
 
   private sanitizeUser<
     T extends {
@@ -151,13 +151,13 @@ class UsersService {
       type: ListType;
       isSystem?: boolean;
     }> = [
-      { name: 'Daily', type: ListType.DAILY },
-      { name: 'Weekly', type: ListType.WEEKLY },
-      { name: 'Monthly', type: ListType.MONTHLY },
-      { name: 'Yearly', type: ListType.YEARLY },
-      // System list for archived completed tasks (created once per user)
-      { name: 'Finished Tasks', type: ListType.FINISHED, isSystem: true },
-    ];
+        { name: 'Daily', type: ListType.DAILY },
+        { name: 'Weekly', type: ListType.WEEKLY },
+        { name: 'Monthly', type: ListType.MONTHLY },
+        { name: 'Yearly', type: ListType.YEARLY },
+        // System list for archived completed tasks (created once per user)
+        { name: 'Finished Tasks', type: ListType.FINISHED, isSystem: true },
+      ];
 
     await this.prisma.toDoList.createMany({
       data: defaultLists.map((list) => ({
@@ -222,6 +222,48 @@ class UsersService {
   async sendOtp(email: string, otp: string, name?: string) {
     console.log(`[DEV] OTP for ${email}: ${otp}`);
     await this.emailService.sendVerificationEmail(email, otp, name);
+  }
+
+  async generatePasswordResetOtp(email: string) {
+    const user = await this.findByEmail(email);
+    if (!user) {
+      // Don't leak user existence? Actually for personal apps it's usually fine, 
+      // but let's be professional and throw 404 if we want, or just return success either way.
+      // For this spec, we'll throw 404 to be clear.
+      throw new NotFoundException('User not found');
+    }
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = new Date();
+    expiresAt.setMinutes(expiresAt.getMinutes() + 15); // 15 minutes
+
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: {
+        passwordResetOtp: otp,
+        passwordResetExpiresAt: expiresAt,
+      },
+    });
+
+    console.log(`[DEV] Password Reset OTP for ${email}: ${otp}`);
+    // Reuse verification email template for now or add a new one if needed
+    await this.emailService.sendVerificationEmail(email, otp, user.name || undefined);
+
+    return { message: 'Password reset OTP sent' };
+  }
+
+  async verifyPasswordResetOtp(email: string, otp: string) {
+    const user = await this.findByEmail(email);
+    if (!user || user.passwordResetOtp !== otp) {
+      throw new BadRequestException('Invalid OTP');
+    }
+
+    const now = new Date();
+    if (user.passwordResetExpiresAt && user.passwordResetExpiresAt < now) {
+      throw new BadRequestException('OTP expired');
+    }
+
+    return user;
   }
 
   async setPassword(userId: string, passwordHash: string): Promise<User> {

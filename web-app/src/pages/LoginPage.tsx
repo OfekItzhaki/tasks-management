@@ -20,6 +20,9 @@ export default function LoginPage() {
   const [isRegistering, setIsRegistering] = useState(false);
   const [regStep, setRegStep] = useState(1);
   const [regToken, setRegToken] = useState('');
+  const [isResettingPassword, setIsResettingPassword] = useState(false);
+  const [resetStep, setResetStep] = useState(1);
+  const [resetToken, setResetToken] = useState('');
 
   const { login } = useAuth();
 
@@ -179,6 +182,13 @@ export default function LoginPage() {
                   : regStep === 2
                     ? handleRegisterVerify
                     : handleRegisterComplete
+                : isResettingPassword
+                  ? resetStep === 1
+                    ? handleForgotPasswordStart
+                    : resetStep === 2
+                      ? handleForgotPasswordVerify
+                      : handleForgotPasswordComplete
+                : handleLogin
             }
           >
             {error && (
@@ -315,40 +325,62 @@ export default function LoginPage() {
                   </p>
 
                   {/* Resend Code Button */}
-                  <div className="mt-4 flex justify-center">
-                    <button
-                      type="button"
-                      onClick={handleResendCode}
-                      disabled={loading || resendCooldown > 0}
-                      className="text-[10px] font-bold text-slate-400 hover:text-violet-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors uppercase tracking-widest flex items-center gap-2"
-                    >
-                      {resendCooldown > 0 ? (
-                        <span>Wait {resendCooldown}s</span>
-                      ) : (
-                        <>
-                          <svg
-                            className="w-3 h-3"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                            />
-                          </svg>
-                          Resend Code
-                        </>
-                      )}
-                    </button>
                   </div>
                 </div>
               )}
 
-              {/* Login or Step 3: Password */}
-              {(!isRegistering || regStep === 3) && (
+              {/* Reset Password: Step 2 OTP */}
+              {isResettingPassword && resetStep === 2 && (
+                <div className="group animate-scale-in">
+                  <label
+                    htmlFor="otp"
+                    className="block text-xs font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2 ml-1 transition-colors group-focus-within:text-violet-600 dark:group-focus-within:text-violet-400"
+                  >
+                    Reset Code
+                  </label>
+                  <div className="relative">
+                    <input
+                      id="otp"
+                      name="otp"
+                      type="text"
+                      inputMode="numeric"
+                      autoComplete="one-time-code"
+                      maxLength={6}
+                      required
+                      value={otp}
+                      onChange={(e) => {
+                        const val = e.target.value.replace(/\D/g, '');
+                        setOtp(val);
+                        if (val.length === 6) {
+                          void handleForgotPasswordVerify(undefined, val);
+                        }
+                      }}
+                      className="premium-input px-11 tracking-[0.5em] text-center font-bold text-lg"
+                      placeholder="000000"
+                    />
+                    <div className="absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400 group-focus-within:text-violet-500 transition-colors">
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Login, Registration Step 3, or Reset Step 3: Password */}
+              {((!isRegistering && !isResettingPassword) ||
+                (isRegistering && regStep === 3) ||
+                (isResettingPassword && resetStep === 3)) && (
                 <div className="group">
                   <label
                     htmlFor="password"
@@ -453,11 +485,28 @@ export default function LoginPage() {
                       )}
                     </div>
                   </div>
+
+                  {!isRegistering && !isResettingPassword && (
+                    <div className="mt-2 flex justify-end">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsResettingPassword(true);
+                          setResetStep(1);
+                          setError('');
+                        }}
+                        className="text-[10px] font-bold text-slate-400 hover:text-violet-600 transition-colors uppercase tracking-widest"
+                      >
+                        Forgot Password?
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
 
-              {/* Step 3 only: Confirm Password */}
-              {isRegistering && regStep === 3 && (
+              {/* Registration Step 3 or Reset Step 3 only: Confirm Password */}
+              {((isRegistering && regStep === 3) ||
+                (isResettingPassword && resetStep === 3)) && (
                 <div className="group">
                   <label
                     htmlFor="passwordConfirm"
@@ -527,15 +576,22 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={() => {
-                  setIsRegistering(!isRegistering);
-                  setRegStep(1);
+                  if (isResettingPassword) {
+                    setIsResettingPassword(false);
+                    setResetStep(1);
+                  } else {
+                    setIsRegistering(!isRegistering);
+                    setRegStep(1);
+                  }
                   setError('');
                 }}
                 className="text-[11px] font-bold text-slate-400 hover:text-violet-600 dark:hover:text-violet-400 transition-all uppercase tracking-[0.2em] py-2 px-4 rounded-xl hover:bg-violet-500/5"
               >
-                {isRegistering
+                {isResettingPassword
                   ? 'Back to Sign In'
-                  : "Don't have an account? Sign Up"}
+                  : isRegistering
+                    ? 'Back to Sign In'
+                    : "Don't have an account? Sign Up"}
               </button>
             </div>
           </form>
@@ -546,7 +602,7 @@ export default function LoginPage() {
             Developed by OfekLabs
           </p>
         </div>
-      </div>
-    </div>
+      </div >
+    </div >
   );
 }
