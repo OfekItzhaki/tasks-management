@@ -5,5 +5,5 @@ export class UpdateStepCommand {
     public readonly stepId: string,
     public readonly dto: UpdateStepDto,
     public readonly userId: string,
-  ) { }
+  ) {}
 }

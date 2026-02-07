@@ -18,7 +18,7 @@ export class AuthService {
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
     private readonly prisma: PrismaService,
-  ) { }
+  ) {}
 
   async validateUser(email: string, password: string) {
     const user = await this.usersService.findByEmail(email);
@@ -43,7 +43,12 @@ export class AuthService {
     return this.createAuthSession(user);
   }
 
-  private async createAuthSession(user: Omit<NonNullable<Awaited<ReturnType<typeof this.usersService.findByEmail>>>, 'passwordHash'>) {
+  private async createAuthSession(
+    user: Omit<
+      NonNullable<Awaited<ReturnType<typeof this.usersService.findByEmail>>>,
+      'passwordHash'
+    >,
+  ) {
     const payload = { sub: user.id, email: user.email };
     const accessToken = this.jwtService.sign(payload, { expiresIn: '15m' }); // Short-lived
     const refreshToken = await this.generateRefreshToken(user.id);
@@ -73,7 +78,10 @@ export class AuthService {
     // Return plain token to be signed/sent to user
     return this.jwtService.sign(
       { jti: token, sub: userId },
-      { expiresIn: '7d', secret: process.env.JWT_REFRESH_SECRET || 'refresh-secret' },
+      {
+        expiresIn: '7d',
+        secret: process.env.JWT_REFRESH_SECRET || 'refresh-secret',
+      },
     );
   }
 
@@ -96,7 +104,10 @@ export class AuthService {
       }
 
       // Check if the token matches (hashing)
-      const isMatch = await bcrypt.compare(payload.jti, refreshTokenRecord.token);
+      const isMatch = await bcrypt.compare(
+        payload.jti,
+        refreshTokenRecord.token,
+      );
       if (!isMatch) {
         throw new UnauthorizedException('Token mismatch');
       }

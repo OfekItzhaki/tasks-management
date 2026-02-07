@@ -178,7 +178,9 @@ describe('UsersService', () => {
     });
 
     it('should throw ForbiddenException if accessing another user', async () => {
-      await expect(service.getUser('1', '2')).rejects.toThrow(ForbiddenException);
+      await expect(service.getUser('1', '2')).rejects.toThrow(
+        ForbiddenException,
+      );
       await expect(service.getUser('1', '2')).rejects.toThrow(
         'You can only access your own profile',
       );

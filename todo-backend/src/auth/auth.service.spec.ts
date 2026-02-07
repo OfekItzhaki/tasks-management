@@ -151,12 +151,12 @@ describe('AuthService', () => {
       // Access token call
       expect(mockJwtService.sign).toHaveBeenCalledWith(
         { sub: '1', email: 'test@example.com' },
-        { expiresIn: '15m' }
+        { expiresIn: '15m' },
       );
       // Refresh token call
       expect(mockJwtService.sign).toHaveBeenCalledWith(
         { jti: expect.any(String), sub: '1' },
-        { expiresIn: '7d', secret: expect.any(String) }
+        { expiresIn: '7d', secret: expect.any(String) },
       );
     });
 

@@ -22,4 +22,4 @@ const QueryHandlers = [GetStepsHandler];
   controllers: [StepsController],
   providers: [...CommandHandlers, ...QueryHandlers],
 })
-export class StepsModule { }
+export class StepsModule {}

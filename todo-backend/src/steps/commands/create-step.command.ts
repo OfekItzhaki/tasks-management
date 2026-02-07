@@ -5,5 +5,5 @@ export class CreateStepCommand {
     public readonly taskId: string,
     public readonly dto: CreateStepDto,
     public readonly userId: string,
-  ) { }
+  ) {}
 }

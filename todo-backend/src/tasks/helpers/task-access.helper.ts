@@ -1,12 +1,20 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { ShareRole } from '@prisma/client';
 
 @Injectable()
 export class TaskAccessHelper {
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(private readonly prisma: PrismaService) {}
 
-  async ensureListAccess(todoListId: string, userId: string, requiredRole: ShareRole = ShareRole.VIEWER) {
+  async ensureListAccess(
+    todoListId: string,
+    userId: string,
+    requiredRole: ShareRole = ShareRole.VIEWER,
+  ) {
     const list = await this.prisma.toDoList.findFirst({
       where: {
         id: todoListId,
@@ -37,13 +45,19 @@ export class TaskAccessHelper {
     // If required is VIEWER, both VIEWER and EDITOR are fine.
     // If required is EDITOR, only EDITOR is fine.
     if (requiredRole === ShareRole.EDITOR && share.role !== ShareRole.EDITOR) {
-      throw new ForbiddenException('You need Editor permissions for this action');
+      throw new ForbiddenException(
+        'You need Editor permissions for this action',
+      );
     }
 
     return list;
   }
 
-  async findTaskForUser(id: string, userId: string, requiredRole: ShareRole = ShareRole.VIEWER) {
+  async findTaskForUser(
+    id: string,
+    userId: string,
+    requiredRole: ShareRole = ShareRole.VIEWER,
+  ) {
     const task = await this.prisma.task.findFirst({
       where: {
         id,
@@ -65,7 +79,9 @@ export class TaskAccessHelper {
     });
 
     if (!task) {
-      const existsButDeleted = await this.prisma.task.findUnique({ where: { id } });
+      const existsButDeleted = await this.prisma.task.findUnique({
+        where: { id },
+      });
       if (existsButDeleted) {
         // Find it anyway for recovery purposes if it's the owner or has access to the list
         // However, for regular "findTaskForUser" we strictly check deletedAt: null
@@ -85,7 +101,9 @@ export class TaskAccessHelper {
     }
 
     if (requiredRole === ShareRole.EDITOR && share.role !== ShareRole.EDITOR) {
-      throw new ForbiddenException('You need Editor permissions for this action');
+      throw new ForbiddenException(
+        'You need Editor permissions for this action',
+      );
     }
 
     return task;

@@ -13,7 +13,7 @@ export class ListSharesService {
   constructor(
     private prisma: PrismaService,
     private eventsGateway: EventsGateway,
-  ) { }
+  ) {}
 
   private async ensureOwnedList(todoListId: string, ownerId: string) {
     const list = await (this.prisma.toDoList as any).findFirst({
@@ -88,15 +88,19 @@ export class ListSharesService {
             tasks: {
               where: { deletedAt: null },
               orderBy: { order: 'asc' },
-              include: { steps: { where: { deletedAt: null } } }
-            }
-          }
+              include: { steps: { where: { deletedAt: null } } },
+            },
+          },
         },
       },
     });
 
     // Notify the shared user
-    this.eventsGateway.sendToUser(shareListDto.sharedWithId, 'list_shared', (share as any).toDoList);
+    this.eventsGateway.sendToUser(
+      shareListDto.sharedWithId,
+      'list_shared',
+      share.toDoList,
+    );
 
     return share;
   }
@@ -134,7 +138,7 @@ export class ListSharesService {
     // Filter out deleted lists and return only the list objects
     return shares
       .map((share: any) => share.toDoList)
-      .filter((list: any) => list !== null && (list as any).deletedAt === null);
+      .filter((list: any) => list !== null && list.deletedAt === null);
   }
 
   async getListShares(todoListId: string, ownerId: string) {
@@ -186,7 +190,12 @@ export class ListSharesService {
     return result;
   }
 
-  async updateShareRole(todoListId: string, userId: string, role: ShareRole, ownerId: string) {
+  async updateShareRole(
+    todoListId: string,
+    userId: string,
+    role: ShareRole,
+    ownerId: string,
+  ) {
     await this.ensureOwnedList(todoListId, ownerId);
 
     const share = await (this.prisma.listShare as any).findUnique({

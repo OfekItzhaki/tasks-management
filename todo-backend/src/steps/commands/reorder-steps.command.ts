@@ -3,5 +3,5 @@ export class ReorderStepsCommand {
     public readonly taskId: string,
     public readonly userId: string,
     public readonly stepIds: string[],
-  ) { }
+  ) {}
 }

@@ -20,4 +20,4 @@ import { PrismaModule } from '../prisma/prisma.module';
   providers: [RemindersService, RemindersProcessor],
   exports: [RemindersService],
 })
-export class RemindersModule { }
+export class RemindersModule {}

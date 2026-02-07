@@ -11,4 +11,4 @@ import { PrismaModule } from '../prisma/prisma.module';
   controllers: [MeController],
   providers: [GetTrashHandler, UpdateProfilePictureHandler],
 })
-export class MeModule { }
+export class MeModule {}

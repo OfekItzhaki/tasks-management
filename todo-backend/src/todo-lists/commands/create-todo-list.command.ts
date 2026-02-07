@@ -4,5 +4,5 @@ export class CreateTodoListCommand {
   constructor(
     public readonly createToDoListDto: CreateToDoListDto,
     public readonly userId: string,
-  ) { }
+  ) {}
 }

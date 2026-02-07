@@ -38,7 +38,7 @@ export class TodoListsController {
   constructor(
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
-  ) { }
+  ) {}
 
   @Post()
   @ApiOperation({ summary: 'Create a new to-do list' })
@@ -63,10 +63,7 @@ export class TodoListsController {
   @ApiOperation({ summary: 'Get list by ID' })
   @ApiResponse({ status: 200, description: 'Returns list with tasks' })
   @ApiResponse({ status: 404, description: 'List not found' })
-  findOne(
-    @Param('id') id: string,
-    @CurrentUser() user: CurrentUserPayload,
-  ) {
+  findOne(@Param('id') id: string, @CurrentUser() user: CurrentUserPayload) {
     return this.queryBus.execute(new GetTodoListByIdQuery(id, user.userId));
   }
 
@@ -88,10 +85,7 @@ export class TodoListsController {
   @ApiOperation({ summary: 'Soft delete list' })
   @ApiResponse({ status: 200, description: 'List deleted successfully' })
   @ApiResponse({ status: 404, description: 'List not found' })
-  remove(
-    @Param('id') id: string,
-    @CurrentUser() user: CurrentUserPayload,
-  ) {
+  remove(@Param('id') id: string, @CurrentUser() user: CurrentUserPayload) {
     return this.commandBus.execute(new RemoveTodoListCommand(id, user.userId));
   }
 
@@ -99,10 +93,7 @@ export class TodoListsController {
   @ApiOperation({ summary: 'Restore soft-deleted list' })
   @ApiResponse({ status: 200, description: 'List restored successfully' })
   @ApiResponse({ status: 404, description: 'List not found' })
-  restore(
-    @Param('id') id: string,
-    @CurrentUser() user: CurrentUserPayload,
-  ) {
+  restore(@Param('id') id: string, @CurrentUser() user: CurrentUserPayload) {
     return this.commandBus.execute(new RestoreTodoListCommand(id, user.userId));
   }
 

@@ -39,4 +39,4 @@ const QueryHandlers = [
   ],
   exports: [TasksService, TaskAccessHelper],
 })
-export class TasksModule { }
+export class TasksModule {}

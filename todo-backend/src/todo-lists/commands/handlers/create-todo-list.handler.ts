@@ -5,11 +5,12 @@ import { EventsService } from '../../../events/events.service';
 
 @CommandHandler(CreateTodoListCommand)
 export class CreateTodoListHandler
-  implements ICommandHandler<CreateTodoListCommand> {
+  implements ICommandHandler<CreateTodoListCommand>
+{
   constructor(
     private readonly todoListsService: TodoListsService,
     private readonly eventsService: EventsService,
-  ) { }
+  ) {}
 
   async execute(command: CreateTodoListCommand) {
     const result = await this.todoListsService.create(
@@ -17,7 +18,11 @@ export class CreateTodoListHandler
       command.userId,
     );
 
-    await this.eventsService.broadcastListEvent(result.id, 'list_created', result);
+    await this.eventsService.broadcastListEvent(
+      result.id,
+      'list_created',
+      result,
+    );
 
     return result;
   }

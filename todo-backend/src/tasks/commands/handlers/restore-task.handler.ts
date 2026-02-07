@@ -8,12 +8,16 @@ export class RestoreTaskHandler implements ICommandHandler<RestoreTaskCommand> {
   constructor(
     private readonly tasksService: TasksService,
     private readonly eventsService: EventsService,
-  ) { }
+  ) {}
 
   async execute(command: RestoreTaskCommand) {
     const result = await this.tasksService.restore(command.id, command.userId);
 
-    await this.eventsService.broadcastTaskEvent(command.id, 'task_restored', result);
+    await this.eventsService.broadcastTaskEvent(
+      command.id,
+      'task_restored',
+      result,
+    );
 
     return result;
   }

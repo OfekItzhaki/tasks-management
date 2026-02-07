@@ -5,5 +5,5 @@ export class CreateTaskCommand {
     public readonly todoListId: string,
     public readonly createTaskDto: CreateTaskDto,
     public readonly userId: string,
-  ) { }
+  ) {}
 }

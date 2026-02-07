@@ -1,4 +1,14 @@
-import { Body, Controller, Post, Param, HttpCode, HttpStatus, Res, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Post,
+  Param,
+  HttpCode,
+  HttpStatus,
+  Res,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { Response, Request } from 'express';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
@@ -20,21 +30,25 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly usersService: UsersService,
-  ) { }
+  ) {}
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Login with email and password' })
   @ApiResponse({
     status: 200,
-    description: 'Returns JWT access token and user data, sets refresh token cookie',
+    description:
+      'Returns JWT access token and user data, sets refresh token cookie',
   })
   @ApiResponse({ status: 401, description: 'Invalid credentials' })
   async login(
     @Body() loginDto: LoginDto,
     @Res({ passthrough: true }) response: Response,
   ) {
-    const result = await this.authService.login(loginDto.email, loginDto.password);
+    const result = await this.authService.login(
+      loginDto.email,
+      loginDto.password,
+    );
     this.setRefreshTokenCookie(response, result.refreshToken);
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -140,7 +154,10 @@ export class AuthController {
     if (dto.password !== dto.passwordConfirm) {
       throw new BadRequestException('Passwords do not match');
     }
-    const result = await this.authService.registerFinish(dto.registrationToken, dto.password);
+    const result = await this.authService.registerFinish(
+      dto.registrationToken,
+      dto.password,
+    );
     this.setRefreshTokenCookie(response, result.refreshToken);
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars

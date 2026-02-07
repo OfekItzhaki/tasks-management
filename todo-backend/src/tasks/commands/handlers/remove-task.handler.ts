@@ -8,12 +8,14 @@ export class RemoveTaskHandler implements ICommandHandler<RemoveTaskCommand> {
   constructor(
     private readonly tasksService: TasksService,
     private readonly eventsService: EventsService,
-  ) { }
+  ) {}
 
   async execute(command: RemoveTaskCommand) {
     const result = await this.tasksService.remove(command.id, command.userId);
 
-    await this.eventsService.broadcastTaskEvent(command.id, 'task_deleted', { id: command.id });
+    await this.eventsService.broadcastTaskEvent(command.id, 'task_deleted', {
+      id: command.id,
+    });
 
     return result;
   }

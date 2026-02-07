@@ -43,7 +43,7 @@ export class TasksController {
   constructor(
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
-  ) { }
+  ) {}
 
   @Post('todo-list/:todoListId')
   @ApiOperation({ summary: 'Create a new task in a list' })
@@ -106,10 +106,7 @@ export class TasksController {
   @ApiOperation({ summary: 'Get task by ID' })
   @ApiResponse({ status: 200, description: 'Returns task with steps' })
   @ApiResponse({ status: 404, description: 'Task not found' })
-  findOne(
-    @Param('id') id: string,
-    @CurrentUser() user: CurrentUserPayload,
-  ) {
+  findOne(@Param('id') id: string, @CurrentUser() user: CurrentUserPayload) {
     return this.queryBus.execute(new GetTaskQuery(id, user.userId));
   }
 
@@ -131,10 +128,7 @@ export class TasksController {
   @ApiOperation({ summary: 'Soft delete task' })
   @ApiResponse({ status: 200, description: 'Task deleted successfully' })
   @ApiResponse({ status: 404, description: 'Task not found' })
-  remove(
-    @Param('id') id: string,
-    @CurrentUser() user: CurrentUserPayload,
-  ) {
+  remove(@Param('id') id: string, @CurrentUser() user: CurrentUserPayload) {
     return this.commandBus.execute(new RemoveTaskCommand(id, user.userId));
   }
 
@@ -143,10 +137,7 @@ export class TasksController {
   @ApiResponse({ status: 200, description: 'Task restored successfully' })
   @ApiResponse({ status: 400, description: 'Task cannot be restored' })
   @ApiResponse({ status: 404, description: 'Task not found' })
-  restore(
-    @Param('id') id: string,
-    @CurrentUser() user: CurrentUserPayload,
-  ) {
+  restore(@Param('id') id: string, @CurrentUser() user: CurrentUserPayload) {
     return this.commandBus.execute(new RestoreTaskCommand(id, user.userId));
   }
 

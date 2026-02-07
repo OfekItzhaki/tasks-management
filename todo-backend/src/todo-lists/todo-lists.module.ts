@@ -26,4 +26,4 @@ const QueryHandlers = [GetTodoListsHandler, GetTodoListByIdHandler];
   providers: [TodoListsService, ...CommandHandlers, ...QueryHandlers],
   exports: [TodoListsService],
 })
-export class TodoListsModule { }
+export class TodoListsModule {}

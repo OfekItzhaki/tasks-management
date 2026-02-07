@@ -13,4 +13,4 @@ import { BullModule } from '@nestjs/bullmq';
   providers: [TaskSchedulerService],
   exports: [TaskSchedulerService],
 })
-export class TaskSchedulerModule { }
+export class TaskSchedulerModule {}

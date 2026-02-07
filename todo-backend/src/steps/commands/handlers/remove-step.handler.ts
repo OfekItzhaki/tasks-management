@@ -9,7 +9,7 @@ export class RemoveStepHandler implements ICommandHandler<RemoveStepCommand> {
   constructor(
     private readonly prisma: PrismaService,
     private readonly eventsService: EventsService,
-  ) { }
+  ) {}
 
   async execute(command: RemoveStepCommand) {
     const { stepId, userId } = command;

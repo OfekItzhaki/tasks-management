@@ -5,5 +5,5 @@ export class UpdateTodoListCommand {
     public readonly id: string,
     public readonly updateToDoListDto: UpdateToDoListDto,
     public readonly userId: string,
-  ) { }
+  ) {}
 }

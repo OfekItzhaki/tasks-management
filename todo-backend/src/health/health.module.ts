@@ -3,7 +3,7 @@ import { HealthController } from './health.controller';
 import { PrismaModule } from '../prisma/prisma.module';
 
 @Module({
-    imports: [PrismaModule],
-    controllers: [HealthController],
+  imports: [PrismaModule],
+  controllers: [HealthController],
 })
-export class HealthModule { }
+export class HealthModule {}

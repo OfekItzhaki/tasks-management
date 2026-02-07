@@ -8,7 +8,7 @@ export class UpdateTaskHandler implements ICommandHandler<UpdateTaskCommand> {
   constructor(
     private readonly tasksService: TasksService,
     private readonly eventsService: EventsService,
-  ) { }
+  ) {}
 
   async execute(command: UpdateTaskCommand) {
     const result = await this.tasksService.update(
@@ -18,7 +18,11 @@ export class UpdateTaskHandler implements ICommandHandler<UpdateTaskCommand> {
     );
 
     // Broadcast update to all authorized users (owner + shared)
-    await this.eventsService.broadcastTaskEvent(command.id, 'task_updated', result);
+    await this.eventsService.broadcastTaskEvent(
+      command.id,
+      'task_updated',
+      result,
+    );
 
     return result;
   }

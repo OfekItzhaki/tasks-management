@@ -37,7 +37,7 @@ export class StepsController {
   constructor(
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
-  ) { }
+  ) {}
 
   @Post('tasks/:taskId/steps')
   @ApiOperation({ summary: 'Create a new step (sub-task)' })
@@ -82,10 +82,7 @@ export class StepsController {
   @ApiOperation({ summary: 'Soft delete step' })
   @ApiResponse({ status: 200, description: 'Step deleted successfully' })
   @ApiResponse({ status: 404, description: 'Step not found' })
-  remove(
-    @Param('id') stepId: string,
-    @CurrentUser() user: CurrentUserPayload,
-  ) {
+  remove(@Param('id') stepId: string, @CurrentUser() user: CurrentUserPayload) {
     return this.commandBus.execute(new RemoveStepCommand(stepId, user.userId));
   }
 

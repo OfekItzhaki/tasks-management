@@ -29,7 +29,7 @@ import {
 @UseGuards(JwtAuthGuard)
 @Controller('list-shares')
 export class ListSharesController {
-  constructor(private readonly listSharesService: ListSharesService) { }
+  constructor(private readonly listSharesService: ListSharesService) {}
 
   @Post('todo-list/:todoListId')
   @ApiOperation({ summary: 'Share a list with another user' })

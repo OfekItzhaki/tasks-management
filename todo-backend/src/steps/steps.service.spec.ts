@@ -37,7 +37,11 @@ describe('StepsService', () => {
     service = module.get<StepsService>(StepsService);
 
     // Set default mock implementations
-    mockPrismaService.task.findFirst.mockResolvedValue({ id: '1', todoList: { ownerId: '1', deletedAt: null }, deletedAt: null });
+    mockPrismaService.task.findFirst.mockResolvedValue({
+      id: '1',
+      todoList: { ownerId: '1', deletedAt: null },
+      deletedAt: null,
+    });
     mockPrismaService.task.findUnique.mockResolvedValue(null);
     mockPrismaService.step.findFirst.mockResolvedValue(null);
     mockPrismaService.step.findMany.mockResolvedValue([]);
@@ -126,9 +130,9 @@ describe('StepsService', () => {
     it('should throw NotFoundException if task does not exist', async () => {
       mockPrismaService.task.findFirst.mockResolvedValue(null);
 
-      await expect(service.reorder('taskId', ownerId, ['1', '2', '3'])).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(
+        service.reorder('taskId', ownerId, ['1', '2', '3']),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 

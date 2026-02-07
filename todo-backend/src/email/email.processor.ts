@@ -61,7 +61,10 @@ export class EmailProcessor extends WorkerHost {
       });
       this.logger.log(`Successfully sent reminder email to: ${email}`);
     } catch (error) {
-      this.logger.error(`Failed to send reminder email to ${email}:`, error.stack);
+      this.logger.error(
+        `Failed to send reminder email to ${email}:`,
+        error.stack,
+      );
       throw error;
     }
   }

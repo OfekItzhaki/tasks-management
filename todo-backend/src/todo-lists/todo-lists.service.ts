@@ -13,7 +13,7 @@ export class TodoListsService {
   constructor(
     private prisma: PrismaService,
     private taskAccess: TaskAccessHelper,
-  ) { }
+  ) {}
 
   async create(createToDoListDto: CreateToDoListDto, ownerId: string) {
     const list = await this.prisma.toDoList.create({
@@ -81,7 +81,11 @@ export class TodoListsService {
     updateToDoListDto: UpdateToDoListDto,
     userId: string,
   ) {
-    const list = await this.taskAccess.ensureListAccess(id, userId, ShareRole.EDITOR);
+    const list = await this.taskAccess.ensureListAccess(
+      id,
+      userId,
+      ShareRole.EDITOR,
+    );
 
     const updated = await this.prisma.toDoList.update({
       where: { id },
@@ -138,9 +142,13 @@ export class TodoListsService {
     }
 
     // Manual cleanup of relations if not cascading
-    await (this.prisma.step as any).deleteMany({ where: { task: { todoListId: id } } });
+    await (this.prisma.step as any).deleteMany({
+      where: { task: { todoListId: id } },
+    });
     await this.prisma.task.deleteMany({ where: { todoListId: id } });
-    await (this.prisma.listShare as any).deleteMany({ where: { toDoListId: id } });
+    await (this.prisma.listShare as any).deleteMany({
+      where: { toDoListId: id },
+    });
 
     const result = await this.prisma.toDoList.delete({
       where: { id },

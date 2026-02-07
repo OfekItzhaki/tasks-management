@@ -25,14 +25,18 @@ export class TasksService {
     private taskAccess: TaskAccessHelper,
     @Inject(forwardRef(() => TaskSchedulerService))
     private taskScheduler: TaskSchedulerService,
-  ) { }
+  ) {}
 
   async create(
     todoListId: string,
     createTaskDto: CreateTaskDto,
     ownerId: string,
   ) {
-    await this.taskAccess.ensureListAccess(todoListId, ownerId, ShareRole.EDITOR);
+    await this.taskAccess.ensureListAccess(
+      todoListId,
+      ownerId,
+      ShareRole.EDITOR,
+    );
 
     const task = await this.prisma.task.create({
       data: {
@@ -42,8 +46,8 @@ export class TasksService {
         reminderDaysBefore: createTaskDto.reminderDaysBefore ?? [],
         reminderConfig: createTaskDto.reminderConfig
           ? (JSON.parse(
-            JSON.stringify(createTaskDto.reminderConfig),
-          ) as Prisma.InputJsonValue)
+              JSON.stringify(createTaskDto.reminderConfig),
+            ) as Prisma.InputJsonValue)
           : Prisma.JsonNull,
         completed: createTaskDto.completed ?? false,
         todoListId,
@@ -106,7 +110,11 @@ export class TasksService {
   }
 
   async update(id: string, updateTaskDto: UpdateTaskDto, userId: string) {
-    const task = await this.taskAccess.findTaskForUser(id, userId, ShareRole.EDITOR);
+    const task = await this.taskAccess.findTaskForUser(
+      id,
+      userId,
+      ShareRole.EDITOR,
+    );
 
     // Track completedAt timestamp
     let completedAt: Date | null | undefined = undefined;
@@ -142,8 +150,8 @@ export class TasksService {
         reminderConfig:
           updateTaskDto.reminderConfig !== undefined
             ? (JSON.parse(
-              JSON.stringify(updateTaskDto.reminderConfig),
-            ) as Prisma.InputJsonValue)
+                JSON.stringify(updateTaskDto.reminderConfig),
+              ) as Prisma.InputJsonValue)
             : undefined,
         completed: updateTaskDto.completed,
         ...(completedAt !== undefined && { completedAt }),
@@ -155,7 +163,11 @@ export class TasksService {
   }
 
   async remove(id: string, userId: string) {
-    const task = await this.taskAccess.findTaskForUser(id, userId, ShareRole.EDITOR);
+    const task = await this.taskAccess.findTaskForUser(
+      id,
+      userId,
+      ShareRole.EDITOR,
+    );
 
     const result = await this.prisma.task.update({
       where: { id },
@@ -187,10 +199,7 @@ export class TasksService {
     });
 
     return allTasks.filter((task) =>
-      TaskOccurrenceHelper.shouldAppearOnDate(
-        task,
-        date,
-      ),
+      TaskOccurrenceHelper.shouldAppearOnDate(task, date),
     );
   }
 
@@ -214,10 +223,7 @@ export class TasksService {
     });
 
     return allTasks.filter((task) =>
-      TaskOccurrenceHelper.shouldRemindOnDate(
-        task,
-        date,
-      ),
+      TaskOccurrenceHelper.shouldRemindOnDate(task, date),
     );
   }
 
@@ -230,10 +236,7 @@ export class TasksService {
       where: {
         id,
         todoList: {
-          OR: [
-            { ownerId },
-            { shares: { some: { sharedWithId: ownerId } } },
-          ],
+          OR: [{ ownerId }, { shares: { some: { sharedWithId: ownerId } } }],
         },
       },
       include: { todoList: true },
@@ -260,7 +263,9 @@ export class TasksService {
     // Case 2: Task was archived (completed in a system list)
     if (task.todoList.type === ListType.FINISHED) {
       if (!task.originalListId) {
-        throw new BadRequestException('Original list information not available');
+        throw new BadRequestException(
+          'Original list information not available',
+        );
       }
 
       const originalList = await this.prisma.toDoList.findFirst({
@@ -300,10 +305,7 @@ export class TasksService {
       where: {
         id,
         todoList: {
-          OR: [
-            { ownerId },
-            { shares: { some: { sharedWithId: ownerId } } },
-          ],
+          OR: [{ ownerId }, { shares: { some: { sharedWithId: ownerId } } }],
         },
       },
       include: { todoList: true },

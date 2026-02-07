@@ -9,7 +9,7 @@ export class CreateStepHandler implements ICommandHandler<CreateStepCommand> {
   constructor(
     private readonly prisma: PrismaService,
     private readonly eventsService: EventsService,
-  ) { }
+  ) {}
 
   async execute(command: CreateStepCommand) {
     const { taskId, dto, userId } = command;
@@ -49,7 +49,10 @@ export class CreateStepHandler implements ICommandHandler<CreateStepCommand> {
       },
     });
 
-    await this.eventsService.broadcastStepEvent(taskId, 'step_created', { taskId, step });
+    await this.eventsService.broadcastStepEvent(taskId, 'step_created', {
+      taskId,
+      step,
+    });
 
     return step;
   }

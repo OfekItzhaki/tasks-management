@@ -5,5 +5,5 @@ export class UpdateTaskCommand {
     public readonly id: string,
     public readonly updateTaskDto: UpdateTaskDto,
     public readonly userId: string,
-  ) { }
+  ) {}
 }

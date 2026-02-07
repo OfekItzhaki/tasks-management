@@ -22,7 +22,7 @@ export class TaskSchedulerService implements OnModuleInit {
   constructor(
     private prisma: PrismaService,
     @InjectQueue('reminders') private remindersQueue: Queue,
-  ) { }
+  ) {}
 
   private isSchedulerDisabled(): boolean {
     return process.env.DISABLE_SCHEDULER === 'true';
@@ -159,9 +159,7 @@ export class TaskSchedulerService implements OnModuleInit {
 
       // Move tasks to their owner's Finished list
       for (const [ownerId, tasks] of Object.entries(tasksByOwner)) {
-        const finishedList = await this.getOrCreateFinishedList(
-          ownerId,
-        );
+        const finishedList = await this.getOrCreateFinishedList(ownerId);
 
         // Update each task individually to preserve originalListId
         for (const task of tasks as any[]) {
@@ -174,7 +172,9 @@ export class TaskSchedulerService implements OnModuleInit {
           });
         }
 
-        this.logger.log(`Archived ${(tasks as any[]).length} tasks for user ${ownerId}`);
+        this.logger.log(
+          `Archived ${(tasks as any[]).length} tasks for user ${ownerId}`,
+        );
       }
     });
   }
@@ -491,9 +491,15 @@ export class TaskSchedulerService implements OnModuleInit {
       if (tasksToPurge.length > 0) {
         const taskIds = tasksToPurge.map((t: any) => t.id);
         // Manual cleanup if no cascade
-        await (this.prisma.step as any).deleteMany({ where: { taskId: { in: taskIds } } });
-        await (this.prisma.task as any).deleteMany({ where: { id: { in: taskIds } } });
-        this.logger.log(`Purged ${tasksToPurge.length} old tasks from recycle bin`);
+        await (this.prisma.step as any).deleteMany({
+          where: { taskId: { in: taskIds } },
+        });
+        await (this.prisma.task as any).deleteMany({
+          where: { id: { in: taskIds } },
+        });
+        this.logger.log(
+          `Purged ${tasksToPurge.length} old tasks from recycle bin`,
+        );
       }
 
       // 2. Purge old soft-deleted lists
@@ -506,12 +512,22 @@ export class TaskSchedulerService implements OnModuleInit {
 
       if (listsToPurge.length > 0) {
         for (const list of listsToPurge) {
-          await (this.prisma.step as any).deleteMany({ where: { task: { todoListId: list.id } } });
-          await (this.prisma.task as any).deleteMany({ where: { todoListId: list.id } });
-          await (this.prisma.listShare as any).deleteMany({ where: { toDoListId: list.id } });
-          await (this.prisma.toDoList as any).delete({ where: { id: list.id } });
+          await (this.prisma.step as any).deleteMany({
+            where: { task: { todoListId: list.id } },
+          });
+          await (this.prisma.task as any).deleteMany({
+            where: { todoListId: list.id },
+          });
+          await (this.prisma.listShare as any).deleteMany({
+            where: { toDoListId: list.id },
+          });
+          await (this.prisma.toDoList as any).delete({
+            where: { id: list.id },
+          });
         }
-        this.logger.log(`Purged ${listsToPurge.length} old lists from recycle bin`);
+        this.logger.log(
+          `Purged ${listsToPurge.length} old lists from recycle bin`,
+        );
       }
     });
   }

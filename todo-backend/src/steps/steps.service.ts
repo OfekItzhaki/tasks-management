@@ -14,7 +14,7 @@ export class StepsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly taskAccess: TaskAccessHelper,
-  ) { }
+  ) {}
 
   private async ensureTaskAccess(taskId: string, userId: string) {
     // Check if user owns the list OR has shared access
@@ -108,7 +108,11 @@ export class StepsService {
   async update(stepId: string, dto: UpdateStepDto, ownerId: string) {
     const step = await this.ensureStepAccess(stepId, ownerId);
     // Find task to check EDITOR role
-    await this.taskAccess.findTaskForUser(step.taskId, ownerId, ShareRole.EDITOR);
+    await this.taskAccess.findTaskForUser(
+      step.taskId,
+      ownerId,
+      ShareRole.EDITOR,
+    );
 
     return this.prisma.step.update({
       where: { id: stepId },
@@ -121,7 +125,11 @@ export class StepsService {
 
   async remove(stepId: string, ownerId: string) {
     const step = await this.ensureStepAccess(stepId, ownerId);
-    await this.taskAccess.findTaskForUser(step.taskId, ownerId, ShareRole.EDITOR);
+    await this.taskAccess.findTaskForUser(
+      step.taskId,
+      ownerId,
+      ShareRole.EDITOR,
+    );
 
     return this.prisma.step.update({
       where: { id: stepId },

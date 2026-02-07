@@ -9,7 +9,7 @@ export class UpdateStepHandler implements ICommandHandler<UpdateStepCommand> {
   constructor(
     private readonly prisma: PrismaService,
     private readonly eventsService: EventsService,
-  ) { }
+  ) {}
 
   async execute(command: UpdateStepCommand) {
     const { stepId, dto, userId } = command;

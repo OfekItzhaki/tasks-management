@@ -8,7 +8,7 @@ export class CreateTaskHandler implements ICommandHandler<CreateTaskCommand> {
   constructor(
     private readonly tasksService: TasksService,
     private readonly eventsService: EventsService,
-  ) { }
+  ) {}
 
   async execute(command: CreateTaskCommand) {
     const result = await this.tasksService.create(
@@ -17,7 +17,11 @@ export class CreateTaskHandler implements ICommandHandler<CreateTaskCommand> {
       command.userId,
     );
 
-    await this.eventsService.broadcastTaskEvent((result as any).id, 'task_created', result);
+    await this.eventsService.broadcastTaskEvent(
+      (result as any).id,
+      'task_created',
+      result,
+    );
 
     return result;
   }

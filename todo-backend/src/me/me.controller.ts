@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Query, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Query,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
@@ -26,7 +34,7 @@ export class MeController {
   constructor(
     private readonly queryBus: QueryBus,
     private readonly commandBus: CommandBus,
-  ) { }
+  ) {}
 
   @Get('lists')
   @ApiOperation({ summary: 'Get my lists (alias for GET /todo-lists)' })
@@ -61,11 +69,16 @@ export class MeController {
   @Post('profile-picture')
   @UseInterceptors(FileInterceptor('file'))
   @ApiOperation({ summary: 'Update profile picture' })
-  @ApiResponse({ status: 200, description: 'Profile picture updated successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'Profile picture updated successfully',
+  })
   updateProfilePicture(
     @CurrentUser() user: CurrentUserPayload,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    return this.commandBus.execute(new UpdateProfilePictureCommand(user.userId, file));
+    return this.commandBus.execute(
+      new UpdateProfilePictureCommand(user.userId, file),
+    );
   }
 }

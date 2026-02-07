@@ -34,7 +34,7 @@ export class RemindersService {
     private readonly prisma: PrismaService,
     private readonly eventsGateway: EventsGateway,
     private readonly emailService: EmailService,
-  ) { }
+  ) {}
 
   /**
    * Get reminders for a specific date and format them as notifications
@@ -54,7 +54,7 @@ export class RemindersService {
       const reminderDaysArray = Array.isArray(task.reminderDaysBefore)
         ? task.reminderDaysBefore
         : task.reminderDaysBefore
-          ? [task.reminderDaysBefore as number]
+          ? [task.reminderDaysBefore]
           : [1];
 
       const dueDate = this.calculateTaskDueDate(task, date);
@@ -96,7 +96,10 @@ export class RemindersService {
   /**
    * Send reminders to user via multi-channel
    */
-  async sendReminders(userId: string, notifications: ReminderNotification[]): Promise<void> {
+  async sendReminders(
+    userId: string,
+    notifications: ReminderNotification[],
+  ): Promise<void> {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
       select: { email: true, notificationFrequency: true },
@@ -211,7 +214,7 @@ export class RemindersService {
     if (dueDate) {
       const daysUntilDue = Math.ceil(
         (dueDate.getTime() - new Date().setHours(0, 0, 0, 0)) /
-        (1000 * 60 * 60 * 24),
+          (1000 * 60 * 60 * 24),
       );
 
       if (daysUntilDue === 0) {
