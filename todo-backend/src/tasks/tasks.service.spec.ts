@@ -12,6 +12,7 @@ describe('TasksService', () => {
   const mockPrismaService = {
     task: {
       findFirst: jest.fn(),
+      findUnique: jest.fn(),
       findMany: jest.fn(),
       create: jest.fn(),
       update: jest.fn(),
@@ -50,13 +51,13 @@ describe('TasksService', () => {
   });
 
   describe('getTasksByDate', () => {
-    const ownerId = 1;
+    const ownerId = '1';
 
     it('should return daily tasks for any date', async () => {
       const date = new Date('2024-12-25');
       const mockTasks = [
         {
-          id: 1,
+          id: '1',
           description: 'Daily task',
           dueDate: null,
           specificDayOfWeek: null,
@@ -71,14 +72,14 @@ describe('TasksService', () => {
       const result = await service.getTasksByDate(ownerId, date);
 
       expect(result).toHaveLength(1);
-      expect(result[0].id).toBe(1);
+      expect(result[0].id).toBe('1');
     });
 
     it('should return weekly tasks on specified day of week', async () => {
       const date = new Date('2024-12-25'); // Wednesday (day 3)
       const mockTasks = [
         {
-          id: 1,
+          id: '1',
           description: 'Weekly task',
           dueDate: null,
           specificDayOfWeek: 3, // Wednesday
@@ -100,7 +101,7 @@ describe('TasksService', () => {
       date.setHours(0, 0, 0, 0);
       const mockTasks = [
         {
-          id: 1,
+          id: '1',
           description: 'Task with due date',
           dueDate: new Date('2024-12-25'),
           specificDayOfWeek: null,
@@ -115,7 +116,7 @@ describe('TasksService', () => {
       const result = await service.getTasksByDate(ownerId, date);
 
       expect(result).toHaveLength(1);
-      expect(result[0].id).toBe(1);
+      expect(result[0].id).toBe('1');
     });
 
     it('should not return completed tasks', async () => {
@@ -130,8 +131,8 @@ describe('TasksService', () => {
   });
 
   describe('create', () => {
-    const todoListId = 1;
-    const ownerId = 1;
+    const todoListId = '1';
+    const ownerId = '1';
 
     it('should create a task successfully', async () => {
       const createDto = {
@@ -139,7 +140,7 @@ describe('TasksService', () => {
         completed: false,
       };
       const mockTask = {
-        id: 1,
+        id: '1',
         ...createDto,
         todoListId,
       };
@@ -171,7 +172,7 @@ describe('TasksService', () => {
         reminderConfig,
       };
       const mockTask = {
-        id: 1,
+        id: '1',
         ...createDto,
         reminderDaysBefore: [],
         specificDayOfWeek: null,
@@ -202,7 +203,7 @@ describe('TasksService', () => {
         dueDate: new Date('2026-01-30'),
       };
       const mockTask = {
-        id: 1,
+        id: '1',
         ...createDto,
         specificDayOfWeek: null,
         reminderConfig: null,
@@ -232,7 +233,7 @@ describe('TasksService', () => {
         specificDayOfWeek: 1, // Monday
       };
       const mockTask = {
-        id: 1,
+        id: '1',
         ...createDto,
         reminderDaysBefore: [],
         reminderConfig: null,
@@ -266,8 +267,8 @@ describe('TasksService', () => {
   });
 
   describe('findOne', () => {
-    const taskId = 1;
-    const ownerId = 1;
+    const taskId = '1';
+    const ownerId = '1';
 
     it('should return task if found', async () => {
       const mockTask = {
@@ -298,14 +299,14 @@ describe('TasksService', () => {
   });
 
   describe('getTasksWithReminders', () => {
-    const ownerId = 1;
+    const ownerId = '1';
 
     it('should return tasks with reminders for specific date', async () => {
       const date = new Date('2024-12-25');
       const reminderDate = new Date('2024-12-26'); // Due date is 1 day after
       const mockTasks = [
         {
-          id: 1,
+          id: '1',
           description: 'Task with reminder',
           dueDate: reminderDate,
           reminderDaysBefore: 1,
@@ -324,8 +325,8 @@ describe('TasksService', () => {
   });
 
   describe('update', () => {
-    const taskId = 1;
-    const ownerId = 1;
+    const taskId = '1';
+    const ownerId = '1';
 
     it('should update task successfully', async () => {
       const mockTask = {
@@ -521,8 +522,8 @@ describe('TasksService', () => {
   });
 
   describe('remove', () => {
-    const taskId = 1;
-    const ownerId = 1;
+    const taskId = '1';
+    const ownerId = '1';
 
     it('should soft delete task', async () => {
       const mockTask = {
@@ -557,12 +558,12 @@ describe('TasksService', () => {
   });
 
   describe('findAll', () => {
-    const ownerId = 1;
+    const ownerId = '1';
 
     it('should return all tasks for owner', async () => {
       const mockTasks = [
         {
-          id: 1,
+          id: '1',
           description: 'Task 1',
           todoList: { ownerId, deletedAt: null },
           deletedAt: null,
@@ -578,10 +579,10 @@ describe('TasksService', () => {
     });
 
     it('should filter by todoListId if provided', async () => {
-      const todoListId = 1;
+      const todoListId = '1';
       const mockTasks = [
         {
-          id: 1,
+          id: '1',
           description: 'Task 1',
           todoListId,
           todoList: { ownerId, deletedAt: null },

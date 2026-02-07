@@ -3,6 +3,7 @@ import { NotFoundException } from '@nestjs/common';
 import { TodoListsService } from './todo-lists.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { ListType } from '@prisma/client';
+import { TaskAccessHelper } from '../tasks/helpers/task-access.helper';
 
 describe('TodoListsService', () => {
   let service: TodoListsService;
@@ -12,7 +13,19 @@ describe('TodoListsService', () => {
       create: jest.fn(),
       findMany: jest.fn(),
       findFirst: jest.fn(),
+      findUnique: jest.fn(),
       update: jest.fn(),
+      delete: jest.fn(),
+      deleteMany: jest.fn(),
+    },
+    listShare: {
+      deleteMany: jest.fn(),
+    },
+    task: {
+      deleteMany: jest.fn(),
+    },
+    step: {
+      deleteMany: jest.fn(),
     },
   };
 
@@ -23,6 +36,13 @@ describe('TodoListsService', () => {
         {
           provide: PrismaService,
           useValue: mockPrismaService,
+        },
+        {
+          provide: TaskAccessHelper,
+          useValue: {
+            ensureListAccess: jest.fn().mockResolvedValue({ id: '1', ownerId: '1' }),
+            findTaskForUser: jest.fn(),
+          },
         },
       ],
     }).compile();
@@ -35,12 +55,12 @@ describe('TodoListsService', () => {
   });
 
   describe('create', () => {
-    const ownerId = 1;
+    const ownerId = '1';
 
     it('should create list with CUSTOM type by default', async () => {
       const createDto = { name: 'Test List' };
       const mockList = {
-        id: 1,
+        id: '1',
         name: 'Test List',
         type: ListType.CUSTOM,
         ownerId,
@@ -66,7 +86,7 @@ describe('TodoListsService', () => {
         type: ListType.DAILY,
       };
       const mockList = {
-        id: 1,
+        id: '1',
         ...createDto,
         ownerId,
       };
@@ -80,19 +100,19 @@ describe('TodoListsService', () => {
   });
 
   describe('findAll', () => {
-    const ownerId = 1;
+    const ownerId = '1';
 
     it('should return all lists for owner', async () => {
       const mockLists = [
         {
-          id: 1,
+          id: '1',
           name: 'List 1',
           ownerId,
           deletedAt: null,
           tasks: [],
         },
         {
-          id: 2,
+          id: '2',
           name: 'List 2',
           ownerId,
           deletedAt: null,
@@ -117,7 +137,7 @@ describe('TodoListsService', () => {
     it('should exclude deleted lists', async () => {
       const mockLists = [
         {
-          id: 1,
+          id: '1',
           name: 'Active List',
           ownerId,
           deletedAt: null,
@@ -135,8 +155,8 @@ describe('TodoListsService', () => {
   });
 
   describe('findOne', () => {
-    const listId = 1;
-    const ownerId = 1;
+    const listId = '1';
+    const ownerId = '1';
 
     it('should return list if found', async () => {
       const mockList = {
@@ -157,10 +177,10 @@ describe('TodoListsService', () => {
     it('should throw NotFoundException if list not found', async () => {
       mockPrismaService.toDoList.findFirst.mockResolvedValue(null);
 
-      await expect(service.findOne(999, ownerId)).rejects.toThrow(
+      await expect(service.findOne('999', ownerId)).rejects.toThrow(
         NotFoundException,
       );
-      await expect(service.findOne(999, ownerId)).rejects.toThrow(
+      await expect(service.findOne('999', ownerId)).rejects.toThrow(
         'ToDoList with ID 999 not found',
       );
     });
@@ -173,9 +193,9 @@ describe('TodoListsService', () => {
         deletedAt: null,
         tasks: [
           {
-            id: 1,
+            id: '1',
             description: 'Task 1',
-            steps: [{ id: 1, description: 'Step 1' }],
+            steps: [{ id: '1', description: 'Step 1' }],
           },
         ],
       };
@@ -190,8 +210,8 @@ describe('TodoListsService', () => {
   });
 
   describe('update', () => {
-    const listId = 1;
-    const ownerId = 1;
+    const listId = '1';
+    const ownerId = '1';
 
     it('should update list name', async () => {
       const mockList = {
@@ -267,8 +287,8 @@ describe('TodoListsService', () => {
   });
 
   describe('remove', () => {
-    const listId = 1;
-    const ownerId = 1;
+    const listId = '1';
+    const ownerId = '1';
 
     it('should soft delete list', async () => {
       const mockList = {

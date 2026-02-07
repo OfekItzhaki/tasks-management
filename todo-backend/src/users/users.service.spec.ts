@@ -60,7 +60,7 @@ describe('UsersService', () => {
 
     it('should create user and default lists', async () => {
       const mockUser = {
-        id: 1,
+        id: '1',
         email: 'test@example.com',
         name: 'Test User',
         passwordHash: 'hashed',
@@ -90,27 +90,27 @@ describe('UsersService', () => {
           expect.objectContaining({
             name: 'Daily',
             type: ListType.DAILY,
-            ownerId: 1,
+            ownerId: '1',
           }),
           expect.objectContaining({
             name: 'Weekly',
             type: ListType.WEEKLY,
-            ownerId: 1,
+            ownerId: '1',
           }),
           expect.objectContaining({
             name: 'Monthly',
             type: ListType.MONTHLY,
-            ownerId: 1,
+            ownerId: '1',
           }),
           expect.objectContaining({
             name: 'Yearly',
             type: ListType.YEARLY,
-            ownerId: 1,
+            ownerId: '1',
           }),
           expect.objectContaining({
             name: 'Finished Tasks',
             type: ListType.FINISHED,
-            ownerId: 1,
+            ownerId: '1',
             isSystem: true,
           }),
         ]),
@@ -121,7 +121,7 @@ describe('UsersService', () => {
 
     it('should hash password before storing', async () => {
       const mockUser = {
-        id: 1,
+        id: '1',
         email: 'test@example.com',
         passwordHash: 'hashed',
         emailVerificationOtp: '123456',
@@ -149,8 +149,8 @@ describe('UsersService', () => {
   });
 
   describe('getUser', () => {
-    const userId = 1;
-    const requestingUserId = 1;
+    const userId = '1';
+    const requestingUserId = '1';
 
     it('should return user if found and authorized', async () => {
       const mockUser = {
@@ -178,8 +178,8 @@ describe('UsersService', () => {
     });
 
     it('should throw ForbiddenException if accessing another user', async () => {
-      await expect(service.getUser(1, 2)).rejects.toThrow(ForbiddenException);
-      await expect(service.getUser(1, 2)).rejects.toThrow(
+      await expect(service.getUser('1', '2')).rejects.toThrow(ForbiddenException);
+      await expect(service.getUser('1', '2')).rejects.toThrow(
         'You can only access your own profile',
       );
     });
@@ -187,15 +187,15 @@ describe('UsersService', () => {
     it('should throw NotFoundException if user not found', async () => {
       mockPrismaService.user.findFirst.mockResolvedValue(null);
 
-      await expect(service.getUser(999, 999)).rejects.toThrow(
+      await expect(service.getUser('999', '999')).rejects.toThrow(
         NotFoundException,
       );
     });
   });
 
   describe('updateUser', () => {
-    const userId = 1;
-    const requestingUserId = 1;
+    const userId = '1';
+    const requestingUserId = '1';
 
     it('should update user successfully', async () => {
       const mockUser = {
@@ -272,7 +272,7 @@ describe('UsersService', () => {
   describe('verifyEmail', () => {
     it('should verify email successfully', async () => {
       const mockUser = {
-        id: 1,
+        id: '1',
         email: 'test@example.com',
         emailVerified: false,
         emailVerificationOtp: 'valid-token',
@@ -318,7 +318,7 @@ describe('UsersService', () => {
 
     it('should throw BadRequestException if email already verified', async () => {
       const mockUser = {
-        id: 1,
+        id: '1',
         email: 'test@example.com',
         emailVerified: true,
         emailVerificationOtp: '123456',
@@ -343,8 +343,8 @@ describe('UsersService', () => {
   });
 
   describe('deleteUser', () => {
-    const userId = 1;
-    const requestingUserId = 1;
+    const userId = '1';
+    const requestingUserId = '1';
 
     it('should soft delete user', async () => {
       const mockUser = {

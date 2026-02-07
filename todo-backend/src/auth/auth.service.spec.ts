@@ -3,6 +3,7 @@ import { UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { AuthService } from './auth.service';
 import UsersService from '../users/users.service';
+import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 
 jest.mock('bcrypt');
@@ -22,6 +23,15 @@ describe('AuthService', () => {
     verify: jest.fn(),
   };
 
+  const mockPrismaService = {
+    refreshToken: {
+      create: jest.fn(),
+      findFirst: jest.fn(),
+      update: jest.fn(),
+      updateMany: jest.fn(),
+    },
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -33,6 +43,10 @@ describe('AuthService', () => {
         {
           provide: JwtService,
           useValue: mockJwtService,
+        },
+        {
+          provide: PrismaService,
+          useValue: mockPrismaService,
         },
       ],
     }).compile();
@@ -47,7 +61,7 @@ describe('AuthService', () => {
   describe('validateUser', () => {
     it('should return user without passwordHash if credentials are valid', async () => {
       const mockUser = {
-        id: 1,
+        id: '1',
         email: 'test@example.com',
         passwordHash: 'hashed-password',
         name: 'Test User',
@@ -63,7 +77,7 @@ describe('AuthService', () => {
       );
 
       expect(result).not.toHaveProperty('passwordHash');
-      expect(result).toHaveProperty('id', 1);
+      expect(result).toHaveProperty('id', '1');
       expect(result).toHaveProperty('email', 'test@example.com');
     });
 
@@ -80,7 +94,7 @@ describe('AuthService', () => {
 
     it('should throw UnauthorizedException if user has no passwordHash', async () => {
       const mockUser = {
-        id: 1,
+        id: '1',
         email: 'test@example.com',
         passwordHash: null,
       };
@@ -94,7 +108,7 @@ describe('AuthService', () => {
 
     it('should throw UnauthorizedException if password is incorrect', async () => {
       const mockUser = {
-        id: 1,
+        id: '1',
         email: 'test@example.com',
         passwordHash: 'hashed-password',
         emailVerified: true,
@@ -115,7 +129,7 @@ describe('AuthService', () => {
   describe('login', () => {
     it('should return access token and user on successful login', async () => {
       const mockUser = {
-        id: 1,
+        id: '1',
         email: 'test@example.com',
         name: 'Test User',
         passwordHash: 'hashed-password',
@@ -133,10 +147,17 @@ describe('AuthService', () => {
       expect(result).toHaveProperty('accessToken', mockToken);
       expect(result).toHaveProperty('user');
       expect(result.user).not.toHaveProperty('passwordHash');
-      expect(mockJwtService.sign).toHaveBeenCalledWith({
-        sub: 1,
-        email: 'test@example.com',
-      });
+
+      // Access token call
+      expect(mockJwtService.sign).toHaveBeenCalledWith(
+        { sub: '1', email: 'test@example.com' },
+        { expiresIn: '15m' }
+      );
+      // Refresh token call
+      expect(mockJwtService.sign).toHaveBeenCalledWith(
+        { jti: expect.any(String), sub: '1' },
+        { expiresIn: '7d', secret: expect.any(String) }
+      );
     });
 
     it('should throw UnauthorizedException on invalid credentials', async () => {
@@ -151,7 +172,7 @@ describe('AuthService', () => {
   describe('registration flow', () => {
     it('registerStart should initiate registration', async () => {
       mockUsersService.initUser = jest.fn().mockResolvedValue({
-        id: 1,
+        id: '1',
         email: 'test@example.com',
         emailVerificationOtp: '123456',
       });
@@ -168,7 +189,7 @@ describe('AuthService', () => {
 
     it('registerVerify should return token for valid OTP', async () => {
       const mockUser = {
-        id: 1,
+        id: '1',
         email: 'test@example.com',
         emailVerificationOtp: '123456',
         emailVerificationExpiresAt: new Date(Date.now() + 10000),
@@ -186,10 +207,10 @@ describe('AuthService', () => {
     });
 
     it('registerFinish should complete registration and login', async () => {
-      const mockUser = { id: 1, email: 'test@example.com' };
+      const mockUser = { id: '1', email: 'test@example.com' };
       const mockToken = 'reg-token';
       const mockPayload = {
-        sub: 1,
+        sub: '1',
         purpose: 'registration',
         email: 'test@example.com',
       };
@@ -210,6 +231,9 @@ describe('AuthService', () => {
 
       expect(result).toHaveProperty('accessToken', 'final-jwt');
       expect(mockUsersService.setPassword).toHaveBeenCalled();
+
+      // Verification of login internal calls
+      expect(mockJwtService.sign).toHaveBeenCalled();
     });
   });
 });

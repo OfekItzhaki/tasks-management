@@ -3,9 +3,15 @@ import { NotFoundException, ConflictException } from '@nestjs/common';
 import { ListSharesService } from './list-shares.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { ShareListDto } from './dto/share-list.dto';
+import { EventsGateway } from '../events/events.gateway';
+import { ShareRole } from '@prisma/client';
 
 describe('ListSharesService', () => {
   let service: ListSharesService;
+
+  const mockEventsGateway = {
+    sendToUser: jest.fn(),
+  };
 
   const mockPrismaService = {
     toDoList: {
@@ -30,6 +36,10 @@ describe('ListSharesService', () => {
           provide: PrismaService,
           useValue: mockPrismaService,
         },
+        {
+          provide: EventsGateway,
+          useValue: mockEventsGateway,
+        },
       ],
     }).compile();
 
@@ -41,9 +51,9 @@ describe('ListSharesService', () => {
   });
 
   describe('shareList', () => {
-    const todoListId = 1;
-    const ownerId = 1;
-    const shareListDto: ShareListDto = { sharedWithId: 2 };
+    const todoListId = '1';
+    const ownerId = '1';
+    const shareListDto: ShareListDto = { sharedWithId: '2' };
 
     it('should share list successfully', async () => {
       const mockList = {
@@ -52,14 +62,14 @@ describe('ListSharesService', () => {
         deletedAt: null,
       };
       const mockUser = {
-        id: 2,
+        id: '2',
         deletedAt: null,
       };
       const mockShare = {
-        id: 1,
-        sharedWithId: 2,
+        id: '1',
+        sharedWithId: '2',
         toDoListId: todoListId,
-        sharedWith: { id: 2, email: 'user2@example.com' },
+        sharedWith: { id: '2', email: 'user2@example.com' },
         toDoList: mockList,
       };
 
@@ -74,8 +84,12 @@ describe('ListSharesService', () => {
         data: {
           sharedWithId: shareListDto.sharedWithId,
           toDoListId: todoListId,
+          role: ShareRole.EDITOR,
         },
-        include: expect.any(Object),
+        include: expect.objectContaining({
+          sharedWith: expect.any(Object),
+          toDoList: expect.any(Object),
+        }),
       });
       expect(result).toEqual(mockShare);
     });
@@ -113,12 +127,12 @@ describe('ListSharesService', () => {
         deletedAt: null,
       };
       const mockUser = {
-        id: 2,
+        id: '2',
         deletedAt: null,
       };
       const existingShare = {
-        id: 1,
-        sharedWithId: 2,
+        id: '1',
+        sharedWithId: '2',
         toDoListId: todoListId,
       };
 
@@ -136,18 +150,18 @@ describe('ListSharesService', () => {
   });
 
   describe('getSharedLists', () => {
-    const userId = 1;
+    const userId = '1';
 
     it('should return shared lists for user', async () => {
       const mockShares = [
         {
-          id: 1,
+          id: '1',
           toDoList: {
-            id: 1,
+            id: '1',
             name: 'Shared List',
             deletedAt: null,
             owner: {
-              id: 2,
+              id: '2',
               email: 'owner@example.com',
               name: 'Owner',
               profilePicture: null,
