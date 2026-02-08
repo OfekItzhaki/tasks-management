@@ -7,9 +7,7 @@ import { Resend } from 'resend';
 export class EmailProcessor extends WorkerHost {
   private readonly logger = new Logger(EmailProcessor.name);
 
-  constructor(
-    @Inject('RESEND_CLIENT') private readonly resend: Resend | null,
-  ) {
+  constructor(@Inject('RESEND_CLIENT') private readonly resend: Resend | null) {
     super();
     if (!this.resend) {
       this.logger.warn(

@@ -19,10 +19,15 @@ const getApiBaseUrl = (): string => {
     const hostname = window.location.hostname;
     const isProdDomain =
       hostname.includes('ofeklabs.dev') ||
-      hostname.includes('onrender.com');
+      hostname.includes('onrender.com') ||
+      hostname.includes('vercel.app') ||
+      hostname.includes('netlify.app');
 
     if (isProdDomain && url.includes('localhost')) {
-      url = 'https://tasks-api.ofeklabs.dev';
+      throw new Error(
+        'Production environment detected but API_URL not configured. ' +
+        'Please set VITE_API_URL environment variable.'
+      );
     }
   }
 
