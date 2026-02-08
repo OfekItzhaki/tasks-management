@@ -12,8 +12,8 @@ import './index.css';
 
 // Inject Vite environment variables into window for frontend-services
 if (typeof window !== 'undefined') {
-  (window as Record<string, unknown>).__VITE_API_URL__ =
-    import.meta.env.VITE_API_URL;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (window as any).__VITE_API_URL__ = import.meta.env.VITE_API_URL;
 }
 
 // Register service worker for PWA features
