@@ -2,8 +2,12 @@
 const getApiBaseUrl = (): string => {
   let url = 'http://localhost:3000';
 
-  // In Vite/Browser, we check both process.env (if polyfilled) and import.meta.env
-  if (typeof process !== 'undefined' && (process as any).env) {
+  // Check for Vite environment variables (import.meta.env is injected at build time)
+  if (typeof window !== 'undefined' && (window as Record<string, unknown>).__VITE_API_URL__) {
+    url = (window as Record<string, unknown>).__VITE_API_URL__ as string;
+  }
+  // In Node.js/SSR, check process.env
+  else if (typeof process !== 'undefined' && (process as any).env) {
     const env = (process as any).env;
     const vUrl = env['VITE_API_URL'];
     const aUrl = env['API_BASE_URL'];

@@ -10,6 +10,12 @@ import { registerServiceWorker } from './utils/registerServiceWorker';
 import './i18n';
 import './index.css';
 
+// Inject Vite environment variables into window for frontend-services
+if (typeof window !== 'undefined') {
+  (window as Record<string, unknown>).__VITE_API_URL__ =
+    import.meta.env.VITE_API_URL;
+}
+
 // Register service worker for PWA features
 if (import.meta.env.PROD) {
   registerServiceWorker();
