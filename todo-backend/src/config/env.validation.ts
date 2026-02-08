@@ -11,7 +11,7 @@ export const envSchema = z.object({
   SENTRY_DSN: z.string().url().optional(),
 
   // Email config
-  RESEND_API_KEY: z.string().min(1),
+  RESEND_API_KEY: z.string().min(1).optional(),
   SMTP_HOST: z.string().optional(),
   SMTP_PORT: z.string().transform(Number).optional(),
   SMTP_SECURE: z.string().optional().default('false'),

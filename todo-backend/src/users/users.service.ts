@@ -185,21 +185,17 @@ class UsersService {
   }
 
   async initUser(email: string): Promise<User> {
-    console.log(`initUser: starting for ${email}`);
     const existingUser = await this.findByEmail(email);
-    console.log(`initUser: existingUser check done, found: ${!!existingUser}`);
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const expiresAt = new Date();
     expiresAt.setMinutes(expiresAt.getMinutes() + 10); // 10 minutes for registration
 
     if (existingUser) {
       if (existingUser.emailVerified) {
-        console.log(`initUser: email already verified`);
         throw new BadRequestException(
           'Email is already registered and verified',
         );
       }
-      console.log(`initUser: updating existing unverified user`);
       // Update existing unverified user with new OTP
       return this.prisma.user.update({
         where: { id: existingUser.id },
@@ -212,7 +208,6 @@ class UsersService {
       });
     }
 
-    console.log(`initUser: creating new unverified user`);
     const user = await this.prisma.user.create({
       data: {
         email,
@@ -224,18 +219,17 @@ class UsersService {
       },
     });
 
-    console.log(
-      `initUser: user created, id=${user.id}. creating default lists...`,
-    );
     // Create default lists for the new user
     await this.createDefaultLists(user.id);
-    console.log(`initUser: default lists created`);
 
     return user;
   }
 
   async sendOtp(email: string, otp: string, name?: string) {
-    console.log(`[DEV] OTP for ${email}: ${otp}`);
+    // Only log in development
+    if (process.env.NODE_ENV === 'development') {
+      this.logger.debug(`OTP for ${email}: ${otp}`);
+    }
     await this.emailService.sendVerificationEmail(email, otp, name);
   }
 
@@ -260,7 +254,10 @@ class UsersService {
       },
     });
 
-    console.log(`[DEV] Password Reset OTP for ${email}: ${otp}`);
+    // Only log in development
+    if (process.env.NODE_ENV === 'development') {
+      this.logger.debug(`Password Reset OTP for ${email}: ${otp}`);
+    }
     // Reuse verification email template for now or add a new one if needed
     await this.emailService.sendVerificationEmail(
       email,
@@ -406,8 +403,10 @@ class UsersService {
       } as Prisma.UserUpdateInput,
     });
 
-    // Log for Dev
-    console.log(`[DEV] Resent OTP for ${email}: ${emailVerificationOtp}`);
+    // Only log in development
+    if (process.env.NODE_ENV === 'development') {
+      this.logger.debug(`Resent OTP for ${email}: ${emailVerificationOtp}`);
+    }
 
     // Send verification email (don't await to avoid blocking response)
     this.emailService

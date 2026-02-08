@@ -21,7 +21,8 @@ import { EmailProcessor } from './email.processor';
     {
       provide: 'RESEND_CLIENT',
       useFactory: (config: ConfigService) => {
-        return new Resend(config.get('RESEND_API_KEY'));
+        const apiKey = config.get<string>('RESEND_API_KEY');
+        return apiKey ? new Resend(apiKey) : null;
       },
       inject: [ConfigService],
     },
