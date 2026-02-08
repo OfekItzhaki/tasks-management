@@ -6,7 +6,7 @@ import type { Task } from '@tasks-management/frontend-services';
  */
 export function getCachedTaskById(
   queryClient: QueryClient,
-  taskId: number | null,
+  taskId: number | null
 ): Task | undefined {
   if (typeof taskId !== 'number' || Number.isNaN(taskId)) {
     return undefined;
@@ -30,7 +30,7 @@ export function getCachedTaskById(
  */
 export function invalidateTaskQueries(
   queryClient: QueryClient,
-  task: Task,
+  task: Task
 ): void {
   queryClient.invalidateQueries({ queryKey: ['task', task.id] });
   if (task.todoListId) {

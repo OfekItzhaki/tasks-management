@@ -1,0 +1,202 @@
+﻿
+> todo-backend@0.3.0 lint
+> eslint "{src,apps,libs,test}/**/*.ts" --quiet
+
+
+C:\Users\ofeki\OneDrive\Desktop\Horizon\Tasks Management\todo-backend\src\app.module.ts
+  76:25  error  Delete `┬╖`  prettier/prettier
+
+C:\Users\ofeki\OneDrive\Desktop\Horizon\Tasks Management\todo-backend\src\auth\auth.module.ts
+  24:26  error  Delete `┬╖`  prettier/prettier
+
+C:\Users\ofeki\OneDrive\Desktop\Horizon\Tasks Management\todo-backend\src\auth\auth.service.ts
+   14:11  error  'JwtPayload' is defined but never used                                                                                                               @typescript-eslint/no-unused-vars
+   30:6   error  Delete `┬╖`                                                                                                                                           prettier/prettier
+   47:27  error  Replace ``Login┬╖failed:┬╖invalid┬╖password┬╖for┬╖userId=${user.id}`` with `ΓÅÄ┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖`Login┬╖failed:┬╖invalid┬╖password┬╖for┬╖userId=${user.id}`,ΓÅÄ┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖`  prettier/prettier
+  111:13  error  Unsafe assignment of an `any` value                                                                                                                  @typescript-eslint/no-unsafe-assignment
+  115:20  error  Unsafe member access .sub on an `any` value                                                                                                          @typescript-eslint/no-unsafe-member-access
+  115:36  error  Unsafe member access .jti on an `any` value                                                                                                          @typescript-eslint/no-unsafe-member-access
+  121:11  error  Unsafe assignment of an `any` value                                                                                                                  @typescript-eslint/no-unsafe-assignment
+  121:27  error  Unsafe member access .sub on an `any` value                                                                                                          @typescript-eslint/no-unsafe-member-access
+  133:17  error  Unsafe member access .jti on an `any` value                                                                                                          @typescript-eslint/no-unsafe-member-access
+  146:61  error  Unsafe member access .sub on an `any` value                                                                                                          @typescript-eslint/no-unsafe-member-access
+
+C:\Users\ofeki\OneDrive\Desktop\Horizon\Tasks Management\todo-backend\src\config\env.validation.ts
+  43:15  error  Replace ``≡ƒÜÇ┬╖Environment┬╖Validated┬╖-┬╖API┬╖Port:┬╖${result.data.PORT},┬╖Redis:┬╖${result.data.REDIS_HOST}:${result.data.REDIS_PORT}`` with `ΓÅÄ┬╖┬╖┬╖┬╖`≡ƒÜÇ┬╖Environment┬╖Validated┬╖-┬╖API┬╖Port:┬╖${result.data.PORT},┬╖Redis:┬╖${result.data.REDIS_HOST}:${result.data.REDIS_PORT}`,ΓÅÄ┬╖┬╖`  prettier/prettier
+
+C:\Users\ofeki\OneDrive\Desktop\Horizon\Tasks Management\todo-backend\src\email\email.module.ts
+  13:9   error  Insert `┬╖┬╖`                                                                                prettier/prettier
+  14:1   error  Insert `┬╖┬╖`                                                                                prettier/prettier
+  15:1   error  Replace `┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖` with `┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖`                                               prettier/prettier
+  16:1   error  Insert `┬╖┬╖`                                                                                prettier/prettier
+  17:1   error  Insert `┬╖┬╖`                                                                                prettier/prettier
+  18:15  error  Insert `┬╖┬╖`                                                                                prettier/prettier
+  19:15  error  Insert `┬╖┬╖`                                                                                prettier/prettier
+  20:1   error  Replace `┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖` with `┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖`                                       prettier/prettier
+  21:1   error  Insert `┬╖┬╖`                                                                                prettier/prettier
+  22:1   error  Replace `┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖` with `┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖`                                           prettier/prettier
+  23:1   error  Insert `┬╖┬╖`                                                                                prettier/prettier
+  24:13  error  Insert `┬╖┬╖`                                                                                prettier/prettier
+  25:1   error  Insert `┬╖┬╖`                                                                                prettier/prettier
+  26:1   error  Insert `┬╖┬╖`                                                                                prettier/prettier
+  27:11  error  Insert `┬╖┬╖`                                                                                prettier/prettier
+  28:1   error  Insert `┬╖┬╖`                                                                                prettier/prettier
+  29:1   error  Replace `┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖` with `┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖`                                                       prettier/prettier
+  30:1   error  Insert `┬╖┬╖`                                                                                prettier/prettier
+  33:1   error  Replace `┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖` with `┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖`                                                       prettier/prettier
+  34:11  error  Insert `┬╖┬╖`                                                                                prettier/prettier
+  35:9   error  Insert `┬╖┬╖`                                                                                prettier/prettier
+  36:1   error  Insert `┬╖┬╖`                                                                                prettier/prettier
+  45:1   error  Insert `┬╖┬╖`                                                                                prettier/prettier
+  46:11  error  Insert `┬╖┬╖`                                                                                prettier/prettier
+  47:11  error  Insert `┬╖┬╖`                                                                                prettier/prettier
+  48:1   error  Replace `┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖add:┬╖async┬╖()┬╖=>┬╖{┬╖` with `┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖add:┬╖async┬╖()┬╖=>┬╖{`          prettier/prettier
+  49:1   error  Replace `┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖process:┬╖async┬╖()┬╖=>┬╖{┬╖` with `┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖process:┬╖async┬╖()┬╖=>┬╖{`  prettier/prettier
+  50:1   error  Insert `┬╖┬╖`                                                                                prettier/prettier
+  51:9   error  Insert `┬╖┬╖`                                                                                prettier/prettier
+  52:1   error  Insert `┬╖┬╖`                                                                                prettier/prettier
+  55:1   error  Insert `┬╖┬╖`                                                                                prettier/prettier
+  56:11  error  Insert `┬╖┬╖`                                                                                prettier/prettier
+  57:1   error  Insert `┬╖┬╖`                                                                                prettier/prettier
+  58:1   error  Replace `┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖` with `┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖`                                                       prettier/prettier
+  59:1   error  Insert `┬╖┬╖`                                                                                prettier/prettier
+  64:27  error  Delete `┬╖`                                                                                 prettier/prettier
+
+C:\Users\ofeki\OneDrive\Desktop\Horizon\Tasks Management\todo-backend\src\email\email.service.ts
+   7:74  error  Delete `┬╖`                                                                                                                                                     prettier/prettier
+  14:17  error  Replace ``[EmailService]┬╖Queueing┬╖OTP┬╖email┬╖for:┬╖${email}┬╖(OTP:┬╖${otp})`` with `ΓÅÄ┬╖┬╖┬╖┬╖┬╖┬╖`[EmailService]┬╖Queueing┬╖OTP┬╖email┬╖for:┬╖${email}┬╖(OTP:┬╖${otp})`,ΓÅÄ┬╖┬╖┬╖┬╖`  prettier/prettier
+
+C:\Users\ofeki\OneDrive\Desktop\Horizon\Tasks Management\todo-backend\src\events\events.gateway.spec.ts
+  52:14  error  A method that is not declared with `this: void` may cause unintentional scoping of `this` when separated from its object.
+Consider using an arrow function or explicitly `.bind()`ing the method to avoid calling the method with an unintended `this` value. 
+If a function does not access `this`, it can be annotated with `this: void`  @typescript-eslint/unbound-method
+
+C:\Users\ofeki\OneDrive\Desktop\Horizon\Tasks Management\todo-backend\src\events\events.gateway.ts
+   37:13  error  Unsafe assignment of an `any` value          @typescript-eslint/no-unsafe-assignment
+   38:30  error  Unsafe member access .sub on an `any` value  @typescript-eslint/no-unsafe-member-access
+   40:7   error  Unsafe assignment of an `any` value          @typescript-eslint/no-unsafe-assignment
+  101:14  error  '_client' is defined but never used          @typescript-eslint/no-unused-vars
+
+C:\Users\ofeki\OneDrive\Desktop\Horizon\Tasks Management\todo-backend\src\events\events.service.spec.ts
+    8:7   error  'prismaService' is assigned a value but never used                                                                                                                                                                                                                                                                                          @typescript-eslint/no-unused-vars
+   67:14  error  A method that is not declared with `this: void` may cause unintentional scoping of `this` when separated from its object.
+Consider using an arrow function or explicitly `.bind()`ing the method to avoid calling the method with an unintended `this` value. 
+If a function does not access `this`, it can be annotated with `this: void`  @typescript-eslint/unbound-method
+   74:14  error  A method that is not declared with `this: void` may cause unintentional scoping of `this` when separated from its object.
+Consider using an arrow function or explicitly `.bind()`ing the method to avoid calling the method with an unintended `this` value. 
+If a function does not access `this`, it can be annotated with `this: void`  @typescript-eslint/unbound-method
+   79:14  error  A method that is not declared with `this: void` may cause unintentional scoping of `this` when separated from its object.
+Consider using an arrow function or explicitly `.bind()`ing the method to avoid calling the method with an unintended `this` value. 
+If a function does not access `this`, it can be annotated with `this: void`  @typescript-eslint/unbound-method
+   85:14  error  A method that is not declared with `this: void` may cause unintentional scoping of `this` when separated from its object.
+Consider using an arrow function or explicitly `.bind()`ing the method to avoid calling the method with an unintended `this` value. 
+If a function does not access `this`, it can be annotated with `this: void`  @typescript-eslint/unbound-method
+  106:14  error  A method that is not declared with `this: void` may cause unintentional scoping of `this` when separated from its object.
+Consider using an arrow function or explicitly `.bind()`ing the method to avoid calling the method with an unintended `this` value. 
+If a function does not access `this`, it can be annotated with `this: void`  @typescript-eslint/unbound-method
+  107:14  error  A method that is not declared with `this: void` may cause unintentional scoping of `this` when separated from its object.
+Consider using an arrow function or explicitly `.bind()`ing the method to avoid calling the method with an unintended `this` value. 
+If a function does not access `this`, it can be annotated with `this: void`  @typescript-eslint/unbound-method
+  120:14  error  A method that is not declared with `this: void` may cause unintentional scoping of `this` when separated from its object.
+Consider using an arrow function or explicitly `.bind()`ing the method to avoid calling the method with an unintended `this` value. 
+If a function does not access `this`, it can be annotated with `this: void`  @typescript-eslint/unbound-method
+  135:14  error  A method that is not declared with `this: void` may cause unintentional scoping of `this` when separated from its object.
+Consider using an arrow function or explicitly `.bind()`ing the method to avoid calling the method with an unintended `this` value. 
+If a function does not access `this`, it can be annotated with `this: void`  @typescript-eslint/unbound-method
+  148:14  error  A method that is not declared with `this: void` may cause unintentional scoping of `this` when separated from its object.
+Consider using an arrow function or explicitly `.bind()`ing the method to avoid calling the method with an unintended `this` value. 
+If a function does not access `this`, it can be annotated with `this: void`  @typescript-eslint/unbound-method
+  167:14  error  A method that is not declared with `this: void` may cause unintentional scoping of `this` when separated from its object.
+Consider using an arrow function or explicitly `.bind()`ing the method to avoid calling the method with an unintended `this` value. 
+If a function does not access `this`, it can be annotated with `this: void`  @typescript-eslint/unbound-method
+  168:14  error  A method that is not declared with `this: void` may cause unintentional scoping of `this` when separated from its object.
+Consider using an arrow function or explicitly `.bind()`ing the method to avoid calling the method with an unintended `this` value. 
+If a function does not access `this`, it can be annotated with `this: void`  @typescript-eslint/unbound-method
+  180:14  error  A method that is not declared with `this: void` may cause unintentional scoping of `this` when separated from its object.
+Consider using an arrow function or explicitly `.bind()`ing the method to avoid calling the method with an unintended `this` value. 
+If a function does not access `this`, it can be annotated with `this: void`  @typescript-eslint/unbound-method
+  199:14  error  A method that is not declared with `this: void` may cause unintentional scoping of `this` when separated from its object.
+Consider using an arrow function or explicitly `.bind()`ing the method to avoid calling the method with an unintended `this` value. 
+If a function does not access `this`, it can be annotated with `this: void`  @typescript-eslint/unbound-method
+  234:14  error  A method that is not declared with `this: void` may cause unintentional scoping of `this` when separated from its object.
+Consider using an arrow function or explicitly `.bind()`ing the method to avoid calling the method with an unintended `this` value. 
+If a function does not access `this`, it can be annotated with `this: void`  @typescript-eslint/unbound-method
+
+C:\Users\ofeki\OneDrive\Desktop\Horizon\Tasks Management\todo-backend\src\events\ws-jwt.guard.ts
+  15:57  error  Delete `┬╖`                                                                         prettier/prettier
+  19:22  error  This assertion is unnecessary since it does not change the type of the expression  @typescript-eslint/no-unnecessary-type-assertion
+
+C:\Users\ofeki\OneDrive\Desktop\Horizon\Tasks Management\todo-backend\src\me\commands\handlers\update-profile-picture.handler.ts
+  13:58  error  Replace `┬╖` with `ΓÅÄ`  prettier/prettier
+  17:6   error  Delete `┬╖`            prettier/prettier
+
+C:\Users\ofeki\OneDrive\Desktop\Horizon\Tasks Management\todo-backend\src\reminders\reminders.module.ts
+  17:9   error  Insert `┬╖┬╖`                                                                                prettier/prettier
+  18:1   error  Insert `┬╖┬╖`                                                                                prettier/prettier
+  19:9   error  Insert `┬╖┬╖`                                                                                prettier/prettier
+  20:1   error  Insert `┬╖┬╖`                                                                                prettier/prettier
+  30:9   error  Insert `┬╖┬╖`                                                                                prettier/prettier
+  31:1   error  Insert `┬╖┬╖`                                                                                prettier/prettier
+  32:1   error  Insert `┬╖┬╖`                                                                                prettier/prettier
+  33:13  error  Replace `add:┬╖async┬╖()┬╖=>┬╖{┬╖` with `┬╖┬╖add:┬╖async┬╖()┬╖=>┬╖{`                                  prettier/prettier
+  34:1   error  Replace `┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖process:┬╖async┬╖()┬╖=>┬╖{┬╖` with `┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖process:┬╖async┬╖()┬╖=>┬╖{`  prettier/prettier
+  35:1   error  Replace `┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖` with `┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖`                                                   prettier/prettier
+  36:1   error  Insert `┬╖┬╖`                                                                                prettier/prettier
+  37:1   error  Insert `┬╖┬╖`                                                                                prettier/prettier
+  41:31  error  Delete `┬╖`                                                                                 prettier/prettier
+
+C:\Users\ofeki\OneDrive\Desktop\Horizon\Tasks Management\todo-backend\src\task-scheduler\task-scheduler.module.ts
+  11:9   error  Insert `┬╖┬╖`                                                                                prettier/prettier
+  12:1   error  Insert `┬╖┬╖`                                                                                prettier/prettier
+  13:9   error  Insert `┬╖┬╖`                                                                                prettier/prettier
+  14:1   error  Replace `┬╖┬╖┬╖┬╖┬╖┬╖` with `┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖`                                                           prettier/prettier
+  22:9   error  Insert `┬╖┬╖`                                                                                prettier/prettier
+  23:1   error  Insert `┬╖┬╖`                                                                                prettier/prettier
+  24:1   error  Insert `┬╖┬╖`                                                                                prettier/prettier
+  25:13  error  Replace `add:┬╖async┬╖()┬╖=>┬╖{┬╖` with `┬╖┬╖add:┬╖async┬╖()┬╖=>┬╖{`                                  prettier/prettier
+  26:1   error  Replace `┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖process:┬╖async┬╖()┬╖=>┬╖{┬╖` with `┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖process:┬╖async┬╖()┬╖=>┬╖{`  prettier/prettier
+  27:1   error  Replace `┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖` with `┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖`                                                   prettier/prettier
+  28:1   error  Insert `┬╖┬╖`                                                                                prettier/prettier
+  29:1   error  Insert `┬╖┬╖`                                                                                prettier/prettier
+  33:35  error  Delete `┬╖`                                                                                 prettier/prettier
+
+C:\Users\ofeki\OneDrive\Desktop\Horizon\Tasks Management\todo-backend\src\tasks\tasks.service.ts
+   28:6   error  Delete `┬╖`                                                                                                                                                                                        prettier/prettier
+   49:13  error  Insert `┬╖┬╖`                                                                                                                                                                                       prettier/prettier
+   50:1   error  Insert `┬╖┬╖`                                                                                                                                                                                       prettier/prettier
+   74:9   error  'listFilter' is never reassigned. Use 'const' instead                                                                                                                                             prefer-const
+   76:12  error  Replace `ΓÅÄ┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖{┬╖ownerId:┬╖userId┬╖},ΓÅÄ┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖{┬╖shares:┬╖{┬╖some:┬╖{┬╖sharedWithId:┬╖userId┬╖}┬╖}┬╖},ΓÅÄ┬╖┬╖┬╖┬╖┬╖┬╖` with `{┬╖ownerId:┬╖userId┬╖},┬╖{┬╖shares:┬╖{┬╖some:┬╖{┬╖sharedWithId:┬╖userId┬╖}┬╖}┬╖}`                 prettier/prettier
+  168:15  error  Insert `┬╖┬╖`                                                                                                                                                                                       prettier/prettier
+  169:1   error  Insert `┬╖┬╖`                                                                                                                                                                                       prettier/prettier
+  236:24  error  Replace ``Trash┬╖list┬╖not┬╖found┬╖for┬╖user┬╖${userId},┬╖soft┬╖deleting`` with `ΓÅÄ┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖`Trash┬╖list┬╖not┬╖found┬╖for┬╖user┬╖${userId},┬╖soft┬╖deleting`,ΓÅÄ┬╖┬╖┬╖┬╖┬╖┬╖`                                               prettier/prettier
+  393:9   error  Replace `!allowActive┬╖&&┬╖!task.deletedAt┬╖&&┬╖task.todoList.type┬╖!==┬╖ListType.FINISHED` with `ΓÅÄ┬╖┬╖┬╖┬╖┬╖┬╖!allowActive┬╖&&ΓÅÄ┬╖┬╖┬╖┬╖┬╖┬╖!task.deletedAt┬╖&&ΓÅÄ┬╖┬╖┬╖┬╖┬╖┬╖task.todoList.type┬╖!==┬╖ListType.FINISHEDΓÅÄ┬╖┬╖┬╖┬╖`  prettier/prettier
+
+C:\Users\ofeki\OneDrive\Desktop\Horizon\Tasks Management\todo-backend\src\todo-lists\todo-lists.service.ts
+  16:6   error  Delete `┬╖`                                        prettier/prettier
+  86:11  error  Unsafe assignment of an `any` value               @typescript-eslint/no-unsafe-assignment
+  87:11  error  Unsafe assignment of an `any` value               @typescript-eslint/no-unsafe-assignment
+  88:11  error  Unsafe assignment of an `any` value               @typescript-eslint/no-unsafe-assignment
+  88:33  error  Unsafe member access .isSystem on an `any` value  @typescript-eslint/no-unsafe-member-access
+
+C:\Users\ofeki\OneDrive\Desktop\Horizon\Tasks Management\todo-backend\src\users\users.controller.ts
+  32:11  error  'CloudinaryResponse' is defined but never used      @typescript-eslint/no-unused-vars
+  40:10  error  'UploadApiResponse' is defined but never used       @typescript-eslint/no-unused-vars
+  40:29  error  'UploadApiErrorResponse' is defined but never used  @typescript-eslint/no-unused-vars
+  50:6   error  Delete `┬╖`                                          prettier/prettier
+
+C:\Users\ofeki\OneDrive\Desktop\Horizon\Tasks Management\todo-backend\src\users\users.service.ts
+   43:6   error  Delete `┬╖`                                                                                                                                                                     prettier/prettier
+   72:25  error  Replace ``Error┬╖finding┬╖user┬╖by┬╖email=${email}:┬╖${err.message}`,┬╖err.stack` with `ΓÅÄ┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖`Error┬╖finding┬╖user┬╖by┬╖email=${email}:┬╖${err.message}`,ΓÅÄ┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖err.stack,ΓÅÄ┬╖┬╖┬╖┬╖┬╖┬╖`  prettier/prettier
+  145:16  error  This assertion is unnecessary since it does not change the type of the expression                                                                                              @typescript-eslint/no-unnecessary-type-assertion
+  146:20  error  This assertion is unnecessary since it does not change the type of the expression                                                                                              @typescript-eslint/no-unnecessary-type-assertion
+  166:7   error  Delete `┬╖┬╖`                                                                                                                                                                    prettier/prettier
+  167:1   error  Delete `┬╖┬╖`                                                                                                                                                                    prettier/prettier
+  168:7   error  Delete `┬╖┬╖`                                                                                                                                                                    prettier/prettier
+  169:1   error  Replace `┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖` with `┬╖┬╖┬╖┬╖┬╖┬╖`                                                                                                                                               prettier/prettier
+  170:1   error  Delete `┬╖┬╖`                                                                                                                                                                    prettier/prettier
+  171:1   error  Replace `┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖` with `┬╖┬╖┬╖┬╖┬╖┬╖`                                                                                                                                               prettier/prettier
+  172:1   error  Delete `┬╖┬╖`                                                                                                                                                                    prettier/prettier
+
+Γ£û 130 problems (130 errors, 0 warnings)
+  95 errors and 0 warnings potentially fixable with the `--fix` option.
+

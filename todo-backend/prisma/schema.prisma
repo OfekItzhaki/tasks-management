@@ -39,18 +39,31 @@ enum NotificationFrequency {
 }
 
 model ToDoList {
-  id        String      @id @default(uuid())
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
-  name      String      @db.VarChar(255)
-  ownerId   String
-  order     Int         @default(autoincrement())
-  deletedAt DateTime?
-  type      ListType    @default(CUSTOM)
-  isSystem  Boolean     @default(false) // System lists (like "Finished Tasks") cannot be deleted
-  shares    ListShare[]
-  tasks     Task[]
-  owner     User        @relation(fields: [ownerId], references: [id])
+  id               String           @id @default(uuid())
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  name             String           @db.VarChar(255)
+  ownerId          String
+  order            Int              @default(autoincrement())
+  deletedAt        DateTime?
+  type             ListType         @default(CUSTOM)
+  isSystem         Boolean          @default(false) // System lists (like "Finished Tasks") cannot be deleted
+  taskBehavior     TaskBehavior     @default(ONE_OFF)
+  completionPolicy CompletionPolicy @default(KEEP)
+  shares           ListShare[]
+  tasks            Task[]
+  owner            User             @relation(fields: [ownerId], references: [id])
+}
+
+enum TaskBehavior {
+  RECURRING
+  ONE_OFF
+}
+
+enum CompletionPolicy {
+  AUTO_DELETE
+  KEEP
+  MOVE_TO_DONE
 }
 
 model ListShare {
@@ -108,6 +121,7 @@ enum ListType {
   YEARLY
   CUSTOM
   FINISHED // System list for archived completed tasks
+  TRASH    // System list for soft-deleted tasks
 }
 
 model RefreshToken {

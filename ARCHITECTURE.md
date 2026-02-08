@@ -1,6 +1,8 @@
-# 🏆 Architecture & Excellence Blueprint
+# 🏆 Horizon Universal Architecture & Excellence Blueprint
 
-This document defines the "Golden Rules" and the architectural standards. It is intended for both human developers and AI agents to ensure consistency, scalability, and high code quality.
+This document defines the "Golden Rules" and architectural standards for all projects within the Horizon platform. It is intended for both human developers and AI agents to ensure consistency, scalability, and high code quality across the entire ecosystem.
+
+---
 
 ## 🏗️ Architectural Pillars
 
@@ -16,288 +18,117 @@ This document defines the "Golden Rules" and the architectural standards. It is 
 - **Frontend**: Use a central notification system (e.g., `react-hot-toast`) to display these errors.
 
 ### 3. Container-First & Infrastructure-as-Code
-- **Docker**: Every core dependency (API, Web, DB, **Redis**) must be in `docker-compose.yml`.
+- **Docker**: Every core dependency (API, Web, DB, Cache) must be in `docker-compose.yml`.
 - **Environment**: Use `.env` files for secrets. Use `render.yaml` or similar for cloud infrastructure definition.
-- **Rules**: Local dev must be "Plug & Play" with a single `docker-compose up`.
+- **Rules**: Local dev must be "Plug & Play" with a single helper script (`dev.ps1`) that handles dynamic port allocation and service startup.
 
 ### 4. Background Job & Multi-Channel Delivery
-- **Offloading**: Never perform slow operations (Email, external API sync) in the request-response cycle. Use **BullMQ** or similar.
+- **Offloading**: Never perform slow operations (Email, external API sync, heavy processing) in the request-response cycle. Use **BullMQ** (for Node.js/NestJS) or **Hangfire** (for .NET).
 - **Reliability**: Jobs should be retriable and traceable.
 - **Fallback**: Implement multi-channel defaults (e.g., WebSocket for real-time, Email for fallback).
 
 ### 5. Resilient Session Management
 - **UX Requirement**: Users should never be kicked out due to expired short-lived tokens.
-- **Pattern**: Implement a 401 Interceptor that triggers an automatic `/auth/refresh` and retries the original request seamlessly.
+- **Pattern**: Implement a 401 Interceptor that triggers an automatic renewal (refresh token) and retries the original request seamlessly.
 
 ### 6. Universal State & Caching
-- **Standard**: Always use `@tanstack/react-query` for data fetching, caching, and state synchronization.
+- **Standard**: Always use a robust data-fetching library (e.g., `@tanstack/react-query`) for caching and state synchronization.
 - **Benefit**: Ensures a "snappy" UI with built-in optimistic updates and automated background refetching.
-- **Parity**: All frontends (Web, Mobile, etc.) MUST adopt this to ensure consistent behavior.
+- **Parity**: All frontends (Web, Mobile) MUST adopt the same caching logic.
 
 ### 7. Real-time Communication & Presence
-- **Technology**: Use **Socket.IO** for bidirectional, real-time communication.
-- **Pattern**: Implement room-based communication for scoped updates (e.g., `enter-list`, `leave-list` events).
-- **Use Cases**:
-  - Collaborative presence (show active users in a list)
-  - Live task updates across clients
-  - Instant notifications for shared list changes
-- **Mobile Integration**: Use a singleton socket instance to manage persistent connections across screens.
+- **Technology**: Use **Socket.IO** (NestJS) or **SignalR** (.NET) for bidirectional, real-time communication.
+- **Pattern**: Implement room-based/hub-based communication for scoped updates.
+- **Mobile Integration**: Use singleton instances for persistent connections across screens.
 - **Fallback**: Always ensure REST APIs are available as fallback for critical operations.
 
 ### 8. Observability & Health Monitoring
-- **Structured Logging**: Use **Seq** for visual log search and filtering
-  - All logs must be structured (JSON format with contextual properties)
-  - Query examples: `Level == "Error" && UserId == "123"`, `@Timestamp > DateTime('2026-02-07')`
-  - Enables rapid debugging and production issue diagnosis
-- **Health Checks**: Implement `/health` endpoint for orchestration and monitoring
-  - Check: Database connectivity, Redis availability, Storage accessibility
-  - Return: 200 (Healthy) or 503 (Unhealthy) with diagnostic details
-  - Used by: Docker, Kubernetes, load balancers for automated recovery
-- **Metrics**: Track request counts, error rates, and response times for performance monitoring
-- **Transient Fault Handling**: Implement retries and circuit breakers for infrastructure dependencies
-  - API must handle slow database/cache startup via connection retries
-  - Services must be self-healing with Docker restart policies
-  - Ensures high availability in distributed container environments (ADR 007)
+- **Structured Logging**: All logs must be structured (JSON format with contextual properties). Use **Seq** for visual log search.
+- **Health Checks**: Implement `/health` endpoints for orchestration and monitoring.
+- **Transient Fault Handling**: Implement retries and circuit breakers for infrastructure dependencies (DB, Cache, Storage).
 - **Persistence Strategy**: All infrastructure data (DB, Cache, Logs) must persist across restarts via Docker volumes.
+
+### 9. Pluggable Storage Abstraction
+- **Abstraction**: Applications must interact with storage via an interface (e.g., `IStorageService`) rather than direct filesystem calls.
+- **Hybrid Support**: The architecture should support multiple providers (Local Disk, S3, Cloudinary) switchable via configuration.
+- **Path Resolution**: Use a centralized resolver to handle transitions between relative local paths and absolute production URLs.
+
+### 10. Implementation Excellence & Patterns
+- **Standardized Onboarding**: Complex flows must be broken into discrete, verifiable steps (e.g., Identity Verification -> Resource Allocation).
+- **Tooling Automation**: Repetitive developer tasks (setup, verification, seeding) MUST be scripted (e.g., `dev.ps1`).
+- **Dynamic Infrastructure**: The `dev.ps1` script handles environmental conflicts by automatically re-mapping ports for Redis, DB, and Seq if defaults are taken.
+
+---
 
 ## 🚀 DevOps Workflow Patterns
 
 ### Northern Workflow (Build & Test)
 - **Goal**: Code quality, formatting, and logical correctness.
-- **Tools**: VS Code, PowerShell (`setup-dev.ps1`), GitHub Actions, **Prettier**, **ESLint**.
-- **Rule**: Never merge if `npm run format:check`, `npm run lint`, or `npm test` fails.
+- **Tools**: VS Code, PowerShell, GitHub Actions, **Prettier**, **ESLint**.
+- **Rule**: Never merge if formatting checks, linting, or tests fail.
 
 ### Southern Workflow (Docker & Deploy)
 - **Goal**: Environment parity and deployment reliability.
-- **Tools**: Docker Compose, Health Checks.
-- **Rule**: A feature is only "Done" when it passes health checks in the container mesh.
-
-## 🌿 Git & Collaboration
-- **Branch Naming**: 
-  - `feat/feature-name` (new work)
-  - `fix/bug-name` (hotfixes)
-  - `chore/task-name` (maintenance)
-- **Commit Messages**: Use **Conventional Commits** (e.g., `feat: add folder renaming`).
-- **PR Strategy**: Always squash-merge to keep the `main` branch history clean.
-
-### Git Tagging & Semantic Versioning
-- **Versioning Standard**: Follow **Semantic Versioning** (SemVer): `MAJOR.MINOR.PATCH`
-  - **MAJOR**: Breaking changes (e.g., API contract changes, removed features)
-  - **MINOR**: New features, backward-compatible additions
-  - **PATCH**: Bug fixes, performance improvements
-- **Tag Format**: `v{version}` (e.g., `v1.2.3`)
-- **Release Process**:
-  1. Update version in relevant `package.json` or version files
-  2. Create annotated tag: `git tag -a v1.2.3 -m "Release v1.2.3: Feature parity achieved"`
-  3. Push tags: `git push origin v1.2.3`
-- **Pre-release Tags**: Use `-alpha`, `-beta`, `-rc` suffixes (e.g., `v2.0.0-beta.1`)
-- **Changelog**: Maintain `CHANGELOG.md` with version history using conventional commit groupings
-
-### Commit Strategy & Best Practices
-- **Atomic Commits**: Each commit should represent a single logical change
-- **Commit Frequency**: Commit after completing each distinct feature, fix, or refactor
-- **When to Commit**:
-  - After completing a phase or major milestone
-  - After fixing a bug or completing a feature
-  - Before switching contexts or starting new work
-  - At natural breakpoints (end of day, before meetings)
-- **Commit Message Format**: Use Conventional Commits
-  ```
-  <type>(<scope>): <subject>
-  
-  <body>
-  
-  <footer>
-  ```
-  - **Types**: `feat`, `fix`, `chore`, `docs`, `refactor`, `test`, `perf`
-  - **Scope**: Optional, e.g., `mobile`, `backend`, `web`, `auth`
-  - **Examples**:
-    - `feat(mobile): migrate ListsScreen to TanStack Query`
-    - `fix(backend): resolve 401 refresh token race condition`
-    - `chore(deps): upgrade @tanstack/react-query to v5.90.16`
-- **Multi-file Changes**: Group related changes in a single commit with a descriptive scope
-- **Breaking Changes**: Use `BREAKING CHANGE:` in footer or `!` after type/scope
-
-### Merge & Integration Strategy
-- **Primary Branch**: `main` (or `master`) is the production-ready branch
-- **Development Branch**: `develop` for integration of features before release
-- **Merge Methods**:
-  - **Squash Merge**: Default for feature branches → `develop` (keeps history clean)
-  - **Merge Commit**: For `develop` → `main` (preserves release history)
-  - **Rebase**: For keeping feature branches up-to-date with `develop` (use with caution)
-- **Before Merging**:
-  - Ensure all tests pass (CI/CD green)
-  - Resolve all merge conflicts locally
-  - Update branch with latest `develop`: `git pull origin develop --rebase`
-  - Verify TypeScript compilation: `npx tsc --noEmit`
-- **Merge Conflicts**:
-  - Always test after resolving conflicts
-  - Prefer "ours" for formatting conflicts, "theirs" for dependency updates
-  - When in doubt, consult the original PR author
-
-### Push & Pull Policies
-- **Push Frequency**: Push at least once per day when actively working
-- **Before Pushing**:
-  - Run local tests and linters
-  - Verify no sensitive data (API keys, tokens) in commits
-  - Check `.gitignore` is properly configured
-- **Force Push**: ⚠️ **NEVER** force push to `main` or `develop`
-  - Only use `git push --force-with-lease` on personal feature branches
-  - Communicate with team before force-pushing shared branches
-- **Pull Strategy**: Use `git pull --rebase` to avoid unnecessary merge commits
-- **Stashing**: Use `git stash` before pulling if you have uncommitted changes
-
-### Branch Protection & Code Review
-- **Protected Branches**: `main` and `develop` should require:
-  - Pull request reviews (minimum 1 approval)
-  - Passing CI/CD checks
-  - No direct commits allowed
-- **Pull Request Guidelines**:
-  - **Title**: Use conventional commit format
-  - **Description**: Include:
-    - What changed and why
-    - Testing performed
-    - Screenshots for UI changes
-    - Breaking changes (if any)
-  - **Size**: Keep PRs under 400 lines when possible (easier to review)
-  - **Draft PRs**: Use for work-in-progress to get early feedback
-- **Code Review Checklist**:
-  - ✅ Follows architectural pillars and golden rules
-  - ✅ No `any` types or unsafe casts
-  - ✅ Proper error handling with ProblemDetails
-  - ✅ Tests included for new features
-  - ✅ Documentation updated if needed
-
-### Workflow Patterns
-- **Feature Development**:
-  ```bash
-  git checkout develop
-  git pull origin develop
-  git checkout -b feat/my-feature
-  # ... make changes ...
-  git add -A
-  git commit -m "feat(scope): description"
-  git push origin feat/my-feature
-  # Create PR: feat/my-feature → develop
-  ```
-- **Hotfix for Production**:
-  ```bash
-  git checkout main
-  git pull origin main
-  git checkout -b fix/critical-bug
-  # ... fix bug ...
-  git commit -m "fix(scope): description"
-  git push origin fix/critical-bug
-  # Create PR: fix/critical-bug → main (and cherry-pick to develop)
-  ```
-- **Syncing Feature Branch**:
-  ```bash
-  git checkout feat/my-feature
-  git fetch origin
-  git rebase origin/develop
-  # Resolve conflicts if any
-  git push --force-with-lease
-  ```
-
-### Git Hygiene & Maintenance
-- **Clean Up Merged Branches**:
-  ```bash
-  git branch -d feat/my-feature  # Delete local
-  git push origin --delete feat/my-feature  # Delete remote
-  ```
-- **Prune Stale References**: `git fetch --prune` regularly
-- **Avoid Committing**:
-  - `node_modules/`, `dist/`, `build/`
-  - `.env` files (use `.env.example` instead)
-  - IDE-specific files (`.vscode/`, `.idea/`)
-  - Large binary files (use Git LFS if needed)
-- **Commit History**: Never rewrite public history (no `git rebase -i` on pushed commits)
-- **Deployment Markers**: Use tags or commit messages to track major stability milestones (e.g., "final parity achieved").
-
-## 🛠️ Onboarding & Multi-Step Patterns
-- **Standard**: Complex interactions like Registration should be broken into discrete, verifiable steps (e.g., Email Entry -> OTP Verification -> Password Selection).
-- **Benefit**: Reduces cognitive load and prevents orphaned database records by verifying identity before resource allocation.
-- **Security**: Identity verification (OTP) MUST be the gatekeeper for sensitive credential creation.
-
-## 📁 Production Asset Persistence
-- **Rule**: Never rely on local filesystem storage (`/uploads`) for production environments. Use Cloud Storage (S3, Cloudinary).
-- **Sync**: Implement a fallback or guidance for users moving from localhost to production to ensure assets (avatars) persist.
-- **Motto**: "If it's in a container, it's ephemeral."
-
-## 🛡️ Security & Performance
-
-### Security Headers
-Implement these HTTP response headers to protect users from common web attacks:
-
-- **CSP (Content-Security-Policy)**: Controls which resources (scripts, styles, images) can load on your page
-  - Prevents: XSS (Cross-Site Scripting) attacks where hackers inject malicious JavaScript
-  - Example: `default-src 'self'; script-src 'self' 'unsafe-inline';`
-  - Impact: Blocks external malicious scripts from executing
-
-- **X-Frame-Options: DENY**: Prevents your site from being embedded in an `<iframe>`
-  - Prevents: Clickjacking attacks where hackers overlay invisible iframes to trick users
-  - Impact: Stops attackers from embedding your login page on malicious sites
-
-- **X-Content-Type-Options: nosniff**: Stops browsers from "guessing" file types (MIME-sniffing)
-  - Prevents: MIME-sniffing attacks where browsers execute disguised files (e.g., `.txt` as JavaScript)
-  - Impact: Forces browsers to respect the declared `Content-Type` header
-
-- **Referrer-Policy: no-referrer**: Controls what information is sent in the `Referer` header
-  - Prevents: Leaking sensitive URLs (e.g., password reset links with tokens) to third-party sites
-  - Impact: Protects user privacy and prevents token exposure
-
-- **Rate Limiting**: Implement IP-based rate limiting (e.g., 100 requests/minute)
-  - Prevents: Brute-force attacks, API abuse, DDoS attempts
-  - Impact: Ensures service availability and fair resource usage
-
-### Secrets & Configuration
-- **Secrets**: Never commit `.env` files. Use `.env.example` as a template.
-- **CORS**: Strictly define allowed origins; never use `*` in production.
-- **API Keys**: Store in environment variables or secret management services (Azure Key Vault, AWS Secrets Manager)
-
-## 📜 Naming Conventions & Style
-- **NestJS / TypeScript**:
-  - DTOs end in `Dto` (`CreateTaskDto.ts`).
-  - Handlers follow the `Command/Handler` or `Query/Handler` pattern.
-  - Services use `camelCase` for methods and avoid `any` at all costs.
-- **C# / .NET (Alternative Standard)**:
-  - Interfaces start with `I` (e.g., `IStorageService`).
-  - Async methods must end in `Async` (e.g., `SaveFileAsync`).
-  - Use file-scoped namespaces.
-- **TypeScript/React**:
-  - Components use PascalCase (`FolderTree.tsx`).
-  - Filenames should match the exported component.
-  - Constants use UPPER_SNAKE_CASE.
-
-## 🚫 Anti-Patterns (What NOT to do)
-- **Lazy API Calls**: Don't use raw `axios` or `fetch` in components; use the generated client.
-- **Fat Controllers**: Controllers should not contain business logic. Logic lives in `Handlers`.
-- **ViewBag/ViewData**: In ASP.NET, never use dynamic objects like `ViewBag`. Use strongly-typed ViewModels or MediatR results for compile-time safety.
-- **Inline Styles**: Avoid `style={{...}}` in React. Use CSS files or Tailwind.
-
-## 📖 Architecture Decision Records (ADR)
-- **ADR 001: Database**: Chose Postgres over SQLite to ensure production/development parity and support complex indexing.
-- **ADR 002: Error Handling**: Chose Global Middleware + ProblemDetails to provide a consistent mobile/web-friendly error format.
-- **ADR 003: Background Jobs**: Chose BullMQ for task offloading to ensure API responsiveness and job reliability.
-- **ADR 004: Observability**: Chose Seq for structured logging over ELK Stack for simplicity and superior developer experience.
-- **ADR 005: Caching**: Chose Redis for distributed caching to support horizontal scaling and session management.
-- **ADR 006: API Versioning**: Chose URI-based versioning (`/api/v1/`) over header-based for simplicity and API discoverability.
-- **ADR 007: Resilience**: Chose connection retries + orchestration health checks to solve container startup race conditions and improve robustness.
-
-## ✅ Gold Standard Verification
-The project achieves "Gold Standard" via:
-1. **Zero-Error Frontend**: No unused vars, no `any` types, Vite build success.
-2. **Standardized Formatting**: `npm run format` (Prettier) and `npm run lint:fix` (ESLint) passed project-wide with zero rule violations.
-3. **Stable Infrastructure**: Health checks for all services.
-4. **Resilient API**: Transient fault handling for DB/Cache.
-5. **Comprehensive Docs**: ARCHITECTURE.md and HORIZON_GUARDIAN.md blueprints.
-
-## 🤖 Future Agent Instructions
-1. **Read the Blueprint**: Always check this file before implementing new features.
-2. **Modularize First**: If a file exceeds 200 lines, search for extraction points before adding more code.
-3. **Audit the "Chain"**: When adding a field to the DB, update the Entity -> DTO -> Handler/Query -> API -> Generated Client.
-4. **Horizon Guardian**: This architecture serves as the foundation for the **Horizon Guardian** product—a tool that enforces these standards automatically via AI-powered code audits and mentorship.
+- **Rules**: A feature is only "Done" when it passes health checks in the container mesh. All infrastructure MUST be ephemeral-ready.
 
 ---
-*Created during the Architectural Overhaul of February 2026.*
-*This document powers the Horizon Guardian enforcement engine.*
+
+## 🌿 Git & Collaboration
+
+### Git Tagging & Semantic Versioning
+- **Versioning Standard**: Follow **Semantic Versioning** (SemVer): `MAJOR.MINOR.PATCH`.
+- **Automated Management**: Use automation tools (e.g., **Google's Release Please**) to manage versions and changelogs.
+- **Rule**: Never manually edit `CHANGELOG.md` files managed by automation.
+
+### Commit & PR Strategy
+- **Atomic Commits**: Each commit should represent a single logical change.
+- **Micro-Commit Strategy**: Commits should be kept short and broken into smaller commits by features. Related or interdependent changes should be committed and pushed together.
+- **Conventional Commits**: Use the `type(scope): description` format (feat, fix, chore, etc.).
+- **Squash Merge**: Default for feature branches to keep history clean.
+
+---
+
+## 🛡️ Security & Performance Standards
+
+### Security Headers
+Every project must implement:
+- **CSP (Content-Security-Policy)**
+- **X-Frame-Options: DENY**
+- **X-Content-Type-Options: nosniff**
+- **Referrer-Policy: no-referrer**
+- **Rate Limiting** (IP-based)
+
+---
+
+## 📜 Naming Conventions & Style
+- **Namespaces**: Use file-scoped namespaces (C#) and consistent directory structures (TS).
+- **Interfaces**: Start with `I` (C#).
+- **Async**: Methods must end in `Async` (C#).
+- **Components**: PascalCase for UI components.
+
+---
+
+## 📖 Architecture Decision Records (ADR)
+Projects should document project-specific ADRs separately. Global platform choices include:
+- **DB**: Prefer production-grade relational databases (Postgres) for parity.
+- **Observability**: Structured Logging (Seq) + Centralized Log Dashboard.
+- **Caching**: Distributed caching (Redis) for horizontally scalable services.
+
+---
+
+## ✅ Gold Standard Verification
+1. **Zero-Error Frontend**: No `any` types, Vite/Build success.
+2. **Standardized Formatting**: Ruleset-compliant project-wide.
+3. **Stable Infrastructure**: Health checks green for all mesh services.
+4. **Horizon Guardian Compliance**: The codebase is audit-ready for the **Horizon Guardian** engine.
+
+---
+
+## 🤖 Future Agent Instructions
+1. **Read the Blueprint**: Always check this file first.
+2. **Modularize First**: If a file exceeds 200 lines, extract logic.
+3. **Audit the Chain**: Ensure changes propagate from Entity -> DTO -> Handler -> API -> Client.
+
+---
+*Created February 2026.*
+*This document powers the Horizon Platform Excellence standards.*

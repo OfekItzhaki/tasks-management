@@ -1,49 +1,42 @@
 import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { MailerModule, MailerService } from '@nestjs-modules/mailer';
-import { BullModule } from '@nestjs/bullmq';
+import { BullModule, getQueueToken } from '@nestjs/bullmq';
+import { Resend } from 'resend';
 import { EmailService } from './email.service';
 import { EmailProcessor } from './email.processor';
 
 @Module({
   imports: [
-    ...(process.env.NODE_ENV === 'test'
-      ? []
-      : [
-          MailerModule.forRootAsync({
-            useFactory: (config: ConfigService) => ({
-              transport: {
-                host: config.get('SMTP_HOST'),
-                port: config.get('SMTP_PORT'),
-                secure: config.get('SMTP_SECURE') === 'true',
-                auth: {
-                  user: config.get('SMTP_USER'),
-                  pass: config.get('SMTP_PASSWORD'),
-                },
-              },
-              defaults: {
-                from: `"Tasks Management" <${config.get('SMTP_FROM') || config.get('SMTP_USER') || 'noreply@tasksmanagement.com'}>`,
-              },
-            }),
-            inject: [ConfigService],
-          }),
-        ]),
-    BullModule.registerQueue({
-      name: 'email',
-    }),
+    ...(process.env.REDIS_HOST
+      ? [
+        BullModule.registerQueue({
+          name: 'email',
+        }),
+      ]
+      : []),
   ],
   providers: [
     EmailService,
     EmailProcessor,
-    ...(process.env.NODE_ENV === 'test'
-      ? [
-          {
-            provide: MailerService,
-            useValue: { sendMail: jest.fn().mockResolvedValue(true) },
+    {
+      provide: 'RESEND_CLIENT',
+      useFactory: (config: ConfigService) => {
+        return new Resend(config.get('RESEND_API_KEY'));
+      },
+      inject: [ConfigService],
+    },
+    ...(process.env.REDIS_HOST
+      ? []
+      : [
+        {
+          provide: getQueueToken('email'),
+          useValue: {
+            add: async () => { },
+            process: async () => { },
           },
-        ]
-      : []),
+        },
+      ]),
   ],
   exports: [EmailService],
 })
-export class EmailModule {}
+export class EmailModule { }

@@ -11,7 +11,9 @@ export class EmailService {
     otp: string,
     name?: string,
   ): Promise<void> {
-    console.log(`[EmailService] Queueing OTP email for: ${email}`);
+    console.log(
+      `[EmailService] Queueing OTP email for: ${email} (OTP: ${otp})`,
+    );
     await this.emailQueue.add('sendVerificationEmail', {
       email,
       otp,

@@ -2,14 +2,17 @@ import toast from 'react-hot-toast';
 import {
   extractErrorMessage as sharedExtractErrorMessage,
   isAuthError as sharedIsAuthError,
-  isTimeoutError as sharedIsTimeoutError
+  isTimeoutError as sharedIsTimeoutError,
 } from '@tasks-management/frontend-services';
 
 /**
  * Extract error message from various error formats
  * Always returns user-friendly messages, never technical errors
  */
-export function extractErrorMessage(error: unknown, defaultMessage: string): string {
+export function extractErrorMessage(
+  error: unknown,
+  defaultMessage: string
+): string {
   return sharedExtractErrorMessage(error, defaultMessage);
 }
 
@@ -30,10 +33,7 @@ export function isTimeoutError(error: unknown): boolean {
 /**
  * Show error toast with consistent formatting
  */
-export function showErrorToast(
-  error: unknown,
-  defaultMessage: string,
-): void {
+export function showErrorToast(error: unknown, defaultMessage: string): void {
   const message = extractErrorMessage(error, defaultMessage);
   toast.error(message);
 }
@@ -44,7 +44,7 @@ export function showErrorToast(
 export function handleApiError(
   error: unknown,
   defaultMessage: string,
-  onAuthError?: () => void,
+  onAuthError?: () => void
 ): void {
   if (isAuthError(error)) {
     // Auth errors are handled by api-client interceptor
@@ -71,7 +71,10 @@ export function handleApiError(
 /**
  * Get user-friendly error message for common scenarios
  */
-export function getFriendlyErrorMessage(error: unknown, operation: string): string {
+export function getFriendlyErrorMessage(
+  error: unknown,
+  operation: string
+): string {
   if (isTimeoutError(error)) {
     return `${operation} is taking too long. Please try again later.`;
   }
@@ -80,5 +83,8 @@ export function getFriendlyErrorMessage(error: unknown, operation: string): stri
     return 'Your session has expired. Please log in again.';
   }
 
-  return extractErrorMessage(error, `Unable to ${operation.toLowerCase()}. Please try again.`);
+  return extractErrorMessage(
+    error,
+    `Unable to ${operation.toLowerCase()}. Please try again.`
+  );
 }

@@ -1,0 +1,95 @@
+﻿
+> todo-backend@0.3.0 lint
+> eslint "{src,apps,libs,test}/**/*.ts" --quiet
+
+
+C:\Users\ofeki\OneDrive\Desktop\Horizon\Tasks Management\todo-backend\src\auth\auth.service.ts
+   14:11  error  'JwtPayload' is defined but never used       @typescript-eslint/no-unused-vars
+  113:13  error  Unsafe assignment of an `any` value          @typescript-eslint/no-unsafe-assignment
+  117:20  error  Unsafe member access .sub on an `any` value  @typescript-eslint/no-unsafe-member-access
+  117:36  error  Unsafe member access .jti on an `any` value  @typescript-eslint/no-unsafe-member-access
+  123:11  error  Unsafe assignment of an `any` value          @typescript-eslint/no-unsafe-assignment
+  123:27  error  Unsafe member access .sub on an `any` value  @typescript-eslint/no-unsafe-member-access
+  135:17  error  Unsafe member access .jti on an `any` value  @typescript-eslint/no-unsafe-member-access
+  148:61  error  Unsafe member access .sub on an `any` value  @typescript-eslint/no-unsafe-member-access
+
+C:\Users\ofeki\OneDrive\Desktop\Horizon\Tasks Management\todo-backend\src\events\events.gateway.spec.ts
+  52:14  error  A method that is not declared with `this: void` may cause unintentional scoping of `this` when separated from its object.
+Consider using an arrow function or explicitly `.bind()`ing the method to avoid calling the method with an unintended `this` value. 
+If a function does not access `this`, it can be annotated with `this: void`  @typescript-eslint/unbound-method
+
+C:\Users\ofeki\OneDrive\Desktop\Horizon\Tasks Management\todo-backend\src\events\events.gateway.ts
+   37:13  error  Unsafe assignment of an `any` value          @typescript-eslint/no-unsafe-assignment
+   38:30  error  Unsafe member access .sub on an `any` value  @typescript-eslint/no-unsafe-member-access
+   40:7   error  Unsafe assignment of an `any` value          @typescript-eslint/no-unsafe-assignment
+  101:14  error  '_client' is defined but never used          @typescript-eslint/no-unused-vars
+
+C:\Users\ofeki\OneDrive\Desktop\Horizon\Tasks Management\todo-backend\src\events\events.service.spec.ts
+    8:7   error  'prismaService' is assigned a value but never used                                                                                                                                                                                                                                                                                          @typescript-eslint/no-unused-vars
+   67:14  error  A method that is not declared with `this: void` may cause unintentional scoping of `this` when separated from its object.
+Consider using an arrow function or explicitly `.bind()`ing the method to avoid calling the method with an unintended `this` value. 
+If a function does not access `this`, it can be annotated with `this: void`  @typescript-eslint/unbound-method
+   74:14  error  A method that is not declared with `this: void` may cause unintentional scoping of `this` when separated from its object.
+Consider using an arrow function or explicitly `.bind()`ing the method to avoid calling the method with an unintended `this` value. 
+If a function does not access `this`, it can be annotated with `this: void`  @typescript-eslint/unbound-method
+   79:14  error  A method that is not declared with `this: void` may cause unintentional scoping of `this` when separated from its object.
+Consider using an arrow function or explicitly `.bind()`ing the method to avoid calling the method with an unintended `this` value. 
+If a function does not access `this`, it can be annotated with `this: void`  @typescript-eslint/unbound-method
+   85:14  error  A method that is not declared with `this: void` may cause unintentional scoping of `this` when separated from its object.
+Consider using an arrow function or explicitly `.bind()`ing the method to avoid calling the method with an unintended `this` value. 
+If a function does not access `this`, it can be annotated with `this: void`  @typescript-eslint/unbound-method
+  106:14  error  A method that is not declared with `this: void` may cause unintentional scoping of `this` when separated from its object.
+Consider using an arrow function or explicitly `.bind()`ing the method to avoid calling the method with an unintended `this` value. 
+If a function does not access `this`, it can be annotated with `this: void`  @typescript-eslint/unbound-method
+  107:14  error  A method that is not declared with `this: void` may cause unintentional scoping of `this` when separated from its object.
+Consider using an arrow function or explicitly `.bind()`ing the method to avoid calling the method with an unintended `this` value. 
+If a function does not access `this`, it can be annotated with `this: void`  @typescript-eslint/unbound-method
+  120:14  error  A method that is not declared with `this: void` may cause unintentional scoping of `this` when separated from its object.
+Consider using an arrow function or explicitly `.bind()`ing the method to avoid calling the method with an unintended `this` value. 
+If a function does not access `this`, it can be annotated with `this: void`  @typescript-eslint/unbound-method
+  135:14  error  A method that is not declared with `this: void` may cause unintentional scoping of `this` when separated from its object.
+Consider using an arrow function or explicitly `.bind()`ing the method to avoid calling the method with an unintended `this` value. 
+If a function does not access `this`, it can be annotated with `this: void`  @typescript-eslint/unbound-method
+  148:14  error  A method that is not declared with `this: void` may cause unintentional scoping of `this` when separated from its object.
+Consider using an arrow function or explicitly `.bind()`ing the method to avoid calling the method with an unintended `this` value. 
+If a function does not access `this`, it can be annotated with `this: void`  @typescript-eslint/unbound-method
+  167:14  error  A method that is not declared with `this: void` may cause unintentional scoping of `this` when separated from its object.
+Consider using an arrow function or explicitly `.bind()`ing the method to avoid calling the method with an unintended `this` value. 
+If a function does not access `this`, it can be annotated with `this: void`  @typescript-eslint/unbound-method
+  168:14  error  A method that is not declared with `this: void` may cause unintentional scoping of `this` when separated from its object.
+Consider using an arrow function or explicitly `.bind()`ing the method to avoid calling the method with an unintended `this` value. 
+If a function does not access `this`, it can be annotated with `this: void`  @typescript-eslint/unbound-method
+  180:14  error  A method that is not declared with `this: void` may cause unintentional scoping of `this` when separated from its object.
+Consider using an arrow function or explicitly `.bind()`ing the method to avoid calling the method with an unintended `this` value. 
+If a function does not access `this`, it can be annotated with `this: void`  @typescript-eslint/unbound-method
+  199:14  error  A method that is not declared with `this: void` may cause unintentional scoping of `this` when separated from its object.
+Consider using an arrow function or explicitly `.bind()`ing the method to avoid calling the method with an unintended `this` value. 
+If a function does not access `this`, it can be annotated with `this: void`  @typescript-eslint/unbound-method
+  234:14  error  A method that is not declared with `this: void` may cause unintentional scoping of `this` when separated from its object.
+Consider using an arrow function or explicitly `.bind()`ing the method to avoid calling the method with an unintended `this` value. 
+If a function does not access `this`, it can be annotated with `this: void`  @typescript-eslint/unbound-method
+
+C:\Users\ofeki\OneDrive\Desktop\Horizon\Tasks Management\todo-backend\src\events\ws-jwt.guard.ts
+  19:22  error  This assertion is unnecessary since it does not change the type of the expression  @typescript-eslint/no-unnecessary-type-assertion
+
+C:\Users\ofeki\OneDrive\Desktop\Horizon\Tasks Management\todo-backend\src\tasks\tasks.service.ts
+  74:9  error  'listFilter' is never reassigned. Use 'const' instead  prefer-const
+
+C:\Users\ofeki\OneDrive\Desktop\Horizon\Tasks Management\todo-backend\src\todo-lists\todo-lists.service.ts
+  86:11  error  Unsafe assignment of an `any` value               @typescript-eslint/no-unsafe-assignment
+  87:11  error  Unsafe assignment of an `any` value               @typescript-eslint/no-unsafe-assignment
+  88:11  error  Unsafe assignment of an `any` value               @typescript-eslint/no-unsafe-assignment
+  88:33  error  Unsafe member access .isSystem on an `any` value  @typescript-eslint/no-unsafe-member-access
+
+C:\Users\ofeki\OneDrive\Desktop\Horizon\Tasks Management\todo-backend\src\users\users.controller.ts
+  32:11  error  'CloudinaryResponse' is defined but never used      @typescript-eslint/no-unused-vars
+  40:10  error  'UploadApiResponse' is defined but never used       @typescript-eslint/no-unused-vars
+  40:29  error  'UploadApiErrorResponse' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\ofeki\OneDrive\Desktop\Horizon\Tasks Management\todo-backend\src\users\users.service.ts
+  148:16  error  This assertion is unnecessary since it does not change the type of the expression  @typescript-eslint/no-unnecessary-type-assertion
+  149:20  error  This assertion is unnecessary since it does not change the type of the expression  @typescript-eslint/no-unnecessary-type-assertion
+
+Γ£û 39 problems (39 errors, 0 warnings)
+  4 errors and 0 warnings potentially fixable with the `--fix` option.
+

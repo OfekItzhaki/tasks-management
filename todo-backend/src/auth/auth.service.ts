@@ -7,9 +7,11 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import UsersService from '../users/users.service';
+import { TodoListsService } from '../todo-lists/todo-lists.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { v4 as uuidv4 } from 'uuid';
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface JwtPayload {
   sub: string;
   email: string;
@@ -23,29 +25,44 @@ export class AuthService {
 
   constructor(
     private readonly usersService: UsersService,
+    private readonly todoListsService: TodoListsService,
     private readonly jwtService: JwtService,
     private readonly prisma: PrismaService,
-  ) {}
+  ) { }
 
   async validateUser(email: string, password: string) {
-    const user = await this.usersService.findByEmail(email);
-    if (!user || !user.passwordHash) {
-      this.logger.debug(`Login failed: no user or hash for email=${email}`);
-      throw new UnauthorizedException('Invalid credentials');
-    }
+    this.logger.error(`Validating user: ${email}`);
+    try {
+      const user = await this.usersService.findByEmail(email);
+      if (!user) {
+        this.logger.error(`Login failed: user not found for email=${email}`);
+        throw new UnauthorizedException('Invalid credentials');
+      }
+      if (!user.passwordHash) {
+        this.logger.error(`Login failed: no password hash for user=${user.id}`);
+        throw new UnauthorizedException('Invalid credentials');
+      }
 
-    const isValid = await bcrypt.compare(password, user.passwordHash);
-    if (!isValid) {
-      this.logger.debug(`Login failed: invalid password for userId=${user.id}`);
-      throw new UnauthorizedException('Invalid credentials');
-    }
+      const isValid = await bcrypt.compare(password, user.passwordHash);
+      if (!isValid) {
+        this.logger.error(
+          `Login failed: invalid password for userId=${user.id}`,
+        );
+        throw new UnauthorizedException('Invalid credentials');
+      }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { passwordHash: _passwordHash, ...safeUser } = user;
-    return safeUser;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { passwordHash: _passwordHash, ...safeUser } = user;
+      return safeUser;
+    } catch (error) {
+      if (error instanceof UnauthorizedException) throw error;
+      this.logger.error(`Error in validateUser: ${error}`);
+      throw error;
+    }
   }
 
   async login(email: string, password: string) {
+    this.logger.debug(`Attempting login for ${email}`);
     const user = await this.validateUser(email, password);
     return this.createAuthSession(user);
   }
@@ -136,6 +153,7 @@ export class AuthService {
 
       return this.createAuthSession(user);
     } catch (e: unknown) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const error = e instanceof Error ? e : new Error(String(e));
       this.logger.error('Refresh token failed:', error.stack);
       throw new UnauthorizedException('Invalid or expired refresh token');
@@ -217,6 +235,9 @@ export class AuthService {
         payload.sub,
         passwordHash,
       );
+
+      // Seed default lists for the new user
+      await this.todoListsService.seedDefaultLists(user.id);
 
       return this.login(user.email, password);
     } catch (e: unknown) {

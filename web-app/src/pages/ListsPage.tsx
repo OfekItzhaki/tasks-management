@@ -8,16 +8,24 @@ import {
   ToDoList,
   ApiError,
   ListType,
+  TaskBehavior,
+  CompletionPolicy,
 } from '@tasks-management/frontend-services';
 import { formatApiError } from '../utils/formatApiError';
 import Skeleton from '../components/Skeleton';
 import { useTranslation } from 'react-i18next';
 
 export default function ListsPage() {
+  const [newListName, setNewListName] = useState('');
+  const [taskBehavior, setTaskBehavior] = useState<TaskBehavior>(
+    TaskBehavior.ONE_OFF
+  );
+  const [completionPolicy, setCompletionPolicy] = useState<CompletionPolicy>(
+    CompletionPolicy.MOVE_TO_DONE
+  );
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [showCreate, setShowCreate] = useState(false);
-  const [newListName, setNewListName] = useState('');
 
   const {
     data: lists = [],
@@ -32,7 +40,11 @@ export default function ListsPage() {
   const createListMutation = useMutation<
     ToDoList,
     ApiError,
-    { name: string },
+    {
+      name: string;
+      taskBehavior: TaskBehavior;
+      completionPolicy: CompletionPolicy;
+    },
     { previousLists?: ToDoList[] }
   >({
     mutationFn: (data) => listsService.createList(data),
@@ -46,6 +58,8 @@ export default function ListsPage() {
       const optimistic: ToDoList = {
         id: tempId,
         name: data.name,
+        taskBehavior: data.taskBehavior,
+        completionPolicy: data.completionPolicy,
         ownerId: 0,
         order: Date.now(),
         type: ListType.CUSTOM,
@@ -70,6 +84,8 @@ export default function ListsPage() {
     },
     onSuccess: () => {
       setNewListName('');
+      setTaskBehavior(TaskBehavior.ONE_OFF);
+      setCompletionPolicy(CompletionPolicy.MOVE_TO_DONE);
       setShowCreate(false);
     },
     onSettled: async () => {
@@ -128,6 +144,8 @@ export default function ListsPage() {
               if (!newListName.trim()) return;
               createListMutation.mutate({
                 name: newListName.trim(),
+                taskBehavior,
+                completionPolicy,
               });
             }}
           >
@@ -143,6 +161,49 @@ export default function ListsPage() {
                   className="premium-input w-full"
                   placeholder={t('lists.form.namePlaceholder')}
                 />
+              </div>
+              <div className="sm:w-48">
+                <label className="block text-xs font-semibold uppercase tracking-wide text-tertiary mb-2">
+                  {t('lists.form.behaviorLabel')}
+                </label>
+                <select
+                  value={taskBehavior}
+                  onChange={(e) =>
+                    setTaskBehavior(e.target.value as TaskBehavior)
+                  }
+                  className="premium-input w-full"
+                >
+                  <option value={TaskBehavior.RECURRING}>
+                    {t('lists.form.behaviorRecurring')}
+                  </option>
+                  <option value={TaskBehavior.ONE_OFF}>
+                    {t('lists.form.behaviorOneOff')}
+                  </option>
+                </select>
+              </div>
+              <div className="sm:w-48">
+                <label className="block text-xs font-semibold uppercase tracking-wide text-tertiary mb-2">
+                  {t('lists.form.policyLabel')}
+                </label>
+                <select
+                  value={completionPolicy}
+                  onChange={(e) =>
+                    setCompletionPolicy(e.target.value as CompletionPolicy)
+                  }
+                  className="premium-input w-full"
+                >
+                  <option value={CompletionPolicy.MOVE_TO_DONE}>
+                    {t('lists.form.policyMoveToDone', {
+                      defaultValue: 'Move to Done',
+                    })}
+                  </option>
+                  <option value={CompletionPolicy.KEEP}>
+                    {t('lists.form.policyKeep')}
+                  </option>
+                  <option value={CompletionPolicy.AUTO_DELETE}>
+                    {t('lists.form.policyDelete')}
+                  </option>
+                </select>
               </div>
               <div className="flex gap-2 sm:items-end">
                 <button
@@ -199,53 +260,146 @@ export default function ListsPage() {
             </span>
           </button>
         )}
-        {lists.map((list, index) => (
-          <Link
-            key={list.id}
-            to={`/lists/${list.id}/tasks`}
-            onMouseEnter={() => {
-              void queryClient.prefetchQuery({
-                queryKey: ['tasks', list.id],
-                queryFn: () => tasksService.getTasksByList(list.id),
-              });
-              void queryClient.prefetchQuery({
-                queryKey: ['list', list.id],
-                queryFn: () => listsService.getListById(list.id),
-              });
-            }}
-            className="group relative p-6 h-40 rounded-2xl border-2 border-border-subtle bg-surface hover:border-accent hover:shadow-lg transition-all duration-200 flex flex-col justify-between animate-slide-up"
-            style={{ animationDelay: `${index * 0.05}s` }}
-          >
-            {/* List Content */}
-            <div>
-              <h3 className="text-xl font-bold text-primary group-hover:text-accent transition-colors line-clamp-2 break-words">
-                {list.name}
-              </h3>
-            </div>
-
-            {/* Footer with Arrow */}
-            <div className="flex justify-between items-center">
-              <div className="w-8 h-8 rounded-lg bg-hover group-hover:bg-accent group-hover:text-white flex items-center justify-center transition-all">
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2.5}
-                    d="M9 5l7 7-7 7"
-                  />
-                </svg>
+        {lists
+          .filter(
+            (l) =>
+              !l.type ||
+              l.type === ListType.CUSTOM ||
+              l.type === ListType.DAILY ||
+              l.type === ListType.WEEKLY ||
+              l.type === ListType.MONTHLY ||
+              l.type === ListType.YEARLY
+          )
+          .map((list, index) => (
+            <Link
+              key={list.id}
+              to={`/lists/${list.id}/tasks`}
+              onMouseEnter={() => {
+                void queryClient.prefetchQuery({
+                  queryKey: ['tasks', list.id],
+                  queryFn: () => tasksService.getTasksByList(list.id),
+                });
+                void queryClient.prefetchQuery({
+                  queryKey: ['list', list.id],
+                  queryFn: () => listsService.getListById(list.id),
+                });
+              }}
+              className="group relative p-6 h-40 rounded-2xl border-2 border-border-subtle bg-surface hover:border-accent hover:shadow-lg transition-all duration-200 flex flex-col justify-between animate-slide-up"
+              style={{ animationDelay: `${index * 0.05}s` }}
+            >
+              {/* List Content */}
+              <div>
+                <h3 className="text-xl font-bold text-primary group-hover:text-accent transition-colors line-clamp-2 break-words">
+                  {list.name}
+                </h3>
               </div>
-            </div>
-            {/* Accent Bar */}
-            <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-accent-primary to-accent-secondary rounded-b-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
-          </Link>
-        ))}
+
+              {/* Footer with Arrow */}
+              <div className="flex justify-between items-center">
+                <div className="w-8 h-8 rounded-lg bg-hover group-hover:bg-accent group-hover:text-white flex items-center justify-center transition-all">
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2.5}
+                      d="M9 5l7 7-7 7"
+                    />
+                  </svg>
+                </div>
+              </div>
+              {/* Accent Bar */}
+              <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-accent-primary to-accent-secondary rounded-b-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
+            </Link>
+          ))}
       </div>
+
+      {/* System Lists Section */}
+      {lists.some(
+        (l) => l.type === ListType.TRASH || l.type === ListType.FINISHED
+      ) && (
+        <div
+          className="mt-12 animate-slide-up"
+          style={{ animationDelay: '0.2s' }}
+        >
+          <h2 className="text-sm font-bold text-tertiary uppercase tracking-wider mb-4 px-1">
+            {t('lists.system', { defaultValue: 'System Lists' })}
+          </h2>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {lists
+              .filter(
+                (l) => l.type === ListType.TRASH || l.type === ListType.FINISHED
+              )
+              .map((list) => (
+                <Link
+                  key={list.id}
+                  to={`/lists/${list.id}/tasks?isTrashView=${list.type === ListType.TRASH}`}
+                  className="group relative p-6 h-24 rounded-2xl border border-border-subtle bg-surface hover:border-accent/50 hover:bg-accent/5 transition-all duration-200 flex items-center justify-between"
+                >
+                  <div className="flex items-center gap-4">
+                    <div
+                      className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                        list.type === ListType.TRASH
+                          ? 'bg-red-100 text-red-600 dark:bg-red-900/20'
+                          : 'bg-green-100 text-green-600 dark:bg-green-900/20'
+                      }`}
+                    >
+                      {list.type === ListType.TRASH ? (
+                        <svg
+                          className="w-5 h-5"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                          />
+                        </svg>
+                      ) : (
+                        <svg
+                          className="w-5 h-5"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M5 13l4 4L19 7"
+                          />
+                        </svg>
+                      )}
+                    </div>
+                    <h3 className="text-lg font-bold text-primary group-hover:text-accent transition-colors">
+                      {list.name}
+                    </h3>
+                  </div>
+                  <svg
+                    className="w-5 h-5 text-tertiary group-hover:text-accent transition-colors"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5l7 7-7 7"
+                    />
+                  </svg>
+                </Link>
+              ))}
+          </div>
+        </div>
+      )}
 
       {/* Empty State */}
       {lists.length === 0 && !showCreate && (

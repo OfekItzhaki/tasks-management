@@ -3,6 +3,7 @@ import {
   NotFoundException,
   ForbiddenException,
   BadRequestException,
+  Logger,
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -34,6 +35,8 @@ type SanitizedUser = Omit<User, 'passwordHash' | 'emailVerificationOtp'>;
 
 @Injectable()
 class UsersService {
+  private readonly logger = new Logger(UsersService.name);
+
   constructor(
     private prisma: PrismaService,
     private emailService: EmailService,
@@ -54,12 +57,24 @@ class UsersService {
   }
 
   async findByEmail(email: string): Promise<User | null> {
-    return this.prisma.user.findFirst({
-      where: {
-        email,
-        deletedAt: null,
-      },
-    });
+    try {
+      this.logger.log(`Finding user by email: ${email}`);
+      const user = await this.prisma.user.findFirst({
+        where: {
+          email,
+          deletedAt: null,
+        },
+      });
+      this.logger.log(`User found: ${user ? user.id : 'null'}`);
+      return user;
+    } catch (error: unknown) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      this.logger.error(
+        `Error finding user by email=${email}: ${err.message}`,
+        err.stack,
+      );
+      throw error;
+    }
   }
 
   async findById(id: string): Promise<User | null> {
@@ -129,14 +144,12 @@ class UsersService {
         .filter((share) => share.toDoList && share.toDoList.deletedAt === null)
         .map((share) => ({
           ...share,
-          toDoList: share.toDoList
-            ? {
-                ...share.toDoList,
-                tasks: share.toDoList.tasks.filter(
-                  (task) => task.deletedAt === null,
-                ),
-              }
-            : null,
+          toDoList: {
+            ...share.toDoList,
+            tasks: share.toDoList.tasks.filter(
+              (task) => task.deletedAt === null,
+            ),
+          },
         })),
     };
 

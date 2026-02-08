@@ -15,6 +15,7 @@ interface SortableTaskItemProps {
   onRestore: () => void;
   onPermanentDelete: () => void;
   onClick: () => void;
+  isOptimistic?: boolean;
 }
 
 export function SortableTaskItem({
@@ -29,6 +30,7 @@ export function SortableTaskItem({
   onRestore,
   onPermanentDelete,
   onClick,
+  isOptimistic = false,
 }: SortableTaskItemProps) {
   const { t } = useTranslation();
   const {
@@ -61,7 +63,7 @@ export function SortableTaskItem({
           : isDragging
             ? 'cursor-grabbing opacity-60 scale-[1.02] shadow-xl z-50 ring-2 ring-accent'
             : 'cursor-pointer'
-      }`}
+      } ${isOptimistic ? 'opacity-60 pointer-events-none' : ''}`}
       onClick={(e) => {
         e.stopPropagation();
         if (isBulkMode) {
@@ -82,7 +84,7 @@ export function SortableTaskItem({
       }}
       role="button"
       tabIndex={0}
-      aria-label={`${isBulkMode ? (isSelected ? 'Deselect' : 'Select') : ''} ${task.description}`}
+      aria-label={`${isBulkMode ? (isSelected ? 'Deselect' : 'Select') + ' ' : ''}${task.description}`}
     >
       {/* Selection Checkbox (Bulk Mode) */}
       {isBulkMode && (
@@ -112,13 +114,14 @@ export function SortableTaskItem({
         <button
           onClick={(e) => {
             e.stopPropagation();
-            onToggleComplete();
+            if (!isOptimistic) onToggleComplete();
           }}
+          disabled={isOptimistic}
           className={`shrink-0 w-7 h-7 rounded-xl border-2 flex items-center justify-center transition-all ${
             isCompletedRow
               ? 'bg-accent-success border-accent-success shadow-lg'
               : 'border-border-strong hover:border-accent bg-surface hover:scale-105 active:scale-95'
-          }`}
+          } ${isOptimistic ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''}`}
         >
           {isCompletedRow && (
             <svg
@@ -219,6 +222,7 @@ export function SortableTaskItem({
                   e.stopPropagation();
                   onRestore();
                 }}
+                aria-label="restore-button"
                 className="p-2.5 text-accent hover:bg-accent/10 rounded-xl transition-all"
                 title={t('tasks.restore')}
               >
@@ -241,6 +245,7 @@ export function SortableTaskItem({
                   e.stopPropagation();
                   onPermanentDelete();
                 }}
+                aria-label="permanent-delete-button"
                 className="p-2.5 text-accent-danger hover:bg-accent-danger/10 rounded-xl transition-all"
                 title={t('tasks.deleteForever')}
               >
@@ -265,6 +270,7 @@ export function SortableTaskItem({
                 e.stopPropagation();
                 onDelete();
               }}
+              aria-label="delete-button"
               className="p-2.5 text-accent-danger hover:bg-accent-danger/10 rounded-xl transition-all hover:scale-110 active:scale-95"
               title={t('tasks.delete')}
             >

@@ -18,12 +18,14 @@ interface ReminderConfigProps {
 const ReminderConfigComponent = memo(function ReminderConfigComponent({
   reminders,
   onRemindersChange,
-  taskDueDate = null
+  taskDueDate = null,
 }: ReminderConfigProps) {
   const { t, i18n } = useTranslation();
   const isRtl = isRtlLanguage(i18n.language);
   const [showEditor, setShowEditor] = useState(false);
-  const [editingReminder, setEditingReminder] = useState<ReminderConfig | null>(null);
+  const [editingReminder, setEditingReminder] = useState<ReminderConfig | null>(
+    null
+  );
 
   const addReminder = useCallback(() => {
     const newReminder: ReminderConfig = {
@@ -36,29 +38,38 @@ const ReminderConfigComponent = memo(function ReminderConfigComponent({
     setShowEditor(true);
   }, []);
 
-  const saveReminder = useCallback((reminder: ReminderConfig) => {
-    setShowEditor(false);
-    setEditingReminder(null);
-    const exists = reminders.find((r) => r.id === reminder.id);
-    const updated = exists
-      ? reminders.map((r) => (r.id === reminder.id ? reminder : r))
-      : [...reminders, reminder];
-    onRemindersChange(updated);
-  }, [reminders, onRemindersChange]);
+  const saveReminder = useCallback(
+    (reminder: ReminderConfig) => {
+      setShowEditor(false);
+      setEditingReminder(null);
+      const exists = reminders.find((r) => r.id === reminder.id);
+      const updated = exists
+        ? reminders.map((r) => (r.id === reminder.id ? reminder : r))
+        : [...reminders, reminder];
+      onRemindersChange(updated);
+    },
+    [reminders, onRemindersChange]
+  );
 
-  const toggleAlarm = useCallback((id: string) => {
-    const updated = reminders.map((r) =>
-      r.id === id ? { ...r, hasAlarm: !r.hasAlarm } : r
-    );
-    onRemindersChange(updated);
-  }, [reminders, onRemindersChange]);
+  const toggleAlarm = useCallback(
+    (id: string) => {
+      const updated = reminders.map((r) =>
+        r.id === id ? { ...r, hasAlarm: !r.hasAlarm } : r
+      );
+      onRemindersChange(updated);
+    },
+    [reminders, onRemindersChange]
+  );
 
-  const removeReminder = useCallback((id: string) => {
-    onRemindersChange(reminders.filter((r) => r.id !== id));
-  }, [reminders, onRemindersChange]);
+  const removeReminder = useCallback(
+    (id: string) => {
+      onRemindersChange(reminders.filter((r) => r.id !== id));
+    },
+    [reminders, onRemindersChange]
+  );
 
   const reminderDisplays = useMemo(() => {
-    return reminders.map(reminder => ({
+    return reminders.map((reminder) => ({
       id: reminder.id,
       display: formatReminderDisplay(reminder, t, { use24h: true }),
       hasAlarm: reminder.hasAlarm ?? false,
@@ -67,7 +78,9 @@ const ReminderConfigComponent = memo(function ReminderConfigComponent({
 
   return (
     <div className="space-y-4">
-      <div className={`flex items-center justify-between ${isRtl ? 'flex-row-reverse' : ''}`}>
+      <div
+        className={`flex items-center justify-between ${isRtl ? 'flex-row-reverse' : ''}`}
+      >
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
           {t('reminders.title', { defaultValue: 'Reminders' })}
         </h3>
@@ -100,10 +113,11 @@ const ReminderConfigComponent = memo(function ReminderConfigComponent({
                   <button
                     type="button"
                     onClick={() => toggleAlarm(reminder.id)}
-                    className={`text-xs px-2 py-0.5 rounded-full font-medium transition-all border ${display.hasAlarm
+                    className={`text-xs px-2 py-0.5 rounded-full font-medium transition-all border ${
+                      display.hasAlarm
                         ? 'bg-yellow-100 text-yellow-800 border-yellow-200 hover:bg-yellow-200'
                         : 'bg-gray-100 text-gray-400 border-gray-200 opacity-60 hover:opacity-100 hover:bg-gray-200'
-                      }`}
+                    }`}
                   >
                     🔔 {t('reminders.alarm', { defaultValue: 'Alarm' })}
                   </button>
@@ -111,7 +125,10 @@ const ReminderConfigComponent = memo(function ReminderConfigComponent({
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
-                    onClick={() => { setEditingReminder(reminder); setShowEditor(true); }}
+                    onClick={() => {
+                      setEditingReminder(reminder);
+                      setShowEditor(true);
+                    }}
                     className="px-3 py-1.5 text-xs font-medium text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-all"
                   >
                     {t('common.edit')}
@@ -134,7 +151,10 @@ const ReminderConfigComponent = memo(function ReminderConfigComponent({
         <ReminderEditor
           reminder={editingReminder}
           onSave={saveReminder}
-          onCancel={() => { setShowEditor(false); setEditingReminder(null); }}
+          onCancel={() => {
+            setShowEditor(false);
+            setEditingReminder(null);
+          }}
           taskDueDate={taskDueDate}
         />
       )}

@@ -9,4 +9,3 @@ export function formatApiError(err: unknown, fallback: string): string {
 
   return fallback;
 }
-

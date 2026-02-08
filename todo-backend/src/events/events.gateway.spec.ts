@@ -49,6 +49,7 @@ describe('EventsGateway', () => {
       gateway.handleConnection(mockSocket);
 
       // Verify JWT was checked
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(jwtService.verify).toHaveBeenCalledWith('valid-token');
 
       // User should be tracked

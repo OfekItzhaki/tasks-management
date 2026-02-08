@@ -60,8 +60,12 @@ export default function Pagination({
   };
 
   return (
-    <div className={`flex flex-col sm:flex-row items-center ${isRtl ? 'flex-row-reverse' : ''} justify-between gap-4 mt-6`}>
-      <div className={`flex items-center ${isRtl ? 'flex-row-reverse space-x-reverse space-x-2' : 'gap-2'} text-sm text-gray-700 dark:text-white`}>
+    <div
+      className={`flex flex-col sm:flex-row items-center ${isRtl ? 'flex-row-reverse' : ''} justify-between gap-4 mt-6`}
+    >
+      <div
+        className={`flex items-center ${isRtl ? 'flex-row-reverse space-x-reverse space-x-2' : 'gap-2'} text-sm text-gray-700 dark:text-white`}
+      >
         <span>
           Showing {startItem} to {endItem} of {totalItems} tasks
         </span>
@@ -80,7 +84,9 @@ export default function Pagination({
       </div>
 
       {totalPages > 1 && (
-        <div className={`flex items-center ${isRtl ? 'flex-row-reverse space-x-reverse space-x-2' : 'gap-2'}`}>
+        <div
+          className={`flex items-center ${isRtl ? 'flex-row-reverse space-x-reverse space-x-2' : 'gap-2'}`}
+        >
           <button
             type="button"
             onClick={() => onPageChange(currentPage - 1)}

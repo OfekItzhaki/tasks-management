@@ -1,0 +1,790 @@
+
+> web-app@1.2.0 test
+> vitest run src/pages/TasksPage.integration.test.tsx -t " renders tasks and allows creating a new task with optimistic disabled state\ --run
+
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90mC:/Users/ofeki/OneDrive/Desktop/Horizon/Tasks Management/web-app[39m
+
+ [32m✓[39m src/utils/dateTimeValidation.test.ts [2m([22m[2m17 tests[22m[2m)[22m[32m 14[2mms[22m[39m
+[90mstderr[2m | src/pages/Sanity.test.tsx[2m > [22m[2mSanity test[2m > [22m[2mrenders a simple div
+[22m[39m⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ [32m✓[39m src/pages/Sanity.test.tsx [2m([22m[2m1 test[22m[2m)[22m[32m 59[2mms[22m[39m
+[90mstderr[2m | src/pages/LoginPage.integration.test.tsx[2m > [22m[2mLoginPage (integration)[2m > [22m[2mshows validation error for invalid email
+[22m[39m⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+[90mstderr[2m | src/pages/ListsPage.integration.test.tsx[2m > [22m[2mListsPage (integration)[2m > [22m[2mloads lists and shows create FAB
+[22m[39m⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+[90mstderr[2m | src/pages/TasksPage.integration.test.tsx[2m > [22m[2mTasksPage (integration)[2m > [22m[2mrenders tasks and allows creating a new task with optimistic disabled state
+[22m[39m⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+[90mstderr[2m | src/pages/TasksPage.integration.test.tsx[2m > [22m[2mTasksPage (integration)[2m > [22m[2mrenders tasks and allows creating a new task with optimistic disabled state
+[22m[39m[MSW] Warning: intercepted a request without a matching request handler:
+
+  • GET /api/v1/users
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+[90mstdout[2m | src/pages/TasksPage.integration.test.tsx[2m > [22m[2mTasksPage (integration)[2m > [22m[2mrenders tasks and allows creating a new task with optimistic disabled state
+[22m[39m[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"max-w-4xl mx-auto pb-24 ltr"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"mb-8 animate-slide-up"[39m
+      [36m>[39m
+        [36m<a[39m
+          [33mclass[39m=[32m"inline-flex items-center gap-2 text-accent hover:text-accent/80 font-semibold text-sm transition-all "[39m
+          [33mhref[39m=[32m"/lists"[39m
+        [36m>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m""[39m
+          [36m>[39m
+            [0m←[0m
+          [36m</span>[39m
+          [0mBack to Lists[0m
+        [36m</a>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4 animate-slide-up"[39m
+        [33mstyle[39m=[32m"animation-delay: 0.1s;"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"min-w-0 flex-1"[39m
+        [36m>[39m
+          [36m<h1[39m
+            [33mclass[39m=[32m"text-4xl font-bold text-primary cursor-pointer hover:text-accent transition-colors flex items-center gap-3 break-words whitespace-normal leading-snug pb-2"[39m
+          [36m>[39m
+            [0mMy List[0m
+            [36m<svg[39m
+              [33mclass[39m=[32m"w-5 h-5 opacity-20"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+          [36m</h1>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"flex items-center gap-3"[39m
+        [36m>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all bg-hover text-primary hover:bg-accent/10"[39m
+          [36m>[39m
+            [0mBulk Actions[0m
+          [36m</button>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"p-2.5 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-all"[39m
+            [33mtitle[39m=[32m"Delete list"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33mclass[39m=[32m"w-6 h-6"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+          [36m</button>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"space-y-4 animate-slide-up"[39m
+        [33mstyle[39m=[32m"animation-delay: 0.2s;"[39m
+      [36m>[39m
+        [36m<button[39m
+          [33mclass[39m=[32m"w-full h-16 rounded-2xl border-2 border-dashed border-border-subtle hover:border-accent hover:bg-accent/5 flex items-center justify-center gap-3 transition-all duration-200 group"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"w-8 h-8 rounded-full bg-hover group-hover:bg-accent group-hover:text-white flex items-center justify-center transition-all"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33mclass[39m=[32m"w-5 h-5"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M12 4v16m8-8H4"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+          [36m</div>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"text-sm font-semibold uppercase tracking-wider text-tertiary group-hover:text-accent transition-colors"[39m
+          [36m>[39m
+            [0mNew Task[0m
+          [36m</span>[39m
+        [36m</button>[39m
+        [36m<div[39m
+          [33maria-label[39m=[32m" Existing Task"[39m
+          [33mclass[39m=[32m"group vibrant-hover-card p-5 mt-4 flex items-center gap-5 transition-all duration-300  cursor-pointer "[39m
+          [33mrole[39m=[32m"button"[39m
+          [33mstyle[39m=[32m"opacity: 1; transition: transform 0ms linear;"[39m
+          [33mtabindex[39m=[32m"0"[39m
+        [36m>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"shrink-0 w-7 h-7 rounded-xl border-2 flex items-center justify-center transition-all border-border-strong hover:border-accent bg-surface hover:scale-105 active:scale-95 "[39m
+          [36m/>[39m
+          [36m<div[39m
+            [33maria-describedby[39m=[32m"DndDescribedBy-0"[39m
+            [33maria-disabled[39m=[32m"false"[39m
+            [33maria-roledescription[39m=[32m"sortable"[39m
+            [33mclass[39m=[32m"shrink-0 cursor-grab active:cursor-grabbing p-1.5 hover:bg-hover rounded-lg opacity-20 group-hover:opacity-100 transition-all"[39m
+            [33mrole[39m=[32m"button"[39m
+            [33mtabindex[39m=[32m"0"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33mclass[39m=[32m"w-5 h-5 text-tertiary"[39m
+              [33mfill[39m=[32m"currentColor"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M10 4a2 2 0 110 4 2 2 0 010-4zm4 0a2 2 0 110 4 2 2 0 010-4zm-4 6a2 2 0 110 4 2 2 0 010-4zm4 0a2 2 0 110 4 2 2 0 010-4zm-4 6a2 2 0 110 4 2 2 0 010-4zm4 0a2 2 0 110 4 2 2 0 010-4z"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex-1 min-w-0 text-left"[39m
+          [36m>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"text-lg font-semibold truncate transition-all duration-300 text-primary"[39m
+            [36m>[39m
+              [0mExisting Task[0m
+            [36m</p>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex items-center gap-4 mt-2"[39m
+            [36m/>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex items-center gap-2 transition-all duration-300 opacity-0 group-hover:opacity-100 translate-x-2 group-hover:translate-x-0"[39m
+          [36m>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"p-2.5 text-accent-danger hover:bg-accent-danger/10 rounded-xl transition-all hover:scale-110 active:scale-95"[39m
+              [33mtitle[39m=[32m"tasks.delete"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33mclass[39m=[32m"w-5 h-5"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mstroke[39m=[32m"currentColor"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+            [36m</button>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mid[39m=[32m"DndDescribedBy-0"[39m
+        [33mstyle[39m=[32m"display: none;"[39m
+      [36m>[39m
+        [0m
+    To pick up a draggable item, press the space bar.
+    While dragging, use the arrow keys to move the item.
+    Press space again to drop the item in its new position, or press escape to cancel.
+  [0m
+      [36m</div>[39m
+      [36m<div[39m
+        [33maria-atomic[39m=[32m"true"[39m
+        [33maria-live[39m=[32m"assertive"[39m
+        [33mid[39m=[32m"DndLiveRegion-0"[39m
+        [33mrole[39m=[32m"status"[39m
+        [33mstyle[39m=[32m"position: fixed; top: 0px; left: 0px; width: 1px; height: 1px; margin: -1px; border: 0px; padding: 0px; overflow: hidden; clip: rect(0px); clip-path: inset(100%); white-space: nowrap;"[39m
+      [36m/>[39m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+
+[90mstderr[2m | src/pages/TasksPage.integration.test.tsx[2m > [22m[2mTasksPage (integration)[2m > [22m[2mrenders tasks and allows creating a new task with optimistic disabled state
+[22m[39m[MSW] Warning: intercepted a request without a matching request handler:
+
+  • POST /api/v1/auth/refresh
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+[90mstderr[2m | src/pages/LoginPage.integration.test.tsx[2m > [22m[2mLoginPage (integration)
+[22m[39m[MSW] Warning: intercepted a request without a matching request handler:
+
+  • POST /api/v1/auth/login
+
+  • Request body: {"email":"invalid","password":"x"}
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+[90mstderr[2m | src/pages/TasksPage.integration.test.tsx[2m > [22m[2mTasksPage (integration)[2m > [22m[2moptimistically removes task when completed in MOVE_TO_DONE list
+[22m[39m[MSW] Warning: intercepted a request without a matching request handler:
+
+  • GET /api/v1/users
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+[90mstderr[2m | src/pages/TasksPage.integration.test.tsx[2m > [22m[2mTasksPage (integration)[2m > [22m[2moptimistically removes task when completed in MOVE_TO_DONE list
+[22m[39m[MSW] Warning: intercepted a request without a matching request handler:
+
+  • POST /api/v1/auth/refresh
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+[90mstderr[2m | src/pages/TasksPage.integration.test.tsx[2m > [22m[2mTasksPage (integration)[2m > [22m[2moptimistically updates title on rename and closes form immediately
+[22m[39m[MSW] Warning: intercepted a request without a matching request handler:
+
+  • GET /api/v1/users
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+[90mstderr[2m | src/pages/TasksPage.integration.test.tsx[2m > [22m[2mTasksPage (integration)[2m > [22m[2moptimistically updates title on rename and closes form immediately
+[22m[39m[MSW] Warning: intercepted a request without a matching request handler:
+
+  • POST /api/v1/auth/refresh
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+ [31m❯[39m src/pages/TasksPage.integration.test.tsx [2m([22m[2m3 tests[22m[2m | [22m[31m2 failed[39m[2m)[22m[33m 503[2mms[22m[39m
+[31m     [31m×[31m renders tasks and allows creating a new task with optimistic disabled state[39m[33m 322[2mms[22m[39m
+     [32m✓[39m optimistically removes task when completed in MOVE_TO_DONE list[32m 96[2mms[22m[39m
+[31m     [31m×[31m optimistically updates title on rename and closes form immediately[39m[32m 82[2mms[22m[39m
+ [32m✓[39m src/pages/ListsPage.integration.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[33m 654[2mms[22m[39m
+     [33m[2m✓[22m[39m creates a new list when form is submitted [33m 563[2mms[22m[39m
+[90mstderr[2m | src/pages/LoginPage.integration.test.tsx[2m > [22m[2mLoginPage (integration)[2m > [22m[2msubmits login successfully (no error shown)
+[22m[39m[MSW] Warning: intercepted a request without a matching request handler:
+
+  • POST /api/v1/auth/login
+
+  • Request body: {"email":"test@example.com","password":"password123"}
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+ [32m✓[39m src/pages/LoginPage.integration.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[33m 1568[2mms[22m[39m
+     [33m[2m✓[22m[39m shows validation error for invalid email [33m 452[2mms[22m[39m
+     [33m[2m✓[22m[39m submits login successfully (no error shown) [33m 574[2mms[22m[39m
+     [33m[2m✓[22m[39m shows error when login fails [33m 535[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 2 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m src/pages/TasksPage.integration.test.tsx[2m > [22mTasksPage (integration)[2m > [22mrenders tasks and allows creating a new task with optimistic disabled state
+[31m[1mTestingLibraryElementError[22m[39m: Unable to find an element with the placeholder text of: /What needs to be done/i
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"max-w-4xl mx-auto pb-24 ltr"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"mb-8 animate-slide-up"[39m
+      [36m>[39m
+        [36m<a[39m
+          [33mclass[39m=[32m"inline-flex items-center gap-2 text-accent hover:text-accent/80 font-semibold text-sm transition-all "[39m
+          [33mhref[39m=[32m"/lists"[39m
+        [36m>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m""[39m
+          [36m>[39m
+            [0m←[0m
+          [36m</span>[39m
+          [0mBack to Lists[0m
+        [36m</a>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4 animate-slide-up"[39m
+        [33mstyle[39m=[32m"animation-delay: 0.1s;"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"min-w-0 flex-1"[39m
+        [36m>[39m
+          [36m<h1[39m
+            [33mclass[39m=[32m"text-4xl font-bold text-primary cursor-pointer hover:text-accent transition-colors flex items-center gap-3 break-words whitespace-normal leading-snug pb-2"[39m
+          [36m>[39m
+            [0mMy List[0m
+            [36m<svg[39m
+              [33mclass[39m=[32m"w-5 h-5 opacity-20"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+          [36m</h1>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"flex items-center gap-3"[39m
+        [36m>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all bg-hover text-primary hover:bg-accent/10"[39m
+          [36m>[39m
+            [0mBulk Actions[0m
+          [36m</button>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"p-2.5 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-all"[39m
+            [33mtitle[39m=[32m"Delete list"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33mclass[39m=[32m"w-6 h-6"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+          [36m</button>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"premium-card p-6 mb-8 animate-scale-in"[39m
+      [36m>[39m
+        [36m<form>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex flex-col sm:flex-row gap-4"[39m
+          [36m>[39m
+            [36m<input[39m
+              [33mclass[39m=[32m"flex-1 bg-gray-50 dark:bg-[#0a0a0a] border border-gray-200 dark:border-[#2a2a2a] rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/50"[39m
+              [33mplaceholder[39m=[32m"e.g. Buy milk"[39m
+              [33mvalue[39m=[32m""[39m
+            [36m/>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex gap-2"[39m
+            [36m>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"px-6 py-3 bg-accent text-white rounded-xl text-xs font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all disabled:opacity-50"[39m
+                [33mdisabled[39m=[32m""[39m
+                [33mtype[39m=[32m"submit"[39m
+              [36m>[39m
+                [0mCreate[0m
+              [36m</button>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"px-6 py-3 bg-gray-100 dark:bg-[#2a2a2a] text-gray-900 dark:text-white rounded-xl text-xs font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [0mCancel[0m
+              [36m</button>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+        [36m</form>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"space-y-4 animate-slide-up"[39m
+        [33mstyle[39m=[32m"animation-delay: 0.2s;"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33maria-label[39m=[32m" Existing Task"[39m
+          [33mclass[39m=[32m"group vibrant-hover-card p-5 mt-4 flex items-center gap-5 transition-all duration-300  cursor-pointer "[39m
+          [33mrole[39m=[32m"button"[39m
+          [33mstyle[39m=[32m"opacity: 1; transition: transform 0ms linear;"[39m
+          [33mtabindex[39m=[32m"0"[39m
+        [36m>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"shrink-0 w-7 h-7 rounded-xl border-2 flex items-center justify-center transition-all border-border-strong hover:border-accent bg-surface hover:scale-105 active:scale-95 "[39m
+          [36m/>[39m
+          [36m<div[39m
+            [33maria-describedby[39m=[32m"DndDescribedBy-0"[39m
+            [33maria-disabled[39m=[32m"false"[39m
+            [33maria-roledescription[39m=[32m"sortable"[39m
+            [33mclass[39m=[32m"shrink-0 cursor-grab active:cursor-grabbing p-1.5 hover:bg-hover rounded-lg opacity-20 group-hover:opacity-100 transition-all"[39m
+            [33mrole[39m=[32m"button"[39m
+            [33mtabindex[39m=[32m"0"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33mclass[39m=[32m"w-5 h-5 text-tertiary"[39m
+              [33mfill[39m=[32m"currentColor"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M10 4a2 2 0 110 4 2 2 0 010-4zm4 0a2 2 0 110 4 2 2 0 010-4zm-4 6a2 2 0 110 4 2 2 0 010-4zm4 0a2 2 0 110 4 2 2 0 010-4zm-4 6a2 2 0 110 4 2 2 0 010-4zm4 0a2 2 0 110 4 2 2 0 010-4z"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex-1 min-w-0 text-left"[39m
+          [36m>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"text-lg font-semibold truncate transition-all duration-300 text-primary"[39m
+            [36m>[39m
+              [0mExisting Task[0m
+            [36m</p>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex items-center gap-4 mt-2"[39m
+            [36m/>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex items-center gap-2 transition-all duration-300 opacity-0 group-hover:opacity-100 translate-x-2 group-hover:translate-x-0"[39m
+          [36m>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"p-2.5 text-accent-danger hover:bg-accent-danger/10 rounded-xl transition-all hover:scale-110 active:scale-95"[39m
+              [33mtitle[39m=[32m"tasks.delete"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33mclass[39m=[32m"w-5 h-5"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mstroke[39m=[32m"currentColor"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+            [36m</button>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mid[39m=[32m"DndDescribedBy-0"[39m
+        [33mstyle[39m=[32m"display: none;"[39m
+      [36m>[39m
+        [0m
+    To pick up a draggable item, press the space bar.
+    While dragging, use the arrow keys to move the item.
+    Press space again to drop the item in its new position, or press escape to cancel.
+  [0m
+      [36m</div>[39m
+      [36m<div[39m
+        [33maria-atomic[39m=[32m"true"[39m
+        [33maria-live[39m=[32m"assertive"[39m
+        [33mid[39m=[32m"DndLiveRegion-0"[39m
+        [33mrole[39m=[32m"status"[39m
+        [33mstyle[39m=[32m"position: fixed; top: 0px; left: 0px; width: 1px; height: 1px; margin: -1px; border: 0px; padding: 0px; overflow: hidden; clip: rect(0px); clip-path: inset(100%); white-space: nowrap;"[39m
+      [36m/>[39m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+[90m [2m❯[22m Object.getElementError node_modules/@testing-library/dom/dist/config.js:[2m37:19[22m[39m
+[90m [2m❯[22m node_modules/@testing-library/dom/dist/query-helpers.js:[2m76:38[22m[39m
+[90m [2m❯[22m node_modules/@testing-library/dom/dist/query-helpers.js:[2m52:17[22m[39m
+[90m [2m❯[22m node_modules/@testing-library/dom/dist/query-helpers.js:[2m95:19[22m[39m
+[36m [2m❯[22m src/pages/TasksPage.integration.test.tsx:[2m80:30[22m[39m
+    [90m 78| [39m
+    [90m 79| [39m        [90m// Type Description[39m
+    [90m 80| [39m        const input = screen.getByPlaceholderText(/What needs to be do…
+    [90m   | [39m                             [31m^[39m
+    [90m 81| [39m        [35mawait[39m user[33m.[39m[34mtype[39m(input[33m,[39m [32m'New Optimistic Task'[39m)[33m;[39m
+    [90m 82| [39m        const submitBtn = screen.getByRole('button', { name: /^CREATE$…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/pages/TasksPage.integration.test.tsx[2m > [22mTasksPage (integration)[2m > [22moptimistically updates title on rename and closes form immediately
+[31m[1mTestingLibraryElementError[22m[39m: Found a label with the text of: /Name/i, however no form control was found associated to that label. Make sure you're using the "for" attribute or "aria-labelledby" attribute correctly.
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"max-w-4xl mx-auto pb-24 ltr"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"mb-8 animate-slide-up"[39m
+      [36m>[39m
+        [36m<a[39m
+          [33mclass[39m=[32m"inline-flex items-center gap-2 text-accent hover:text-accent/80 font-semibold text-sm transition-all "[39m
+          [33mhref[39m=[32m"/lists"[39m
+        [36m>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m""[39m
+          [36m>[39m
+            [0m←[0m
+          [36m</span>[39m
+          [0mBack to Lists[0m
+        [36m</a>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4 animate-slide-up"[39m
+        [33mstyle[39m=[32m"animation-delay: 0.1s;"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"min-w-0 flex-1"[39m
+        [36m>[39m
+          [36m<form[39m
+            [33mclass[39m=[32m"flex flex-col gap-4 premium-card p-6"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex flex-col sm:flex-row gap-4"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex-1"[39m
+              [36m>[39m
+                [36m<label[39m
+                  [33mclass[39m=[32m"block text-xs font-semibold uppercase tracking-wide text-tertiary mb-2"[39m
+                [36m>[39m
+                  [0mName[0m
+                [36m</label>[39m
+                [36m<input[39m
+                  [33mclass[39m=[32m"w-full text-2xl font-bold bg-transparent border-b-2 border-accent focus:outline-none text-primary"[39m
+                  [33mvalue[39m=[32m"My List"[39m
+                [36m/>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"sm:w-48"[39m
+              [36m>[39m
+                [36m<label[39m
+                  [33mclass[39m=[32m"block text-xs font-semibold uppercase tracking-wide text-tertiary mb-2"[39m
+                [36m>[39m
+                  [0mTask Behavior[0m
+                [36m</label>[39m
+                [36m<select[39m
+                  [33mclass[39m=[32m"premium-input w-full text-sm"[39m
+                [36m>[39m
+                  [36m<option[39m
+                    [33mvalue[39m=[32m"RECURRING"[39m
+                  [36m>[39m
+                    [0mRecurring[0m
+                  [36m</option>[39m
+                  [36m<option[39m
+                    [33mvalue[39m=[32m"ONE_OFF"[39m
+                  [36m>[39m
+                    [0mOne-off[0m
+                  [36m</option>[39m
+                [36m</select>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"sm:w-48"[39m
+              [36m>[39m
+                [36m<label[39m
+                  [33mclass[39m=[32m"block text-xs font-semibold uppercase tracking-wide text-tertiary mb-2"[39m
+                [36m>[39m
+                  [0mCompletion Policy[0m
+                [36m</label>[39m
+                [36m<select[39m
+                  [33mclass[39m=[32m"premium-input w-full text-sm"[39m
+                [36m>[39m
+                  [36m<option[39m
+                    [33mvalue[39m=[32m"MOVE_TO_DONE"[39m
+                  [36m>[39m
+                    [0mMove to Done[0m
+                  [36m</option>[39m
+                  [36m<option[39m
+                    [33mvalue[39m=[32m"KEEP"[39m
+                  [36m>[39m
+                    [0mKeep tasks[0m
+                  [36m</option>[39m
+                  [36m<option[39m
+                    [33mvalue[39m=[32m"AUTO_DELETE"[39m
+                  [36m>[39m
+                    [0mDelete immediately[0m
+                  [36m</option>[39m
+                [36m</select>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex justify-end gap-3 mt-2"[39m
+            [36m>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"px-6 py-2.5 bg-hover border border-border-subtle text-primary rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-surface transition-all active:scale-95"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [0mCancel[0m
+              [36m</button>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"premium-button px-8"[39m
+                [33mtype[39m=[32m"submit"[39m
+              [36m>[39m
+                [0mSave[0m
+              [36m</button>[39m
+            [36m</div>[39m
+          [36m</form>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"flex items-center gap-3"[39m
+        [36m>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all bg-hover text-primary hover:bg-accent/10"[39m
+          [36m>[39m
+            [0mBulk Actions[0m
+          [36m</button>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"p-2.5 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-all"[39m
+            [33mtitle[39m=[32m"Delete list"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33mclass[39m=[32m"w-6 h-6"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+          [36m</button>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"space-y-4 animate-slide-up"[39m
+        [33mstyle[39m=[32m"animation-delay: 0.2s;"[39m
+      [36m>[39m
+        [36m<button[39m
+          [33mclass[39m=[32m"w-full h-16 rounded-2xl border-2 border-dashed border-border-subtle hover:border-accent hover:bg-accent/5 flex items-center justify-center gap-3 transition-all duration-200 group"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"w-8 h-8 rounded-full bg-hover group-hover:bg-accent group-hover:text-white flex items-center justify-center transition-all"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33mclass[39m=[32m"w-5 h-5"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M12 4v16m8-8H4"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+          [36m</div>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"text-sm font-semibold uppercase tracking-wider text-tertiary group-hover:text-accent transition-colors"[39m
+          [36m>[39m
+            [0mNew Task[0m
+          [36m</span>[39m
+        [36m</button>[39m
+        [36m<div[39m
+          [33maria-label[39m=[32m" Existing Task"[39m
+          [33mclass[39m=[32m"group vibrant-hover-card p-5 mt-4 flex items-center gap-5 transition-all duration-300  cursor-pointer "[39m
+          [33mrole[39m=[32m"button"[39m
+          [33mstyle[39m=[32m"opacity: 1; transition: transform 0ms linear;"[39m
+          [33mtabindex[39m=[32m"0"[39m
+        [36m>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"shrink-0 w-7 h-7 rounded-xl border-2 flex items-center justify-center transition-all border-border-strong hover:border-accent bg-surface hover:scale-105 active:scale-95 "[39m
+          [36m/>[39m
+          [36m<div[39m
+            [33maria-describedby[39m=[32m"DndDescribedBy-2"[39m
+            [33maria-disabled[39m=[32m"false"[39m
+            [33maria-roledescription[39m=[32m"sortable"[39m
+            [33mclass[39m=[32m"shrink-0 cursor-grab active:cursor-grabbing p-1.5 hover:bg-hover rounded-lg opacity-20 group-hover:opacity-100 transition-all"[39m
+            [33mrole[39m=[32m"button"[39m
+            [33mtabindex[39m=[32m"0"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33mclass[39m=[32m"w-5 h-5 text-tertiary"[39m
+              [33mfill[39m=[32m"currentColor"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M10 4a2 2 0 110 4 2 2 0 010-4zm4 0a2 2 0 110 4 2 2 0 010-4zm-4 6a2 2 0 110 4 2 2 0 010-4zm4 0a2 2 0 110 4 2 2 0 010-4zm-4 6a2 2 0 110 4 2 2 0 010-4zm4 0a2 2 0 110 4 2 2 0 010-4z"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex-1 min-w-0 text-left"[39m
+          [36m>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"text-lg font-semibold truncate transition-all duration-300 text-primary"[39m
+            [36m>[39m
+              [0mExisting Task[0m
+            [36m</p>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex items-center gap-4 mt-2"[39m
+            [36m/>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex items-center gap-2 transition-all duration-300 opacity-0 group-hover:opacity-100 translate-x-2 group-hover:translate-x-0"[39m
+          [36m>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"p-2.5 text-accent-danger hover:bg-accent-danger/10 rounded-xl transition-all hover:scale-110 active:scale-95"[39m
+              [33mtitle[39m=[32m"tasks.delete"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33mclass[39m=[32m"w-5 h-5"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mstroke[39m=[32m"currentColor"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+            [36m</button>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mid[39m=[32m"DndDescribedBy-2"[39m
+        [33mstyle[39m=[32m"display: none;"[39m
+      [36m>[39m
+        [0m
+    To pick up a draggable item, press the space bar.
+    While dragging, use the arrow keys to move the item.
+    Press space again to drop the item in its new position, or press escape to cancel.
+  [0m
+      [36m</div>[39m
+      [36m<div[39m
+        [33maria-atomic[39m=[32m"true"[39m
+        [33maria-live[39m=[32m"assertive"[39m
+        [33mid[39m=[32m"DndLiveRegion-2"[39m
+        [33mrole[39m=[32m"status"[39m
+        [33mstyle[39m=[32m"position: fixed; top: 0px; left: 0px; width: 1px; height: 1px; margin: -1px; border: 0px; padding: 0px; overflow: hidden; clip: rect(0px); clip-path: inset(100%); white-space: nowrap;"[39m
+      [36m/>[39m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+[90m [2m❯[22m Object.getElementError node_modules/@testing-library/dom/dist/config.js:[2m37:19[22m[39m
+[90m [2m❯[22m getAllByLabelText node_modules/@testing-library/dom/dist/queries/label-text.js:[2m108:40[22m[39m
+[90m [2m❯[22m node_modules/@testing-library/dom/dist/query-helpers.js:[2m52:17[22m[39m
+[90m [2m❯[22m node_modules/@testing-library/dom/dist/query-helpers.js:[2m95:19[22m[39m
+[36m [2m❯[22m src/pages/TasksPage.integration.test.tsx:[2m162:23[22m[39m
+    [90m160| [39m
+    [90m161| [39m        [90m// Verify all fields are present in the form[39m
+    [90m162| [39m        [34mexpect[39m(screen[33m.[39m[34mgetByLabelText[39m([36m/Name/i[39m))[33m.[39m[34mtoBeInTheDocument[39m()[33m;[39m
+    [90m   | [39m                      [31m^[39m
+    [90m163| [39m        expect(screen.getByLabelText(/Occurrence/i)).toBeInTheDocument…
+    [90m164| [39m        expect(screen.getByLabelText(/Cycle-of-life/i)).toBeInTheDocum…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m4 passed[39m[22m[90m (5)[39m
+[2m      Tests [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m24 passed[39m[22m[90m (26)[39m
+[2m   Start at [22m 10:56:03
+[2m   Duration [22m 7.03s[2m (transform 931ms, setup 6.56s, import 2.58s, tests 2.80s, environment 15.87s)[22m
+

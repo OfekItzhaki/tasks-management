@@ -1,13 +1,13 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
-import { MailerService } from '@nestjs-modules/mailer';
-import { Logger } from '@nestjs/common';
+import { Inject, Logger } from '@nestjs/common';
+import { Resend } from 'resend';
 
 @Processor('email')
 export class EmailProcessor extends WorkerHost {
   private readonly logger = new Logger(EmailProcessor.name);
 
-  constructor(private readonly mailerService: MailerService) {
+  constructor(@Inject('RESEND_CLIENT') private readonly resend: Resend) {
     super();
   }
 
@@ -41,7 +41,8 @@ export class EmailProcessor extends WorkerHost {
     this.logger.log(`Processing reminder email for: ${email}`);
 
     try {
-      await this.mailerService.sendMail({
+      const { data: result, error } = await this.resend.emails.send({
+        from: 'Tasks Management <onboarding@resend.dev>',
         to: email,
         subject: title,
         html: `
@@ -68,7 +69,14 @@ export class EmailProcessor extends WorkerHost {
         ${message}
       `,
       });
-      this.logger.log(`Successfully sent reminder email to: ${email}`);
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      this.logger.log(
+        `Successfully sent reminder email to: ${email}, ID: ${result?.id}`,
+      );
     } catch (error: unknown) {
       const stack = error instanceof Error ? error.stack : undefined;
       this.logger.error(`Failed to send reminder email to ${email}:`, stack);
@@ -85,7 +93,8 @@ export class EmailProcessor extends WorkerHost {
     this.logger.log(`Processing verification email for: ${email}`);
 
     try {
-      await this.mailerService.sendMail({
+      const { data: result, error } = await this.resend.emails.send({
+        from: 'Tasks Management <onboarding@resend.dev>',
         to: email,
         subject: 'Welcome to Horizon Tasks',
         html: `
@@ -124,7 +133,14 @@ export class EmailProcessor extends WorkerHost {
         If you didn't create an account, you can safely ignore this email.
       `,
       });
-      this.logger.log(`Successfully sent verification email to: ${email}`);
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      this.logger.log(
+        `Successfully sent verification email to: ${email}, ID: ${result?.id}`,
+      );
     } catch (error: unknown) {
       const stack = error instanceof Error ? error.stack : undefined;
       this.logger.error(`Failed to send email to ${email}:`, stack);

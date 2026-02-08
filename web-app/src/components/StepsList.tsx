@@ -56,7 +56,9 @@ export default function StepsList({
 
   return (
     <div className="mt-6">
-      <div className={`flex ${isRtl ? 'flex-row-reverse' : ''} items-center justify-between gap-3 mb-3 relative`}>
+      <div
+        className={`flex ${isRtl ? 'flex-row-reverse' : ''} items-center justify-between gap-3 mb-3 relative`}
+      >
         <div className="flex items-center gap-3">
           <h2 className="premium-header-section text-lg">
             {t('taskDetails.stepsTitle', { defaultValue: 'Steps' })}
@@ -66,7 +68,9 @@ export default function StepsList({
               type="button"
               onClick={onToggleBulkMode}
               className={`p-1.5 rounded-lg transition-colors ${isBulkMode ? 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-200'}`}
-              title={isBulkMode ? t('common.cancel') : t('tasks.selectMultiple')}
+              title={
+                isBulkMode ? t('common.cancel') : t('tasks.selectMultiple')
+              }
             >
               {isBulkMode ? (
                 <svg
@@ -125,9 +129,12 @@ export default function StepsList({
       </div>
 
       {isBulkMode && selectedSteps.size > 0 && (
-        <div className={`mb-4 p-3 premium-card bg-primary-50/50 dark:bg-primary-900/10 flex items-center justify-between gap-3 animate-slide-down ${isRtl ? 'flex-row-reverse' : ''}`}>
+        <div
+          className={`mb-4 p-3 premium-card bg-primary-50/50 dark:bg-primary-900/10 flex items-center justify-between gap-3 animate-slide-down ${isRtl ? 'flex-row-reverse' : ''}`}
+        >
           <span className="text-sm font-semibold text-primary-700 dark:text-primary-300">
-            {selectedSteps.size} {t('tasks.selected', { defaultValue: 'selected' })}
+            {selectedSteps.size}{' '}
+            {t('tasks.selected', { defaultValue: 'selected' })}
           </span>
           <div className="flex gap-2">
             <button
@@ -164,7 +171,9 @@ export default function StepsList({
             <div className="sm:col-span-2 flex gap-2">
               <button
                 type="submit"
-                disabled={createStepMutation.isPending || !newStepDescription.trim()}
+                disabled={
+                  createStepMutation.isPending || !newStepDescription.trim()
+                }
                 className="inline-flex flex-1 justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {createStepMutation.isPending
@@ -185,7 +194,9 @@ export default function StepsList({
 
       {!showAddStep && task.steps && task.steps.length === 0 && (
         <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-          <p className="text-sm">{t('taskDetails.noSteps', { defaultValue: 'No steps yet' })}</p>
+          <p className="text-sm">
+            {t('taskDetails.noSteps', { defaultValue: 'No steps yet' })}
+          </p>
         </div>
       )}
 
@@ -219,7 +230,9 @@ export default function StepsList({
                 {editingStepId === step.id ? (
                   <input
                     value={stepDescriptionDraft}
-                    onChange={(e) => onStepDescriptionDraftChange(e.target.value)}
+                    onChange={(e) =>
+                      onStepDescriptionDraftChange(e.target.value)
+                    }
                     className="min-w-0 flex-1 rounded-md border border-gray-300 dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a] text-gray-900 dark:text-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                     autoFocus
                   />
@@ -243,8 +256,8 @@ export default function StepsList({
                 )}
               </div>
 
-              {!isBulkMode && (
-                editingStepId === step.id ? (
+              {!isBulkMode &&
+                (editingStepId === step.id ? (
                   <div className="flex gap-2">
                     <button
                       type="button"
@@ -273,8 +286,7 @@ export default function StepsList({
                   >
                     {t('common.delete')}
                   </button>
-                )
-              )}
+                ))}
             </li>
           ))}
         </ul>

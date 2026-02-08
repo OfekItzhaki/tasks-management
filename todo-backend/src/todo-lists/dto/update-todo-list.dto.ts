@@ -1,5 +1,6 @@
-import { IsOptional, IsString } from 'class-validator';
+import { IsEnum, IsOptional, IsString } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
+import { TaskBehavior, CompletionPolicy } from '@prisma/client';
 
 export class UpdateToDoListDto {
   @ApiPropertyOptional({
@@ -9,4 +10,20 @@ export class UpdateToDoListDto {
   @IsString()
   @IsOptional()
   name?: string;
+
+  @ApiPropertyOptional({
+    description: 'Task behavior (Recurring vs One-off)',
+    enum: TaskBehavior,
+  })
+  @IsEnum(TaskBehavior)
+  @IsOptional()
+  taskBehavior?: TaskBehavior;
+
+  @ApiPropertyOptional({
+    description: 'Completion policy (Keep vs Auto-delete)',
+    enum: CompletionPolicy,
+  })
+  @IsEnum(CompletionPolicy)
+  @IsOptional()
+  completionPolicy?: CompletionPolicy;
 }

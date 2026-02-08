@@ -5,6 +5,7 @@ import { EventsGateway } from './events.gateway';
 
 describe('EventsService', () => {
   let service: EventsService;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let prismaService: PrismaService;
   let eventsGateway: EventsGateway;
 
@@ -64,6 +65,7 @@ describe('EventsService', () => {
       });
 
       // Should send to owner
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(eventsGateway.sendToUser).toHaveBeenCalledWith(
         'owner-1',
         'task-updated',
@@ -71,17 +73,20 @@ describe('EventsService', () => {
       );
 
       // Should send to shared users
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(eventsGateway.sendToUser).toHaveBeenCalledWith(
         'user-2',
         'task-updated',
         { taskId: 'task-1' },
       );
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(eventsGateway.sendToUser).toHaveBeenCalledWith(
         'user-3',
         'task-updated',
         { taskId: 'task-1' },
       );
 
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(eventsGateway.sendToUser).toHaveBeenCalledTimes(3);
     });
 
@@ -103,7 +108,9 @@ describe('EventsService', () => {
       });
 
       // Should only send to owner
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(eventsGateway.sendToUser).toHaveBeenCalledTimes(1);
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(eventsGateway.sendToUser).toHaveBeenCalledWith(
         'owner-1',
         'task-updated',
@@ -117,6 +124,7 @@ describe('EventsService', () => {
       await service.broadcastTaskEvent('nonexistent', 'task-updated', {});
 
       // Should not send any events
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(eventsGateway.sendToUser).not.toHaveBeenCalled();
     });
 
@@ -132,6 +140,7 @@ describe('EventsService', () => {
       await service.broadcastTaskEvent('task-1', 'task-updated', {});
 
       // Should not send any events
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(eventsGateway.sendToUser).not.toHaveBeenCalled();
     });
 
@@ -145,6 +154,7 @@ describe('EventsService', () => {
         service.broadcastTaskEvent('task-1', 'task-updated', {}),
       ).resolves.not.toThrow();
 
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(eventsGateway.sendToUser).not.toHaveBeenCalled();
     });
   });
@@ -164,7 +174,9 @@ describe('EventsService', () => {
         listId: 'list-1',
       });
 
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(eventsGateway.sendToUser).toHaveBeenCalledTimes(3);
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(eventsGateway.sendToUser).toHaveBeenCalledWith(
         'owner-1',
         'list-updated',
@@ -177,6 +189,7 @@ describe('EventsService', () => {
 
       await service.broadcastListEvent('nonexistent', 'list-updated', {});
 
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(eventsGateway.sendToUser).not.toHaveBeenCalled();
     });
 
@@ -196,6 +209,7 @@ describe('EventsService', () => {
       await service.broadcastListEvent('list-1', 'list-updated', {});
 
       // Should only send to each user once
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(eventsGateway.sendToUser).toHaveBeenCalledTimes(2);
     });
   });
@@ -231,6 +245,7 @@ describe('EventsService', () => {
         },
       });
 
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(eventsGateway.sendToUser).toHaveBeenCalledWith(
         'owner-1',
         'step-updated',

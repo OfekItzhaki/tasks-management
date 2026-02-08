@@ -1,6 +1,9 @@
 import { FallbackProps } from 'react-error-boundary';
 
-export default function ErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
+export default function ErrorFallback({
+  error,
+  resetErrorBoundary,
+}: FallbackProps) {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <div className="max-w-lg w-full bg-white rounded-lg shadow p-6">
@@ -33,4 +36,3 @@ export default function ErrorFallback({ error, resetErrorBoundary }: FallbackPro
     </div>
   );
 }
-

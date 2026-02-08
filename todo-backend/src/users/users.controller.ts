@@ -29,6 +29,7 @@ import {
   CurrentUserPayload,
 } from '../auth/current-user.decorator';
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface CloudinaryResponse {
   secure_url: string;
   [key: string]: any;
@@ -37,6 +38,8 @@ interface CloudinaryResponse {
 interface CloudinaryError {
   message: string;
 }
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { UploadApiResponse, UploadApiErrorResponse } from 'cloudinary';
 import { CloudinaryService } from '../common/cloudinary/cloudinary.service';
 import { FileUploadInterceptor } from './interceptors/file-upload.interceptor';
@@ -47,7 +50,7 @@ class UsersController {
   constructor(
     private userService: UsersService,
     private cloudinaryService: CloudinaryService,
-  ) { }
+  ) {}
 
   @Post()
   @ApiOperation({ summary: 'Register a new user' })

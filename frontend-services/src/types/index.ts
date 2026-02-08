@@ -51,14 +51,28 @@ export enum ListType {
   YEARLY = 'YEARLY',
   CUSTOM = 'CUSTOM',
   FINISHED = 'FINISHED',
+  TRASH = 'TRASH',
+}
+
+export enum TaskBehavior {
+  RECURRING = 'RECURRING',
+  ONE_OFF = 'ONE_OFF',
+}
+
+export enum CompletionPolicy {
+  AUTO_DELETE = 'AUTO_DELETE',
+  KEEP = 'KEEP',
+  MOVE_TO_DONE = 'MOVE_TO_DONE',
 }
 
 export interface ToDoList {
-  id: number;
+  id: string | number;
   name: string;
-  ownerId: number;
+  ownerId: number | string;
   order: number;
   type: ListType;
+  taskBehavior: TaskBehavior;
+  completionPolicy: CompletionPolicy;
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
@@ -67,19 +81,24 @@ export interface ToDoList {
 
 export interface CreateToDoListDto {
   name: string;
+  taskBehavior?: TaskBehavior;
+  completionPolicy?: CompletionPolicy;
 }
 
 export interface UpdateToDoListDto {
   name?: string;
+  taskBehavior?: TaskBehavior;
+  completionPolicy?: CompletionPolicy;
 }
 
 // Task Types
 export interface Task {
-  id: number;
+  id: number | string;
   description: string;
   completed: boolean;
   completedAt: string | null; // When the task was marked complete
-  todoListId: number;
+  todoListId: number | string;
+  originalListId?: number | string | null;
   order: number;
   dueDate: string | null;
   reminderDaysBefore: number[];
@@ -113,10 +132,10 @@ export interface UpdateTaskDto {
 
 // Step Types
 export interface Step {
-  id: number;
+  id: number | string;
   description: string;
   completed: boolean;
-  taskId: number;
+  taskId: number | string;
   order: number;
   createdAt: string;
   updatedAt: string;

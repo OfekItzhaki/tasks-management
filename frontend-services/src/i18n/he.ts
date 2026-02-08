@@ -11,6 +11,7 @@ export default {
       dark: 'כהה',
       auto: 'אוטומטי',
     },
+    trash: 'סל מיחזור',
   },
   languageNames: {
     en: 'English',
@@ -61,6 +62,12 @@ export default {
       typeLabel: 'סוג',
       namePlaceholder: 'לדוגמה: קניות',
       tip: 'טיפ: רשימת "Finished" מנוהלת אוטומטית על ידי המערכת.',
+      behaviorLabel: 'התנהגות משימות',
+      behaviorRecurring: 'חוזרות',
+      behaviorOneOff: 'חד פעמיות',
+      policyLabel: 'מדיניות סיום',
+      policyKeep: 'השאר משימות',
+      policyDelete: 'מחק מיד',
     },
   },
   tasks: {

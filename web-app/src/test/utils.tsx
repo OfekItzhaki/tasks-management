@@ -13,21 +13,31 @@ const createTestQueryClient = () =>
     },
   });
 
-function AllTheProviders({ children }: { children: ReactNode }) {
+interface AllTheProvidersProps {
+  children: ReactNode;
+  route?: string;
+}
+
+function AllTheProviders({ children, route }: AllTheProvidersProps) {
   const queryClient = createTestQueryClient();
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <MemoryRouter>{children}</MemoryRouter>
+        <MemoryRouter initialEntries={[route || '/']}>{children}</MemoryRouter>
       </AuthProvider>
     </QueryClientProvider>
   );
 }
 
-function customRender(ui: ReactElement, options?: Omit<RenderOptions, 'wrapper'>) {
+interface CustomRenderOptions extends Omit<RenderOptions, 'wrapper'> {
+  route?: string;
+}
+
+function customRender(ui: ReactElement, options?: CustomRenderOptions) {
+  const { route, ...renderOptions } = options || {};
   return render(ui, {
-    wrapper: AllTheProviders,
-    ...options,
+    wrapper: (props) => <AllTheProviders {...props} route={route} />,
+    ...renderOptions,
   });
 }
 

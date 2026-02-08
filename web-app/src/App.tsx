@@ -32,9 +32,11 @@ function App() {
             <Route index element={<Navigate to="/lists" replace />} />
             <Route path="lists" element={<ListsPage />} />
             <Route path="lists/:listId/tasks" element={<TasksPage />} />
+            <Route path="trash" element={<TasksPage isTrashView />} />
             <Route path="tasks/:taskId" element={<TaskDetailsPage />} />
             <Route path="profile" element={<ProfilePage />} />
             <Route path="analytics" element={<AnalyticsPage />} />
+            <Route path="trash" element={<TasksPage isTrashView />} />
           </Route>
         </Routes>
       </AuthProvider>

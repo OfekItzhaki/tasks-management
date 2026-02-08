@@ -9,7 +9,7 @@ export function buildTaskUpdatePayload(
   editDescription: string,
   editDueDate: string,
   editReminders: ReminderConfig[],
-  task: Task,
+  task: Task
 ): UpdateTaskDto {
   const updateData: UpdateTaskDto = {
     description: editDescription.trim(),
@@ -21,11 +21,10 @@ export function buildTaskUpdatePayload(
     updateData.dueDate = null;
   }
 
-  const dueDateForConversion =
-    updateData.dueDate ?? task.dueDate ?? undefined;
+  const dueDateForConversion = updateData.dueDate ?? task.dueDate ?? undefined;
   const reminderData = convertRemindersToBackend(
     editReminders,
-    dueDateForConversion,
+    dueDateForConversion
   );
 
   updateData.reminderDaysBefore = reminderData.reminderDaysBefore ?? [];

@@ -10,11 +10,12 @@ interface CloudinaryResponse {
 
 @CommandHandler(UpdateProfilePictureCommand)
 export class UpdateProfilePictureHandler
-  implements ICommandHandler<UpdateProfilePictureCommand> {
+  implements ICommandHandler<UpdateProfilePictureCommand>
+{
   constructor(
     private readonly cloudinaryService: CloudinaryService,
     private readonly prisma: PrismaService,
-  ) { }
+  ) {}
 
   async execute(command: UpdateProfilePictureCommand) {
     const { userId, file } = command;

@@ -18,7 +18,7 @@ export function useAnalysisData() {
   const { i18n } = useTranslation();
 
   const {
-    data: lists = EMPTY_LISTS,
+    data: allLists = EMPTY_LISTS,
     isLoading: listsLoading,
     isError: listsError,
     error: listsErrorObj,
@@ -27,6 +27,11 @@ export function useAnalysisData() {
     queryKey: ['lists'],
     queryFn: () => listsService.getAllLists(),
   });
+
+  // Filter out system lists that shouldn't be in analytics (Trash, Done)
+  const lists = useMemo(() => {
+    return allLists.filter((l) => l.type !== 'TRASH' && l.type !== 'FINISHED');
+  }, [allLists]);
 
   const {
     data: allTasks = EMPTY_TASKS,

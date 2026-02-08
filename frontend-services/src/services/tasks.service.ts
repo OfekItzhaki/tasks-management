@@ -5,7 +5,7 @@ export class TasksService {
   /**
    * Get all tasks (optionally filtered by list)
    */
-  async getAll(todoListId?: number): Promise<Task[]> {
+  async getAll(todoListId?: number | string): Promise<Task[]> {
     const path = todoListId
       ? `/tasks?todoListId=${todoListId}` // Numeric IDs are safe, no encoding needed
       : '/tasks';
@@ -26,35 +26,35 @@ export class TasksService {
   /**
    * Get task by ID
    */
-  async getById(id: number): Promise<Task> {
+  async getById(id: number | string): Promise<Task> {
     return apiClient.get<Task>(`/tasks/${id}`);
   }
 
   /**
    * Create a task in a list
    */
-  async create(todoListId: number, data: CreateTaskDto): Promise<Task> {
+  async create(todoListId: number | string, data: CreateTaskDto): Promise<Task> {
     return apiClient.post<Task>(`/tasks/todo-list/${todoListId}`, data);
   }
 
   /**
    * Update task
    */
-  async update(id: number, data: UpdateTaskDto): Promise<Task> {
+  async update(id: number | string, data: UpdateTaskDto): Promise<Task> {
     return apiClient.patch<Task>(`/tasks/${id}`, data);
   }
 
   /**
    * Delete task (soft delete)
    */
-  async delete(id: number): Promise<Task> {
+  async delete(id: number | string): Promise<Task> {
     return apiClient.delete<Task>(`/tasks/${id}`);
   }
 
   /**
    * Reorder tasks (updates the order property)
    */
-  async reorderTasks(tasks: { id: number; order: number }[]): Promise<void> {
+  async reorderTasks(tasks: { id: number | string; order: number }[]): Promise<void> {
     // Sequentially update for simplicity and to avoid race conditions on order
     for (const task of tasks) {
       await this.update(task.id, { order: task.order });
@@ -64,21 +64,21 @@ export class TasksService {
   /**
    * Bulk update tasks
    */
-  async bulkUpdate(ids: number[], data: UpdateTaskDto): Promise<void> {
+  async bulkUpdate(ids: (number | string)[], data: UpdateTaskDto): Promise<void> {
     await Promise.all(ids.map((id) => this.update(id, data)));
   }
 
   /**
    * Bulk delete tasks
    */
-  async bulkDelete(ids: number[]): Promise<void> {
+  async bulkDelete(ids: (number | string)[]): Promise<void> {
     await Promise.all(ids.map((id) => this.delete(id)));
   }
 
   /**
    * Get user's tasks (optionally filtered by list)
    */
-  async getMyTasks(todoListId?: number): Promise<Task[]> {
+  async getMyTasks(todoListId?: number | string): Promise<Task[]> {
     const path = todoListId
       ? `/me/tasks?todoListId=${todoListId}` // Numeric IDs are safe, no encoding needed
       : '/me/tasks';

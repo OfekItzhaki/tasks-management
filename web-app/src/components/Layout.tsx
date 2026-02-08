@@ -4,6 +4,9 @@ import { useTranslation } from 'react-i18next';
 import { supportedLanguages } from '../i18n';
 import { useTheme } from '../context/ThemeContext';
 import { getAssetUrl } from '@tasks-management/frontend-services';
+import { useQuery } from '@tanstack/react-query';
+import { listsService } from '../services/lists.service';
+import { useState, useRef, useEffect } from 'react';
 
 export default function Layout() {
   const { user, logout, isUploadingAvatar } = useAuth();
@@ -15,18 +18,38 @@ export default function Layout() {
     await logout();
   };
 
-  const navLinks = [
-    { to: '/lists', label: t('nav.lists') },
-    {
-      to: '/analytics',
-      label: t('nav.analytics', { defaultValue: 'Analytics' }),
-    },
-  ];
+  // Fetch lists to get the "Done" list ID
+  const { data: lists } = useQuery({
+    queryKey: ['lists'],
+    queryFn: () => listsService.getAllLists(),
+    enabled: !!user,
+  });
+
+  const doneList = lists?.find((l) => l.type === 'FINISHED');
+
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsDropdownOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   return (
     <div className="min-h-screen flex flex-col bg-app font-inter">
       {/* Navigation Bar - Solid, Clean */}
-      <nav dir="ltr" className="sticky top-0 z-50 bg-surface border-b border-border-subtle shadow-sm">
+      <nav
+        dir="ltr"
+        className="sticky top-0 z-50 bg-surface border-b border-border-subtle shadow-sm"
+      >
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex justify-between items-center h-16">
             {/* Logo & Links */}
@@ -37,19 +60,122 @@ export default function Layout() {
                 </span>
               </Link>
 
-              <div className="hidden sm:flex items-center gap-1">
-                {navLinks.map((link) => (
-                  <Link
-                    key={link.to}
-                    to={link.to}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${location.pathname.startsWith(link.to)
+              <div className="hidden sm:flex items-center gap-4">
+                {/* Lists Dropdown */}
+                <div className="relative" ref={dropdownRef}>
+                  <button
+                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                    className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                      location.pathname.startsWith('/lists') ||
+                      location.pathname.startsWith('/trash')
+                        ? 'bg-accent/10 text-accent'
+                        : 'text-secondary hover:text-primary hover:bg-hover'
+                    }`}
+                  >
+                    {t('nav.lists')}
+                    <svg
+                      className={`w-4 h-4 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 9l-7 7-7-7"
+                      />
+                    </svg>
+                  </button>
+
+                  {isDropdownOpen && (
+                    <div className="absolute top-full left-0 mt-1 w-48 bg-surface rounded-xl shadow-xl border border-border-subtle overflow-hidden animate-fade-in z-50">
+                      <div className="p-1">
+                        <Link
+                          to="/lists"
+                          onClick={() => setIsDropdownOpen(false)}
+                          className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors hover:bg-hover text-primary"
+                        >
+                          <span className="w-5 h-5 flex items-center justify-center text-accent">
+                            <svg
+                              className="w-4 h-4"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M4 6h16M4 10h16M4 14h16M4 18h16"
+                              />
+                            </svg>
+                          </span>
+                          {t('nav.allLists', { defaultValue: 'My Lists' })}
+                        </Link>
+
+                        {doneList && (
+                          <Link
+                            to={`/lists/${doneList.id}/tasks`}
+                            onClick={() => setIsDropdownOpen(false)}
+                            className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors hover:bg-hover text-primary"
+                          >
+                            <span className="w-5 h-5 flex items-center justify-center text-accent-success">
+                              <svg
+                                className="w-4 h-4"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M5 13l4 4L19 7"
+                                />
+                              </svg>
+                            </span>
+                            {t('lists.done', { defaultValue: 'Done' })}
+                          </Link>
+                        )}
+
+                        <Link
+                          to="/trash"
+                          onClick={() => setIsDropdownOpen(false)}
+                          className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors hover:bg-hover text-primary"
+                        >
+                          <span className="w-5 h-5 flex items-center justify-center text-accent-danger">
+                            <svg
+                              className="w-4 h-4"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                              />
+                            </svg>
+                          </span>
+                          {t('nav.trash', { defaultValue: 'Trash' })}
+                        </Link>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <Link
+                  to="/analytics"
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                    location.pathname.startsWith('/analytics')
                       ? 'bg-accent text-white shadow-sm'
                       : 'text-secondary hover:text-primary hover:bg-hover'
-                      }`}
-                  >
-                    {link.label}
-                  </Link>
-                ))}
+                  }`}
+                >
+                  {t('nav.analytics', { defaultValue: 'Analytics' })}
+                </Link>
               </div>
             </div>
 
@@ -61,10 +187,11 @@ export default function Layout() {
                   <button
                     key={mode}
                     onClick={() => setThemeMode(mode)}
-                    className={`p-1.5 rounded-md transition-all ${themeMode === mode
-                      ? 'bg-surface text-accent shadow-sm'
-                      : 'text-tertiary hover:text-secondary'
-                      }`}
+                    className={`p-1.5 rounded-md transition-all ${
+                      themeMode === mode
+                        ? 'bg-surface text-accent shadow-sm'
+                        : 'text-tertiary hover:text-secondary'
+                    }`}
                     title={t(`theme.${mode}`, {
                       defaultValue:
                         mode.charAt(0).toUpperCase() + mode.slice(1),
