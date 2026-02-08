@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.1](https://github.com/OfekItzhaki/horizon-flux/compare/mobile-app-v1.5.0...mobile-app-v1.5.1) (2026-02-08)
+
+
+### Bug Fixes
+
+* remove hardcoded URLs, fix password placeholder, and secure production logs ([#52](https://github.com/OfekItzhaki/horizon-flux/issues/52)) ([c33d586](https://github.com/OfekItzhaki/horizon-flux/commit/c33d586ffe83e92f28f79c1d58bd45a2d2d41ffc))
+
 ## [1.5.0](https://github.com/OfekItzhaki/horizon-tasks/compare/mobile-app-v1.4.0...mobile-app-v1.5.0) (2026-02-08)
 
 
