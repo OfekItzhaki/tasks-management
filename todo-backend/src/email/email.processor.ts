@@ -7,11 +7,25 @@ import { Resend } from 'resend';
 export class EmailProcessor extends WorkerHost {
   private readonly logger = new Logger(EmailProcessor.name);
 
-  constructor(@Inject('RESEND_CLIENT') private readonly resend: Resend) {
+  constructor(
+    @Inject('RESEND_CLIENT') private readonly resend: Resend | null,
+  ) {
     super();
+    if (!this.resend) {
+      this.logger.warn(
+        'RESEND_API_KEY not configured - email sending will be disabled',
+      );
+    }
   }
 
   async process(job: Job<unknown, unknown, string>): Promise<unknown> {
+    if (!this.resend) {
+      this.logger.warn(
+        `Skipping email job "${job.name}" - Resend not configured`,
+      );
+      return;
+    }
+
     switch (job.name) {
       case 'sendVerificationEmail':
         return this.handleSendVerificationEmail(
