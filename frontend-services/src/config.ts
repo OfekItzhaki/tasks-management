@@ -7,12 +7,6 @@ const getApiBaseUrl = (): string => {
     const win = window as any;
     if (win.__VITE_API_URL__) {
       url = win.__VITE_API_URL__;
-    } else {
-      // Fallback: Detect production domain and use corresponding API URL
-      const hostname = window.location.hostname;
-      if (hostname === 'horizon-flux.ofeklabs.dev' || hostname.includes('vercel.app')) {
-        url = 'https://api.horizon-flux.ofeklabs.dev';
-      }
     }
   }
   // In Node.js/SSR, check process.env
