@@ -55,11 +55,6 @@ export default defineConfig({
       },
     }),
   ],
-  define: {
-    'process.env.VITE_API_URL': JSON.stringify(process.env.VITE_API_URL || ''),
-    // Ensure our new bracketed access in frontend-services also works in browser
-    'process.env': JSON.stringify(process.env),
-  },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
