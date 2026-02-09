@@ -142,11 +142,11 @@ export interface UpdateStepDto {
 }
 
 export interface ReorderStepsDto {
-  stepIds: number[];
+  stepIds: string[];
 }
 
 export interface ShareListDto {
-  sharedWithId: number;
+  sharedWithId: string;
 }
 
 // Reminder types (ReminderConfig, ReminderTimeframe, ReminderSpecificDate, etc.)
