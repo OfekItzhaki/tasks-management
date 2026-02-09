@@ -8,26 +8,29 @@ export const configure = (config: { baseURL?: string; turnstileSiteKey?: string 
 
 // Get API base URL - works in both Node.js and browser environments
 const getApiBaseUrl = (): string => {
-  let url = internalBaseUrl || '';
+  let url = internalBaseUrl || 'http://localhost:3000';
 
-  if (!url) {
-    // Check for Vite environment variables (import.meta.env is injected at build time)
-    if (typeof window !== 'undefined') {
-      const win = window as any;
-      if (win.__VITE_API_URL__) {
-        url = win.__VITE_API_URL__;
-      }
-    }
-    // In Node.js/SSR, check process.env
-    else if (typeof process !== 'undefined' && (process as any).env) {
-      const env = (process as any).env;
-      const vUrl = env['VITE_API_URL'];
-      const aUrl = env['API_BASE_URL'];
-      const eUrl = env['EXPO_PUBLIC_API_URL'];
+  // In Vite/Browser, we check both process.env (if polyfilled) and import.meta.env
+  if (typeof process !== 'undefined' && (process as any).env) {
+    const env = (process as any).env;
+    const vUrl = env['VITE_API_URL'];
+    const aUrl = env['API_BASE_URL'];
+    const eUrl = env['EXPO_PUBLIC_API_URL'];
 
-      if (vUrl && vUrl.trim().length > 0) url = vUrl;
-      else if (aUrl && aUrl.trim().length > 0) url = aUrl;
-      else if (eUrl && eUrl.trim().length > 0) url = eUrl;
+    if (vUrl && vUrl.trim().length > 0) url = vUrl;
+    else if (aUrl && aUrl.trim().length > 0) url = aUrl;
+    else if (eUrl && eUrl.trim().length > 0) url = eUrl;
+  }
+
+  // Final Safety Check for Production Domains
+  if (typeof window !== 'undefined' && window.location) {
+    const hostname = window.location.hostname;
+    const isProdDomain =
+      hostname.includes('ofeklabs.dev') ||
+      hostname.includes('onrender.com');
+
+    if (isProdDomain && url.includes('localhost')) {
+      url = 'https://tasks-api.ofeklabs.dev';
     }
   }
 
@@ -54,9 +57,7 @@ export const getTurnstileSiteKey = (): string | null => {
 }
 
 export const API_CONFIG = {
-  get baseURL() {
-    return getApiBaseUrl();
-  },
+  baseURL: getApiBaseUrl(),
   timeout: 30000, // 30 seconds
 };
 
