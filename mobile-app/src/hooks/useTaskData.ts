@@ -5,7 +5,7 @@ import { Task, Step } from '../types';
 import { handleApiError, isAuthError, extractErrorMessage } from '../utils/errorHandler';
 import { normalizeTask } from '../utils/taskHelpers';
 
-export function useTaskData(taskId: number) {
+export function useTaskData(taskId: string) {
   const [task, setTask] = useState<Task | null>(null);
   const [steps, setSteps] = useState<Step[]>([]);
   const [loading, setLoading] = useState(true);

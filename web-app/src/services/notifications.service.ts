@@ -549,7 +549,7 @@ export function cancelNotification(notificationId: string): void {
 /**
  * Cancel all notifications for a task
  */
-export function cancelAllTaskNotifications(taskId: number): void {
+export function cancelAllTaskNotifications(taskId: string): void {
   const keysToCancel: string[] = [];
 
   scheduledNotifications.forEach((_, key) => {

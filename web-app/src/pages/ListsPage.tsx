@@ -60,14 +60,14 @@ export default function ListsPage() {
 
       const previousLists = queryClient.getQueryData<ToDoList[]>(['lists']);
       const now = new Date().toISOString();
-      const tempId = -Date.now();
+      const tempId = `temp-${Date.now()}`;
 
       const optimistic: ToDoList = {
         id: tempId,
         name: data.name,
         taskBehavior: data.taskBehavior,
         completionPolicy: data.completionPolicy,
-        ownerId: 0,
+        ownerId: '0',
         order: Date.now(),
         type: ListType.CUSTOM,
         createdAt: now,

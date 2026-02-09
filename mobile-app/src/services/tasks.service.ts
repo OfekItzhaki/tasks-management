@@ -9,7 +9,7 @@ export class TasksService {
   /**
    * Get all tasks (optionally filtered by list)
    */
-  async getAll(todoListId?: number): Promise<Task[]> {
+  async getAll(todoListId?: string): Promise<Task[]> {
     try {
       const params = todoListId ? { todoListId } : {};
       const response = await apiClient.get<Task[]>('/tasks', { params });
@@ -42,7 +42,7 @@ export class TasksService {
   /**
    * Get a task by ID
    */
-  async getById(id: number): Promise<Task> {
+  async getById(id: string): Promise<Task> {
     try {
       const response = await apiClient.get<Task>(`/tasks/${id}`);
       return response.data;
@@ -57,7 +57,7 @@ export class TasksService {
   /**
    * Create a task in a list
    */
-  async create(todoListId: number, data: CreateTaskDto): Promise<Task> {
+  async create(todoListId: string, data: CreateTaskDto): Promise<Task> {
     try {
       const response = await apiClient.post<Task>(
         `/tasks/todo-list/${todoListId}`,
@@ -75,7 +75,7 @@ export class TasksService {
   /**
    * Update a task
    */
-  async update(id: number, data: UpdateTaskDto): Promise<Task> {
+  async update(id: string, data: UpdateTaskDto): Promise<Task> {
     try {
       const response = await apiClient.patch<Task>(`/tasks/${id}`, data);
       return response.data;
@@ -90,7 +90,7 @@ export class TasksService {
   /**
    * Delete a task (soft delete)
    */
-  async delete(id: number): Promise<void> {
+  async delete(id: string): Promise<void> {
     try {
       await apiClient.delete(`/tasks/${id}`);
     } catch (error) {
@@ -104,7 +104,7 @@ export class TasksService {
   /**
    * Restore an archived task to its original list
    */
-  async restore(id: number): Promise<Task> {
+  async restore(id: string): Promise<Task> {
     try {
       const response = await apiClient.post<Task>(`/tasks/${id}/restore`);
       return response.data;
@@ -119,7 +119,7 @@ export class TasksService {
   /**
    * Permanently delete an archived task (hard delete, cannot be undone)
    */
-  async permanentDelete(id: number): Promise<void> {
+  async permanentDelete(id: string): Promise<void> {
     try {
       await apiClient.delete(`/tasks/${id}/permanent`);
     } catch (error) {

@@ -6,9 +6,9 @@ import type { Task } from '@tasks-management/frontend-services';
  */
 export function getCachedTaskById(
   queryClient: QueryClient,
-  taskId: number | null
+  taskId: string | null
 ): Task | undefined {
-  if (typeof taskId !== 'number' || Number.isNaN(taskId)) {
+  if (!taskId || typeof taskId !== 'string') {
     return undefined;
   }
 
@@ -19,7 +19,8 @@ export function getCachedTaskById(
     queryKey: ['tasks'],
   });
   for (const [, tasks] of candidates) {
-    const found = tasks?.find((t) => t.id === taskId);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const found = (tasks as any)?.find((t: Task) => t.id === taskId);
     if (found) return found;
   }
   return undefined;

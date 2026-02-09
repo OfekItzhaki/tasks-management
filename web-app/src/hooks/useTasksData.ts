@@ -23,39 +23,39 @@ import { cancelAllTaskNotifications } from '../services/notifications.service';
 
 export type ListWithSystemFlag = ToDoList & { isSystem?: boolean };
 
-export function useTasksData(numericListId: number | null) {
+export function useTasksData(listId: string | null) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
   // Queries
   const listQuery = useQuery<ListWithSystemFlag, ApiError>({
-    queryKey: ['list', numericListId],
-    enabled: typeof numericListId === 'number' && !Number.isNaN(numericListId),
+    queryKey: ['list', listId],
+    enabled: !!listId,
     initialData: () => {
-      if (typeof numericListId !== 'number' || Number.isNaN(numericListId)) {
+      if (!listId) {
         return undefined;
       }
       const cachedLists = queryClient.getQueryData<ListWithSystemFlag[]>([
         'lists',
       ]);
-      return cachedLists?.find((l) => l.id === numericListId);
+      return cachedLists?.find((l) => l.id === listId);
     },
-    queryFn: () => listsService.getListById(numericListId as number),
+    queryFn: () => listsService.getListById(listId!),
   });
 
   const tasksQuery = useQuery<Task[], ApiError>({
-    queryKey: ['tasks', numericListId],
-    enabled: typeof numericListId === 'number' && !Number.isNaN(numericListId),
+    queryKey: ['tasks', listId],
+    enabled: !!listId,
     placeholderData: keepPreviousData,
-    queryFn: () => tasksService.getTasksByList(numericListId as number),
+    queryFn: () => tasksService.getTasksByList(listId!),
   });
 
   // Mutations
   const updateListMutation = useMutation<
     ListWithSystemFlag,
     ApiError,
-    { id: number; data: UpdateToDoListDto },
+    { id: string; data: UpdateToDoListDto },
     { previousList?: ListWithSystemFlag; previousLists?: ListWithSystemFlag[] }
   >({
     mutationFn: ({ id, data }) => listsService.updateList(id, data),
@@ -100,7 +100,7 @@ export function useTasksData(numericListId: number | null) {
   const deleteListMutation = useMutation<
     ListWithSystemFlag,
     ApiError,
-    { id: number },
+    { id: string },
     { previousLists?: ListWithSystemFlag[] }
   >({
     mutationFn: ({ id }) => listsService.deleteList(id),
@@ -131,21 +131,17 @@ export function useTasksData(numericListId: number | null) {
     CreateTaskDto,
     { previousTasks?: Task[] }
   >({
-    mutationFn: (data) =>
-      tasksService.createTask(numericListId as number, data),
+    mutationFn: (data) => tasksService.createTask(listId!, data),
     onMutate: (data) => {
-      if (!numericListId) return { previousTasks: undefined };
-      const previousTasks = queryClient.getQueryData<Task[]>([
-        'tasks',
-        numericListId,
-      ]);
+      if (!listId) return { previousTasks: undefined };
+      const previousTasks = queryClient.getQueryData<Task[]>(['tasks', listId]);
       const now = new Date().toISOString();
       const optimistic: Task = {
-        id: -Date.now(),
+        id: `temp-${Date.now()}`,
         description: data.description,
         completed: false,
         completedAt: null,
-        todoListId: numericListId,
+        todoListId: listId,
         order: Date.now(),
         dueDate: null,
         reminderDaysBefore: [],
@@ -155,44 +151,41 @@ export function useTasksData(numericListId: number | null) {
         deletedAt: null,
         steps: [],
       };
-      queryClient.setQueryData<Task[]>(['tasks', numericListId], (old = []) => [
+      queryClient.setQueryData<Task[]>(['tasks', listId], (old = []) => [
         optimistic,
         ...old,
       ]);
       return { previousTasks };
     },
     onError: (err, _data, ctx) => {
-      if (numericListId && ctx?.previousTasks)
-        queryClient.setQueryData(['tasks', numericListId], ctx.previousTasks);
+      if (listId && ctx?.previousTasks)
+        queryClient.setQueryData(['tasks', listId], ctx.previousTasks);
       handleApiError(err, t('tasks.createFailed'));
     },
     onSettled: () => {
-      if (numericListId)
-        queryClient.invalidateQueries({ queryKey: ['tasks', numericListId] });
+      if (listId)
+        queryClient.invalidateQueries({ queryKey: ['tasks', listId] });
     },
   });
 
   const deleteTaskMutation = useQueuedMutation<
     Task,
     ApiError,
-    { id: number },
+    { id: string },
     { previousTasks?: Task[] }
   >({
     mutationFn: ({ id }) => tasksService.deleteTask(id),
     onMutate: ({ id }) => {
-      if (!numericListId) return { previousTasks: undefined };
-      const previousTasks = queryClient.getQueryData<Task[]>([
-        'tasks',
-        numericListId,
-      ]);
-      queryClient.setQueryData<Task[]>(['tasks', numericListId], (old = []) =>
+      if (!listId) return { previousTasks: undefined };
+      const previousTasks = queryClient.getQueryData<Task[]>(['tasks', listId]);
+      queryClient.setQueryData<Task[]>(['tasks', listId], (old = []) =>
         old.filter((t) => t.id !== id)
       );
       return { previousTasks };
     },
     onError: (err, _vars, ctx) => {
-      if (numericListId && ctx?.previousTasks)
-        queryClient.setQueryData(['tasks', numericListId], ctx.previousTasks);
+      if (listId && ctx?.previousTasks)
+        queryClient.setQueryData(['tasks', listId], ctx.previousTasks);
       handleApiError(err, t('tasks.deleteFailed'));
     },
     onSuccess: (_data, vars) => {
@@ -200,27 +193,27 @@ export function useTasksData(numericListId: number | null) {
       toast.success(t('tasks.taskDeleted'));
     },
     onSettled: () => {
-      if (numericListId)
-        queryClient.invalidateQueries({ queryKey: ['tasks', numericListId] });
+      if (listId)
+        queryClient.invalidateQueries({ queryKey: ['tasks', listId] });
     },
   });
 
   const updateTaskMutation = useQueuedMutation<
     Task,
     ApiError,
-    { id: number; data: UpdateTaskDto },
+    { id: string; data: UpdateTaskDto },
     { previousTasks?: Task[]; previousTask?: Task }
   >({
     mutationFn: ({ id, data }) => tasksService.updateTask(id, data),
     onMutate: ({ id, data }) => {
-      const previousTasks = numericListId
-        ? queryClient.getQueryData<Task[]>(['tasks', numericListId])
+      const previousTasks = listId
+        ? queryClient.getQueryData<Task[]>(['tasks', listId])
         : undefined;
       const previousTask = queryClient.getQueryData<Task>(['task', id]);
       const now = new Date().toISOString();
 
-      if (numericListId) {
-        queryClient.setQueryData<Task[]>(['tasks', numericListId], (old = []) =>
+      if (listId) {
+        queryClient.setQueryData<Task[]>(['tasks', listId], (old = []) =>
           old.map((t) => (t.id === id ? { ...t, ...data, updatedAt: now } : t))
         );
       }
@@ -234,15 +227,15 @@ export function useTasksData(numericListId: number | null) {
       return { previousTasks, previousTask };
     },
     onError: (err, vars, ctx) => {
-      if (numericListId && ctx?.previousTasks)
-        queryClient.setQueryData(['tasks', numericListId], ctx.previousTasks);
+      if (listId && ctx?.previousTasks)
+        queryClient.setQueryData(['tasks', listId], ctx.previousTasks);
       if (ctx?.previousTask)
         queryClient.setQueryData(['task', vars.id], ctx.previousTask);
       handleApiError(err, t('taskDetails.updateTaskFailed'));
     },
     onSettled: (_data, _err, vars) => {
-      if (numericListId)
-        queryClient.invalidateQueries({ queryKey: ['tasks', numericListId] });
+      if (listId)
+        queryClient.invalidateQueries({ queryKey: ['tasks', listId] });
       queryClient.invalidateQueries({ queryKey: ['task', vars.id] });
     },
   });
@@ -250,7 +243,7 @@ export function useTasksData(numericListId: number | null) {
   const reorderTasksMutation = useMutation<
     void,
     ApiError,
-    { taskIds: number[] }
+    { taskIds: string[] }
   >({
     mutationFn: async ({ taskIds }) => {
       const updatePromises = taskIds.map((taskId, index) =>
@@ -260,8 +253,8 @@ export function useTasksData(numericListId: number | null) {
     },
     onSuccess: () => {
       toast.success(t('tasks.reordered') || 'Tasks reordered');
-      if (numericListId)
-        queryClient.invalidateQueries({ queryKey: ['tasks', numericListId] });
+      if (listId)
+        queryClient.invalidateQueries({ queryKey: ['tasks', listId] });
     },
     onError: (err) => {
       handleApiError(err, t('tasks.reorderFailed'));
@@ -271,61 +264,55 @@ export function useTasksData(numericListId: number | null) {
   const restoreTaskMutation = useQueuedMutation<
     Task,
     ApiError,
-    { id: number },
+    { id: string },
     { previousTasks?: Task[] }
   >({
     mutationFn: ({ id }) => tasksService.restoreTask(id),
     onMutate: ({ id }) => {
-      if (!numericListId) return { previousTasks: undefined };
-      const previousTasks = queryClient.getQueryData<Task[]>([
-        'tasks',
-        numericListId,
-      ]);
-      queryClient.setQueryData<Task[]>(['tasks', numericListId], (old = []) =>
+      if (!listId) return { previousTasks: undefined };
+      const previousTasks = queryClient.getQueryData<Task[]>(['tasks', listId]);
+      queryClient.setQueryData<Task[]>(['tasks', listId], (old = []) =>
         old.filter((t) => t.id !== id)
       );
       return { previousTasks };
     },
     onError: (err, _vars, ctx) => {
-      if (numericListId && ctx?.previousTasks)
-        queryClient.setQueryData(['tasks', numericListId], ctx.previousTasks);
+      if (listId && ctx?.previousTasks)
+        queryClient.setQueryData(['tasks', listId], ctx.previousTasks);
       handleApiError(err, t('tasks.restoreFailed'));
     },
     onSuccess: (restored) => {
       toast.success(t('tasks.restored'));
-      if (typeof restored.todoListId === 'number') {
+      if (restored.todoListId) {
         queryClient.invalidateQueries({
           queryKey: ['tasks', restored.todoListId],
         });
       }
     },
     onSettled: () => {
-      if (numericListId)
-        queryClient.invalidateQueries({ queryKey: ['tasks', numericListId] });
+      if (listId)
+        queryClient.invalidateQueries({ queryKey: ['tasks', listId] });
     },
   });
 
   const permanentDeleteTaskMutation = useQueuedMutation<
     Task,
     ApiError,
-    { id: number },
+    { id: string },
     { previousTasks?: Task[] }
   >({
     mutationFn: ({ id }) => tasksService.permanentDeleteTask(id),
     onMutate: ({ id }) => {
-      if (!numericListId) return { previousTasks: undefined };
-      const previousTasks = queryClient.getQueryData<Task[]>([
-        'tasks',
-        numericListId,
-      ]);
-      queryClient.setQueryData<Task[]>(['tasks', numericListId], (old = []) =>
+      if (!listId) return { previousTasks: undefined };
+      const previousTasks = queryClient.getQueryData<Task[]>(['tasks', listId]);
+      queryClient.setQueryData<Task[]>(['tasks', listId], (old = []) =>
         old.filter((t) => t.id !== id)
       );
       return { previousTasks };
     },
     onError: (err, _vars, ctx) => {
-      if (numericListId && ctx?.previousTasks)
-        queryClient.setQueryData(['tasks', numericListId], ctx.previousTasks);
+      if (listId && ctx?.previousTasks)
+        queryClient.setQueryData(['tasks', listId], ctx.previousTasks);
       handleApiError(err, t('tasks.deleteForeverFailed'));
     },
     onSuccess: (_data, vars) => {
@@ -333,8 +320,8 @@ export function useTasksData(numericListId: number | null) {
       toast.success(t('tasks.deletedForever'));
     },
     onSettled: () => {
-      if (numericListId)
-        queryClient.invalidateQueries({ queryKey: ['tasks', numericListId] });
+      if (listId)
+        queryClient.invalidateQueries({ queryKey: ['tasks', listId] });
     },
   });
 
