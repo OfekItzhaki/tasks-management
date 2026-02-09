@@ -1,6 +1,14 @@
+let internalBaseUrl: string | null = null;
+let internalTurnstileSiteKey: string | null = null;
+
+export const configure = (config: { baseURL?: string; turnstileSiteKey?: string }) => {
+  if (config.baseURL) internalBaseUrl = config.baseURL;
+  if (config.turnstileSiteKey) internalTurnstileSiteKey = config.turnstileSiteKey;
+};
+
 // Get API base URL - works in both Node.js and browser environments
 const getApiBaseUrl = (): string => {
-  let url = 'http://localhost:3000';
+  let url = internalBaseUrl || 'http://localhost:3000';
 
   // In Vite/Browser, we check both process.env (if polyfilled) and import.meta.env
   if (typeof process !== 'undefined' && (process as any).env) {
@@ -39,6 +47,14 @@ const getApiBaseUrl = (): string => {
 
   return url;
 };
+
+export const getTurnstileSiteKey = (): string | null => {
+  if (internalTurnstileSiteKey) return internalTurnstileSiteKey;
+  if (typeof window !== 'undefined') {
+    return (window as any).__VITE_TURNSTILE_SITE_KEY__ || null;
+  }
+  return null;
+}
 
 export const API_CONFIG = {
   baseURL: getApiBaseUrl(),
