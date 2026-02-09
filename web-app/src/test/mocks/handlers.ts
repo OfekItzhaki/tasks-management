@@ -1,5 +1,14 @@
 import { http, HttpResponse } from 'msw';
 
+const mockUser = {
+  id: '1',
+  email: 'test@example.com',
+  name: 'Test User',
+  emailVerified: true,
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+};
+
 export const handlers = [
   http.post('*/api/v1/auth/login', async ({ request }) => {
     const body = (await request.json()) as {
