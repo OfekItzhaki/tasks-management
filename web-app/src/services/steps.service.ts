@@ -6,23 +6,23 @@ import {
 } from '@tasks-management/frontend-services';
 
 class StepsService {
-  async getStepsByTask(taskId: number): Promise<Step[]> {
+  async getStepsByTask(taskId: string): Promise<Step[]> {
     return frontendStepsService.getByTask(taskId);
   }
 
-  async createStep(taskId: number, data: CreateStepDto): Promise<Step> {
+  async createStep(taskId: string, data: CreateStepDto): Promise<Step> {
     return frontendStepsService.create(taskId, data);
   }
 
-  async updateStep(id: number, data: UpdateStepDto): Promise<Step> {
+  async updateStep(id: string, data: UpdateStepDto): Promise<Step> {
     return frontendStepsService.update(id, data);
   }
 
-  async deleteStep(id: number): Promise<Step> {
+  async deleteStep(id: string): Promise<Step> {
     return frontendStepsService.delete(id);
   }
 
-  async reorderSteps(taskId: number, stepIds: number[]): Promise<Step[]> {
+  async reorderSteps(taskId: string, stepIds: string[]): Promise<Step[]> {
     return frontendStepsService.reorder(taskId, stepIds);
   }
 }

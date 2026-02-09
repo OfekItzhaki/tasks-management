@@ -18,7 +18,7 @@ export enum ListType {
 }
 
 export interface User {
-  id: number;
+  id: string;
   email: string;
   name: string | null;
   profilePicture: string | null;
@@ -29,10 +29,10 @@ export interface User {
 }
 
 export interface ToDoList {
-  id: number;
+  id: string;
   name: string;
   type: ListType;
-  ownerId: number;
+  ownerId: string;
   order: number;
   isSystem: boolean; // System lists (like "Finished Tasks") cannot be deleted
   createdAt: string;
@@ -41,13 +41,13 @@ export interface ToDoList {
 }
 
 export interface Task {
-  id: number;
+  id: string;
   description: string;
   completed: boolean;
   completedAt: string | null; // When the task was marked complete
   completionCount: number; // How many times this repeating task has been completed
-  todoListId: number;
-  originalListId: number | null; // Original list when archived (for restore)
+  todoListId: string;
+  originalListId: string | null; // Original list when archived (for restore)
   order: number;
   dueDate: string | null;
   reminderDaysBefore: number[];
@@ -60,17 +60,17 @@ export interface Task {
 }
 
 export interface Step {
-  id: number;
+  id: string;
   description: string;
   completed: boolean;
-  taskId: number;
+  taskId: string;
   order: number;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface ReminderNotification {
-  taskId: number;
+  taskId: string;
   taskDescription: string;
   dueDate: string;
   reminderDate: string;

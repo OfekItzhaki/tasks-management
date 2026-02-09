@@ -6,9 +6,9 @@ import type { Task } from '@tasks-management/frontend-services';
  */
 export function getCachedTaskById(
   queryClient: QueryClient,
-  taskId: number | null
+  taskId: string | null
 ): Task | undefined {
-  if (typeof taskId !== 'number' || Number.isNaN(taskId)) {
+  if (!taskId) {
     return undefined;
   }
 
