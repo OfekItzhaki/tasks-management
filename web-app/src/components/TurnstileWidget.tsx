@@ -1,6 +1,5 @@
 import { forwardRef } from 'react';
 import { Turnstile, type TurnstileInstance } from '@marsidev/react-turnstile';
-import { getTurnstileSiteKey } from '@tasks-management/frontend-services';
 
 interface TurnstileWidgetProps {
   onSuccess: (token: string) => void;
@@ -36,7 +35,7 @@ interface TurnstileWidgetProps {
  */
 const TurnstileWidget = forwardRef<TurnstileInstance, TurnstileWidgetProps>(
   ({ onSuccess, onError, onExpire }, ref) => {
-    const siteKey = getTurnstileSiteKey();
+    const siteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY;
 
     // If site key is not configured, display an error message
     if (!siteKey) {
@@ -73,12 +72,6 @@ const TurnstileWidget = forwardRef<TurnstileInstance, TurnstileWidgetProps>(
       );
     }
 
-    // For debugging: log the site key being used (first 6 chars)
-    console.log(
-      '[Turnstile] Initializing with siteKey:',
-      siteKey?.substring(0, 10) + '...'
-    );
-
     return (
       <Turnstile
         ref={ref}
@@ -86,25 +79,18 @@ const TurnstileWidget = forwardRef<TurnstileInstance, TurnstileWidgetProps>(
         options={{
           theme: 'auto',
           size: 'normal',
-          appearance: 'always', // Force visibility for debugging
+          appearance: 'interaction-only', // Managed mode - minimal user interaction
         }}
         scriptOptions={{
           appendTo: 'head',
         }}
-        onSuccess={(token) => {
-          console.log('[Turnstile] Token generated successfully');
-          onSuccess(token);
-        }}
+        onSuccess={onSuccess}
         onError={() => {
-          console.error('[Turnstile] Verification error');
           if (onError) {
             onError('CAPTCHA verification failed. Please try again.');
           }
         }}
-        onExpire={() => {
-          console.warn('[Turnstile] Token expired');
-          if (onExpire) onExpire();
-        }}
+        onExpire={onExpire}
       />
     );
   }
