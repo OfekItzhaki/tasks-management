@@ -90,4 +90,12 @@ export class UpdateTaskDto {
   @IsInt()
   @Min(1)
   order?: number;
+
+  @ApiPropertyOptional({
+    description: 'New list ID to move the task to',
+    example: 'uuid-string',
+  })
+  @IsOptional()
+  @IsString()
+  todoListId?: string;
 }

@@ -5,7 +5,7 @@ import { handleApiError, isAuthError } from '../utils/errorHandler';
 import { normalizeTasks, filterTasksByQuery, sortTasks } from '../utils/taskHelpers';
 import type { SortOption } from '../utils/taskHelpers';
 
-export function useTaskList(listId: number) {
+export function useTaskList(listId: string) {
   const [allTasks, setAllTasks] = useState<Task[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);

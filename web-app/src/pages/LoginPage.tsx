@@ -10,7 +10,6 @@ import {
 import { useTranslation } from 'react-i18next';
 import TurnstileWidget from '../components/TurnstileWidget';
 import { type TurnstileInstance } from '@marsidev/react-turnstile';
-import { getTurnstileSiteKey } from '@tasks-management/frontend-services';
 
 export default function LoginPage() {
   const { t } = useTranslation();
@@ -91,25 +90,18 @@ export default function LoginPage() {
       return;
     }
 
-    console.log('[Login] Starting login attempt...', {
-      email,
-      hasCaptcha: !!captchaToken,
-    });
     setLoading(true);
 
     try {
       const credentials: LoginDto = { email, password, captchaToken };
       await login(credentials);
-      console.log('[Login] Login successful, navigating...');
       navigate('/lists');
     } catch (err: unknown) {
-      console.error('[Login] Login failed:', err);
       // Reset turnstile widget on authentication failure
       turnstileRef.current?.reset();
       setCaptchaToken('');
       setError(getErrorMessage(err, t('login.failed')));
     } finally {
-      console.log('[Login] Login process completed');
       setLoading(false);
     }
   };

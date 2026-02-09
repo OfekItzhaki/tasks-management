@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
+import { useQueuedMutation } from '../hooks/useQueuedMutation';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import {
@@ -60,9 +61,7 @@ export default function TasksPage({ isTrashView = false }: TasksPageProps) {
 
   // Bulk Mode State
   const [isBulkMode, setIsBulkMode] = useState(false);
-  const [selectedTasks, setSelectedTasks] = useState<Set<number | string>>(
-    new Set()
-  );
+  const [selectedTasks, setSelectedTasks] = useState<Set<string>>(new Set());
 
   // Find Trash/Done List if in specific View
   const { data: allLists = [] } = useQuery<ToDoList[]>({
@@ -78,7 +77,7 @@ export default function TasksPage({ isTrashView = false }: TasksPageProps) {
 
   //
 
-  // Support both numeric IDs and UUID strings
+  // Use string IDs (UUIDs)
   const effectiveListId = isTrashView ? trashListId : listId;
 
   const { data: list } = useQuery<ListWithSystemFlag, ApiError>({
@@ -88,7 +87,9 @@ export default function TasksPage({ isTrashView = false }: TasksPageProps) {
       const cachedLists = queryClient.getQueryData<ListWithSystemFlag[]>([
         'lists',
       ]);
-      return cachedLists?.find((l) => l.id === effectiveListId);
+      return cachedLists?.find(
+        (l) => (l.id as string) === (effectiveListId as string)
+      );
     },
     queryFn: () => listsService.getListById(effectiveListId!),
   });
@@ -107,7 +108,7 @@ export default function TasksPage({ isTrashView = false }: TasksPageProps) {
   });
 
   // Restore task mutation
-  const restoreTaskMutation = useMutation<Task, ApiError, number | string>({
+  const restoreTaskMutation = useMutation<Task, ApiError, string>({
     mutationFn: (id) => tasksService.restoreTask(id),
     onSuccess: () => {
       toast.success(t('tasks.restored'));
@@ -123,11 +124,7 @@ export default function TasksPage({ isTrashView = false }: TasksPageProps) {
   });
 
   // Permanent delete task mutation
-  const permanentDeleteTaskMutation = useMutation<
-    Task,
-    ApiError,
-    number | string
-  >({
+  const permanentDeleteTaskMutation = useMutation<Task, ApiError, string>({
     mutationFn: (id) => tasksService.permanentDeleteTask(id),
     onSuccess: () => {
       toast.success(t('tasks.deletedForever'));
@@ -162,12 +159,12 @@ export default function TasksPage({ isTrashView = false }: TasksPageProps) {
 
   // Optimistic Action Queue
   const pendingActions = useRef<
-    Record<number, Array<(realId: number | string) => void>>
+    Record<string, Array<(realId: string) => void>>
   >({});
 
   const handleOptimisticAction = useCallback(
-    (taskId: number | string, action: (id: number | string) => void) => {
-      if (typeof taskId === 'number' && taskId < 0) {
+    (taskId: string, action: (id: string) => void) => {
+      if (taskId.startsWith('temp-')) {
         // Optimistic task: Queue the action
         if (!pendingActions.current[taskId]) {
           pendingActions.current[taskId] = [];
@@ -194,7 +191,7 @@ export default function TasksPage({ isTrashView = false }: TasksPageProps) {
   const updateListMutation = useMutation<
     ListWithSystemFlag,
     ApiError,
-    { id: number | string; data: UpdateToDoListDto },
+    { id: string; data: UpdateToDoListDto },
     { previousList?: ListWithSystemFlag; previousLists?: ListWithSystemFlag[] }
   >({
     mutationFn: ({ id, data }) => listsService.updateList(id, data),
@@ -219,7 +216,9 @@ export default function TasksPage({ isTrashView = false }: TasksPageProps) {
 
       if (previousLists) {
         queryClient.setQueryData<ListWithSystemFlag[]>(['lists'], (old = []) =>
-          old.map((l) => (l.id === id ? { ...l, ...data } : l))
+          old.map((l) =>
+            (l.id as string) === (id as string) ? { ...l, ...data } : l
+          )
         );
       }
 
@@ -246,7 +245,7 @@ export default function TasksPage({ isTrashView = false }: TasksPageProps) {
   const deleteListMutation = useMutation<
     ListWithSystemFlag,
     ApiError,
-    { id: number | string },
+    { id: string },
     { previousLists?: ListWithSystemFlag[] }
   >({
     mutationFn: ({ id }) => listsService.deleteList(id),
@@ -256,7 +255,7 @@ export default function TasksPage({ isTrashView = false }: TasksPageProps) {
         'lists',
       ]);
       queryClient.setQueryData<ListWithSystemFlag[]>(['lists'], (old = []) =>
-        old.filter((l) => l.id !== id)
+        old.filter((l) => (l.id as string) !== (id as string))
       );
       return { previousLists };
     },
@@ -277,7 +276,7 @@ export default function TasksPage({ isTrashView = false }: TasksPageProps) {
     Task,
     ApiError,
     CreateTaskDto,
-    { previousTasks?: Task[]; tempId?: number }
+    { previousTasks?: Task[]; tempId?: string }
   >({
     mutationFn: (data) => tasksService.createTask(effectiveListId!, data),
     onMutate: async (data) => {
@@ -295,13 +294,13 @@ export default function TasksPage({ isTrashView = false }: TasksPageProps) {
       ]);
 
       const now = new Date().toISOString();
-      const tempId = -Date.now(); // Generate temp ID
+      const tempId = `temp-${Date.now()}`; // Generate temp ID
       const optimistic: Task = {
-        id: tempId,
+        id: tempId as string,
         description: data.description,
         completed: false,
         completedAt: null,
-        todoListId: Number(effectiveListId),
+        todoListId: effectiveListId as string,
         order: Date.now(),
         dueDate: null,
         reminderDaysBefore: [],
@@ -334,7 +333,9 @@ export default function TasksPage({ isTrashView = false }: TasksPageProps) {
           ['tasks', effectiveListId],
           (old = []) => {
             // Remove any temporary tasks (negative IDs) and add the real task
-            const withoutTemp = old.filter((task) => task.id !== ctx.tempId);
+            const withoutTemp = old.filter(
+              (task) => (task.id as string) !== (ctx.tempId as string)
+            );
             return [newTask, ...withoutTemp];
           }
         );
@@ -344,7 +345,7 @@ export default function TasksPage({ isTrashView = false }: TasksPageProps) {
       if (ctx?.tempId && pendingActions.current[ctx.tempId]) {
         const actions = pendingActions.current[ctx.tempId];
         // Execute all queued actions with the REAL ID
-        actions.forEach((action) => action(newTask.id));
+        actions.forEach((action) => action(newTask.id as string));
         // Cleanup
         delete pendingActions.current[ctx.tempId];
       }
@@ -358,10 +359,10 @@ export default function TasksPage({ isTrashView = false }: TasksPageProps) {
     },
   });
 
-  const updateTaskMutation = useMutation<
+  const updateTaskMutation = useQueuedMutation<
     Task,
     ApiError,
-    { id: string | number; data: UpdateTaskDto },
+    { id: string; data: UpdateTaskDto },
     { previousTasks?: Task[]; previousTask?: Task }
   >({
     mutationFn: ({ id, data }) => tasksService.updateTask(id, data),
@@ -395,7 +396,9 @@ export default function TasksPage({ isTrashView = false }: TasksPageProps) {
               }
               // Otherwise update in place
               return old.map((t) =>
-                t.id === id ? { ...t, ...data, updatedAt: now } : t
+                (t.id as string) === (id as string)
+                  ? { ...t, ...data, updatedAt: now }
+                  : t
               );
             }
           );
@@ -434,11 +437,11 @@ export default function TasksPage({ isTrashView = false }: TasksPageProps) {
   const deleteTaskMutation = useMutation<
     Task,
     ApiError,
-    { id: string | number },
+    string,
     { previousTasks?: Task[] }
   >({
-    mutationFn: ({ id }) => tasksService.deleteTask(id),
-    onMutate: async ({ id }) => {
+    mutationFn: (id) => tasksService.deleteTask(id),
+    onMutate: async (id) => {
       if (!effectiveListId) return { previousTasks: undefined };
       const previousTasks = queryClient.getQueryData<Task[]>([
         'tasks',
@@ -469,7 +472,7 @@ export default function TasksPage({ isTrashView = false }: TasksPageProps) {
 
   // Reorder Mutation
   const reorderMutation = useMutation({
-    mutationFn: (reorderedTasks: { id: number | string; order: number }[]) =>
+    mutationFn: (reorderedTasks: { id: string; order: number }[]) =>
       tasksService.reorderTasks(reorderedTasks),
     onSuccess: () => {
       if (effectiveListId) {
@@ -480,13 +483,8 @@ export default function TasksPage({ isTrashView = false }: TasksPageProps) {
 
   // Bulk Mutations
   const bulkUpdateMutation = useMutation({
-    mutationFn: ({
-      ids,
-      data,
-    }: {
-      ids: (number | string)[];
-      data: UpdateTaskDto;
-    }) => tasksService.bulkUpdate(ids, data),
+    mutationFn: ({ ids, data }: { ids: string[]; data: UpdateTaskDto }) =>
+      tasksService.bulkUpdate(ids, data),
     onSuccess: () => {
       toast.success(t('tasks.bulk.updated', { defaultValue: 'Tasks updated' }));
       setIsBulkMode(false);
@@ -498,7 +496,7 @@ export default function TasksPage({ isTrashView = false }: TasksPageProps) {
   });
 
   const bulkDeleteMutation = useMutation({
-    mutationFn: (ids: (number | string)[]) => tasksService.bulkDelete(ids),
+    mutationFn: (ids: string[]) => tasksService.bulkDelete(ids),
     onSuccess: () => {
       toast.success(t('tasks.bulk.deleted', { defaultValue: 'Tasks deleted' }));
       setIsBulkMode(false);
@@ -541,17 +539,19 @@ export default function TasksPage({ isTrashView = false }: TasksPageProps) {
     setSelectedTasks(new Set());
   };
 
-  const handleToggleSelect = (taskId: number | string) => {
-    const newSelected = new Set(selectedTasks);
-    if (newSelected.has(taskId)) {
-      newSelected.delete(taskId);
-    } else {
-      newSelected.add(taskId);
-    }
-    setSelectedTasks(newSelected);
+  const toggleTaskSelection = (taskId: string) => {
+    setSelectedTasks((prev) => {
+      const next = new Set(prev);
+      if (next.has(taskId)) {
+        next.delete(taskId);
+      } else {
+        next.add(taskId);
+      }
+      return next;
+    });
   };
 
-  const handleToggleSelectAll = () => {
+  const toggleAllTasks = () => {
     if (selectedTasks.size === tasks.length) {
       setSelectedTasks(new Set());
     } else {
@@ -809,7 +809,7 @@ export default function TasksPage({ isTrashView = false }: TasksPageProps) {
             selectedCount={selectedTasks.size}
             allTasks={tasks}
             selectedTasks={selectedTasks}
-            onToggleSelectAll={handleToggleSelectAll}
+            onToggleSelectAll={toggleAllTasks}
             onMarkComplete={() =>
               bulkUpdateMutation.mutate({
                 ids: Array.from(selectedTasks),
@@ -973,10 +973,10 @@ export default function TasksPage({ isTrashView = false }: TasksPageProps) {
                               isSelected={selectedTasks.has(task.id)}
                               isFinishedList={isFinishedList}
                               isRtl={isRtl}
-                              isOptimistic={
-                                typeof task.id === 'number' && task.id < 0
+                              isOptimistic={task.id.startsWith('temp-')}
+                              onToggleSelect={() =>
+                                toggleTaskSelection(task.id)
                               }
-                              onToggleSelect={() => handleToggleSelect(task.id)}
                               onToggleComplete={() =>
                                 handleOptimisticAction(task.id, (id) =>
                                   updateTaskMutation.mutate({
@@ -987,7 +987,7 @@ export default function TasksPage({ isTrashView = false }: TasksPageProps) {
                               }
                               onDelete={() =>
                                 handleOptimisticAction(task.id, (id) =>
-                                  deleteTaskMutation.mutate({ id })
+                                  deleteTaskMutation.mutate(id)
                                 )
                               }
                               onRestore={() =>
@@ -1010,10 +1010,7 @@ export default function TasksPage({ isTrashView = false }: TasksPageProps) {
                               }}
                               onClick={() => {
                                 // Prevent navigation for optimistic tasks
-                                if (
-                                  typeof task.id === 'number' &&
-                                  task.id < 0
-                                ) {
+                                if (task.id.startsWith('temp-')) {
                                   return;
                                 }
                                 navigate(`/tasks/${task.id}`);
@@ -1039,10 +1036,10 @@ export default function TasksPage({ isTrashView = false }: TasksPageProps) {
                               isSelected={selectedTasks.has(task.id)}
                               isFinishedList={isFinishedList}
                               isRtl={isRtl}
-                              isOptimistic={
-                                typeof task.id === 'number' && task.id < 0
+                              isOptimistic={task.id.startsWith('temp-')}
+                              onToggleSelect={() =>
+                                toggleTaskSelection(task.id)
                               }
-                              onToggleSelect={() => handleToggleSelect(task.id)}
                               onToggleComplete={() =>
                                 handleOptimisticAction(task.id, (id) =>
                                   updateTaskMutation.mutate({
@@ -1053,7 +1050,7 @@ export default function TasksPage({ isTrashView = false }: TasksPageProps) {
                               }
                               onDelete={() =>
                                 handleOptimisticAction(task.id, (id) =>
-                                  deleteTaskMutation.mutate({ id })
+                                  deleteTaskMutation.mutate(id)
                                 )
                               }
                               onRestore={() =>
@@ -1076,10 +1073,7 @@ export default function TasksPage({ isTrashView = false }: TasksPageProps) {
                               }}
                               onClick={() => {
                                 // Prevent navigation for optimistic tasks
-                                if (
-                                  typeof task.id === 'number' &&
-                                  task.id < 0
-                                ) {
+                                if (task.id.startsWith('temp-')) {
                                   return;
                                 }
                                 navigate(`/tasks/${task.id}`);
@@ -1100,8 +1094,8 @@ export default function TasksPage({ isTrashView = false }: TasksPageProps) {
                     isSelected={selectedTasks.has(task.id)}
                     isFinishedList={isFinishedList}
                     isRtl={isRtl}
-                    isOptimistic={typeof task.id === 'number' && task.id < 0}
-                    onToggleSelect={() => handleToggleSelect(task.id)}
+                    isOptimistic={task.id.startsWith('temp-')}
+                    onToggleSelect={() => toggleTaskSelection(task.id)}
                     onToggleComplete={() =>
                       handleOptimisticAction(task.id, (id) =>
                         updateTaskMutation.mutate({
@@ -1112,7 +1106,7 @@ export default function TasksPage({ isTrashView = false }: TasksPageProps) {
                     }
                     onDelete={() =>
                       handleOptimisticAction(task.id, (id) =>
-                        deleteTaskMutation.mutate({ id })
+                        deleteTaskMutation.mutate(id)
                       )
                     }
                     onRestore={() =>

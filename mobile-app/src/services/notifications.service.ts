@@ -54,7 +54,7 @@ async function setupNotificationChannel(): Promise<void> {
         vibrationPattern: [0, 250, 250, 250],
         enableVibrate: true,
       });
-      
+
       // Create a separate channel for daily tasks (persistent notification)
       await Notifications.setNotificationChannelAsync('daily-tasks', {
         name: 'Daily Tasks',
@@ -88,7 +88,7 @@ async function ensureNotificationHandlerConfigured(): Promise<void> {
         shouldShowList: true,
       }),
     });
-    
+
     await setupNotificationChannel();
     notificationHandlerConfigured = true;
   } catch (error) {
@@ -101,7 +101,7 @@ async function ensureNotificationHandlerConfigured(): Promise<void> {
 
 export interface ScheduledNotification {
   identifier: string;
-  taskId: number;
+  taskId: string;
   reminderId: string;
 }
 
@@ -152,16 +152,16 @@ export async function requestNotificationPermissions(showGuidance = false): Prom
   try {
     // Initialize notification handler and channel (deferred from module load)
     await ensureNotificationHandlerConfigured();
-    
+
     const { status: existingStatus } = await Notifications.getPermissionsAsync();
     let finalStatus = existingStatus;
-    
+
     if (existingStatus !== 'granted') {
       // Show guidance before requesting if this is the first time
       if (showGuidance && Platform.OS === 'android') {
         const androidVersion = Platform.Version;
         const isAndroid12Plus = typeof androidVersion === 'number' && androidVersion >= 31;
-        
+
         if (isAndroid12Plus) {
           // Show guidance alert and wait for user response
           return new Promise<boolean>((resolve) => {
@@ -185,7 +185,7 @@ export async function requestNotificationPermissions(showGuidance = false): Prom
                       },
                     });
                     finalStatus = status;
-                    
+
                     if (status === 'granted') {
                       // Show additional guidance for Android 12+
                       setTimeout(() => {
@@ -205,7 +205,7 @@ export async function requestNotificationPermissions(showGuidance = false): Prom
                         );
                       }, 500);
                     }
-                    
+
                     resolve(status === 'granted');
                   },
                 },
@@ -214,7 +214,7 @@ export async function requestNotificationPermissions(showGuidance = false): Prom
           });
         }
       }
-      
+
       // Standard permission request
       const { status } = await Notifications.requestPermissionsAsync({
         ios: {
@@ -225,7 +225,7 @@ export async function requestNotificationPermissions(showGuidance = false): Prom
       });
       finalStatus = status;
     }
-    
+
     const granted = finalStatus === 'granted';
     if (__DEV__) {
       console.log(`Notification permissions: ${granted ? 'GRANTED' : 'DENIED'} (status: ${finalStatus})`);
@@ -241,7 +241,7 @@ export async function requestNotificationPermissions(showGuidance = false): Prom
  * Schedule a notification for a reminder
  */
 export async function scheduleReminderNotification(
-  taskId: number,
+  taskId: string,
   taskDescription: string,
   reminder: ReminderConfig,
   dueDate: Date | string | null,
@@ -267,7 +267,7 @@ export async function scheduleReminderNotification(
     if (reminder.timeframe === ReminderTimeframe.EVERY_DAY) {
       // Ensure notification channel is set up
       await setupNotificationChannel();
-      
+
       trigger = {
         type: 'daily',
         hour: hours,
@@ -276,12 +276,12 @@ export async function scheduleReminderNotification(
       if (__DEV__) {
         console.log(`Scheduling daily reminder at ${hours}:${minutes.toString().padStart(2, '0')} (repeats: true)`);
       }
-    } 
+    }
     // For recurring weekly reminders, use weekly trigger
     else if (reminder.timeframe === ReminderTimeframe.EVERY_WEEK && reminder.dayOfWeek !== undefined) {
       // Ensure notification channel is set up
       await setupNotificationChannel();
-      
+
       trigger = {
         type: 'weekly',
         weekday: reminder.dayOfWeek + 1, // expo-notifications uses 1-7 (Sunday = 1)
@@ -291,7 +291,7 @@ export async function scheduleReminderNotification(
       if (__DEV__) {
         console.log(`Scheduling weekly reminder: weekday ${reminder.dayOfWeek + 1} at ${hours}:${minutes.toString().padStart(2, '0')} (repeats: true)`);
       }
-    } 
+    }
     // For other reminders, calculate the date first
     else {
       const triggerDate = calculateNotificationDate(reminder, dueDate);
@@ -312,7 +312,7 @@ export async function scheduleReminderNotification(
 
     // Ensure notification channel is set up before scheduling
     await setupNotificationChannel();
-    
+
     const notificationId = await Notifications.scheduleNotificationAsync({
       content: {
         title: `Reminder: ${taskDescription}`,
@@ -331,7 +331,7 @@ export async function scheduleReminderNotification(
     if (__DEV__) {
       console.log(`Scheduled notification ${notificationId} for task ${taskId}, reminder ${reminder.id} (${reminder.timeframe})`);
     }
-    
+
     return notificationId;
   } catch (error) {
     console.error('Error scheduling notification:', error);
@@ -352,8 +352,8 @@ function calculateNotificationDate(
   const minutes = parseInt(timeParts[1] || '0', 10);
 
   // Don't calculate for recurring daily/weekly - they use recurring triggers
-  if (reminder.timeframe === ReminderTimeframe.EVERY_DAY || 
-      (reminder.timeframe === ReminderTimeframe.EVERY_WEEK && reminder.dayOfWeek !== undefined)) {
+  if (reminder.timeframe === ReminderTimeframe.EVERY_DAY ||
+    (reminder.timeframe === ReminderTimeframe.EVERY_WEEK && reminder.dayOfWeek !== undefined)) {
     return null;
   }
 
@@ -467,7 +467,7 @@ export async function cancelNotification(notificationId: string): Promise<void> 
 /**
  * Cancel all notifications for a task
  */
-export async function cancelAllTaskNotifications(taskId: number): Promise<void> {
+export async function cancelAllTaskNotifications(taskId: string): Promise<void> {
   // Skip in Expo Go
   if (isExpoGo()) {
     return;
@@ -478,7 +478,7 @@ export async function cancelAllTaskNotifications(taskId: number): Promise<void> 
     const taskNotifications = allNotifications.filter(
       (notification) => notification.content.data?.taskId === taskId,
     );
-    
+
     for (const notification of taskNotifications) {
       await Notifications.cancelScheduledNotificationAsync(notification.identifier);
     }
@@ -491,7 +491,7 @@ export async function cancelAllTaskNotifications(taskId: number): Promise<void> 
  * Schedule multiple notifications for a task's reminders
  */
 export async function scheduleTaskReminders(
-  taskId: number,
+  taskId: string,
   taskDescription: string,
   reminders: ReminderConfig[],
   dueDate: Date | string | null,
@@ -543,24 +543,24 @@ async function getTodayTasks(): Promise<Array<{ description: string; isRepeating
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const todayStr = today.toISOString().split('T')[0];
-    
+
     // Get all tasks
     const allTasks = await tasksService.getAll();
-    
+
     // Get today's day of week (0 = Sunday, 6 = Saturday)
     const todayDayOfWeek = today.getDay();
-    
+
     const todayTasks: Array<{ description: string; isRepeating: boolean }> = [];
-    
+
     for (const task of allTasks) {
       // Skip completed tasks
       if (task.completed) {
         continue;
       }
-      
+
       let isToday = false;
       let isRepeating = false;
-      
+
       // Check if task is due today
       if (task.dueDate) {
         const dueDate = new Date(task.dueDate);
@@ -569,7 +569,7 @@ async function getTodayTasks(): Promise<Array<{ description: string; isRepeating
           isToday = true;
         }
       }
-      
+
       // Check if task has daily reminder from reminderConfig
       if (task.reminderConfig && Array.isArray(task.reminderConfig)) {
         const hasDailyReminder = task.reminderConfig.some((r: any) => r.timeframe === ReminderTimeframe.EVERY_DAY);
@@ -578,7 +578,7 @@ async function getTodayTasks(): Promise<Array<{ description: string; isRepeating
           isRepeating = true;
         }
       }
-      
+
       // Check if task has weekly reminder for today
       if (task.specificDayOfWeek !== null && task.specificDayOfWeek !== undefined) {
         if (task.specificDayOfWeek === todayDayOfWeek) {
@@ -586,7 +586,7 @@ async function getTodayTasks(): Promise<Array<{ description: string; isRepeating
           isRepeating = true;
         }
       }
-      
+
       if (isToday) {
         todayTasks.push({
           description: task.description,
@@ -594,7 +594,7 @@ async function getTodayTasks(): Promise<Array<{ description: string; isRepeating
         });
       }
     }
-    
+
     return todayTasks;
   } catch (error) {
     console.error('Error getting today tasks:', error);
@@ -619,9 +619,9 @@ export async function updateDailyTasksNotification(): Promise<void> {
     }
 
     await setupNotificationChannel();
-    
+
     const todayTasks = await getTodayTasks();
-    
+
     if (todayTasks.length === 0) {
       // Cancel the notification if no tasks
       try {
@@ -631,11 +631,11 @@ export async function updateDailyTasksNotification(): Promise<void> {
       }
       return;
     }
-    
+
     // Separate repeating and non-repeating tasks
     const repeatingTasks = todayTasks.filter(t => t.isRepeating);
     const nonRepeatingTasks = todayTasks.filter(t => !t.isRepeating);
-    
+
     // Build notification body
     let body = '';
     if (repeatingTasks.length > 0) {
@@ -647,7 +647,7 @@ export async function updateDailyTasksNotification(): Promise<void> {
         body += `... and ${repeatingTasks.length - 5} more\n`;
       }
     }
-    
+
     if (nonRepeatingTasks.length > 0) {
       if (body) body += '\n';
       body += `One-time (${nonRepeatingTasks.length}):\n`;
@@ -658,18 +658,18 @@ export async function updateDailyTasksNotification(): Promise<void> {
         body += `... and ${nonRepeatingTasks.length - 5} more`;
       }
     }
-    
+
     // Schedule as a persistent notification (ongoing)
     // Use a fixed identifier so we can update it
     const notificationId = 'daily-tasks-persistent';
-    
+
     // Cancel existing notification first
     try {
       await Notifications.cancelScheduledNotificationAsync(notificationId);
     } catch {
       // Ignore if doesn't exist
     }
-    
+
     // Schedule immediate notification that will be persistent
     // Note: Expo Notifications doesn't directly support ongoing/sticky notifications
     // but we can use a low-priority channel and update it frequently
@@ -688,7 +688,7 @@ export async function updateDailyTasksNotification(): Promise<void> {
       },
       trigger: null, // Immediate notification
     });
-    
+
     if (__DEV__) {
       console.log(`Updated daily tasks notification with ${todayTasks.length} tasks`);
     }
@@ -714,14 +714,14 @@ export async function scheduleDailyTasksNotificationUpdate(): Promise<void> {
     }
 
     await setupNotificationChannel();
-    
+
     // Cancel existing scheduled update
     try {
       await Notifications.cancelScheduledNotificationAsync('daily-tasks-update');
     } catch {
       // Ignore if doesn't exist
     }
-    
+
     // Schedule daily update at midnight
     await Notifications.scheduleNotificationAsync({
       identifier: 'daily-tasks-update',
@@ -738,7 +738,7 @@ export async function scheduleDailyTasksNotificationUpdate(): Promise<void> {
         minute: 0,
       },
     });
-    
+
     // Also update immediately
     await updateDailyTasksNotification();
   } catch (error) {
@@ -799,7 +799,7 @@ export async function rescheduleAllReminders(): Promise<void> {
     if (__DEV__) {
       console.log(`Rescheduled ${scheduledCount} reminders across ${allTasks.length} tasks`);
     }
-    
+
     // Also update daily tasks notification
     await updateDailyTasksNotification();
     await scheduleDailyTasksNotificationUpdate();

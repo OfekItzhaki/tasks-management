@@ -311,26 +311,26 @@ export default function ListsScreen() {
       setNewListName('');
       setShowAddModal(false);
     },
-    onError: (error) => handleApiError(error, 'Failed to create list'),
+    onError: (error: any) => handleApiError(error, 'Failed to create list'),
   });
 
   const updateListMutation = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: { name: string } }) =>
+    mutationFn: ({ id, data }: { id: string; data: { name: string } }) =>
       listsService.update(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['lists'] });
       setEditingList(null);
       setEditListName('');
     },
-    onError: (error) => handleApiError(error, 'Failed to update list'),
+    onError: (error: any) => handleApiError(error, 'Failed to update list'),
   });
 
   const deleteListMutation = useMutation({
-    mutationFn: (id: number) => listsService.delete(id),
+    mutationFn: (id: string) => listsService.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['lists'] });
     },
-    onError: (error) => handleApiError(error, 'Failed to delete list'),
+    onError: (error: any) => handleApiError(error, 'Failed to delete list'),
   });
 
   useFocusEffect(

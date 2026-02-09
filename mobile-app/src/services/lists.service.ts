@@ -20,7 +20,7 @@ export class ListsService {
   /**
    * Get a list by ID
    */
-  async getById(id: number): Promise<ToDoList> {
+  async getById(id: string): Promise<ToDoList> {
     try {
       const response = await apiClient.get<ToDoList>(`/todo-lists/${id}`);
       return response.data;
@@ -50,7 +50,7 @@ export class ListsService {
   /**
    * Update a list
    */
-  async update(id: number, data: UpdateTodoListDto): Promise<ToDoList> {
+  async update(id: string, data: UpdateTodoListDto): Promise<ToDoList> {
     try {
       const response = await apiClient.patch<ToDoList>(
         `/todo-lists/${id}`,
@@ -68,7 +68,7 @@ export class ListsService {
   /**
    * Delete a list (soft delete)
    */
-  async delete(id: number): Promise<void> {
+  async delete(id: string): Promise<void> {
     try {
       await apiClient.delete(`/todo-lists/${id}`);
     } catch (error) {
