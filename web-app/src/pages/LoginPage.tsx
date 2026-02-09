@@ -5,6 +5,7 @@ import {
   LoginDto,
   ApiError,
   authService,
+  getTurnstileSiteKey,
 } from '@tasks-management/frontend-services';
 import { useTranslation } from 'react-i18next';
 import TurnstileWidget from '../components/TurnstileWidget';
@@ -83,7 +84,7 @@ export default function LoginPage() {
     setError('');
 
     // Prevent submission if CAPTCHA token is missing when required
-    const siteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY;
+    const siteKey = getTurnstileSiteKey();
     if (siteKey && !captchaToken) {
       setError('Please complete the security verification.');
       return;
@@ -110,7 +111,7 @@ export default function LoginPage() {
     if (!email) return setError('Email is required');
 
     // Prevent submission if CAPTCHA token is missing when required
-    const siteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY;
+    const siteKey = getTurnstileSiteKey();
     if (siteKey && !captchaToken) {
       setError('Please complete the security verification.');
       return;
@@ -177,7 +178,7 @@ export default function LoginPage() {
     if (!email) return setError('Email is required');
 
     // Prevent submission if CAPTCHA token is missing when required
-    const siteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY;
+    const siteKey = getTurnstileSiteKey();
     if (siteKey && !captchaToken) {
       setError('Please complete the security verification.');
       return;

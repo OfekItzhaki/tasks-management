@@ -1,6 +1,8 @@
 import { forwardRef } from 'react';
 import { Turnstile, type TurnstileInstance } from '@marsidev/react-turnstile';
 
+import { getTurnstileSiteKey } from '@tasks-management/frontend-services';
+
 interface TurnstileWidgetProps {
   onSuccess: (token: string) => void;
   onError?: (error: string) => void;
@@ -35,7 +37,7 @@ interface TurnstileWidgetProps {
  */
 const TurnstileWidget = forwardRef<TurnstileInstance, TurnstileWidgetProps>(
   ({ onSuccess, onError, onExpire }, ref) => {
-    const siteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY;
+    const siteKey = getTurnstileSiteKey();
 
     // If site key is not configured, display an error message
     if (!siteKey) {
