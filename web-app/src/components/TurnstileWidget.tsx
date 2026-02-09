@@ -1,5 +1,6 @@
-import { forwardRef, useCallback } from 'react';
+import { forwardRef } from 'react';
 import { Turnstile, type TurnstileInstance } from '@marsidev/react-turnstile';
+
 import { getTurnstileSiteKey } from '@tasks-management/frontend-services';
 
 interface TurnstileWidgetProps {
@@ -38,30 +39,8 @@ const TurnstileWidget = forwardRef<TurnstileInstance, TurnstileWidgetProps>(
   ({ onSuccess, onError, onExpire }, ref) => {
     const siteKey = getTurnstileSiteKey();
 
-    // Memoize handlers to prevent Turnstile component from resetting on parent re-renders
-    const handleSuccess = useCallback(
-      (token: string) => {
-        console.log('[Turnstile] Token generated successfully');
-        onSuccess(token);
-      },
-      [onSuccess]
-    );
-
-    const handleError = useCallback(() => {
-      console.error('[Turnstile] Verification error');
-      if (onError) {
-        onError('CAPTCHA verification failed. Please try again.');
-      }
-    }, [onError]);
-
-    const handleExpire = useCallback(() => {
-      console.warn('[Turnstile] Token expired');
-      if (onExpire) onExpire();
-    }, [onExpire]);
-
     // If site key is not configured, display an error message
     if (!siteKey) {
-      // ... (error message div remains the same)
       return (
         <div className="rounded-md bg-red-50 p-4 border border-red-200">
           <div className="flex">
@@ -102,14 +81,18 @@ const TurnstileWidget = forwardRef<TurnstileInstance, TurnstileWidgetProps>(
         options={{
           theme: 'auto',
           size: 'normal',
-          appearance: 'always',
+          appearance: 'interaction-only', // Managed mode - minimal user interaction
         }}
         scriptOptions={{
           appendTo: 'head',
         }}
-        onSuccess={handleSuccess}
-        onError={handleError}
-        onExpire={handleExpire}
+        onSuccess={onSuccess}
+        onError={() => {
+          if (onError) {
+            onError('CAPTCHA verification failed. Please try again.');
+          }
+        }}
+        onExpire={onExpire}
       />
     );
   }
