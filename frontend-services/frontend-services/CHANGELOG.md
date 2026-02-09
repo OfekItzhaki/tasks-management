@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.2](https://github.com/OfekItzhaki/horizon-flux/compare/frontend-services-v1.3.1...frontend-services-v1.3.2) (2026-02-09)
+
+
+### Bug Fixes
+
+* **config:** resolve API connection failures and CAPTCHA domain mismatch ([#74](https://github.com/OfekItzhaki/horizon-flux/issues/74)) ([f0cc133](https://github.com/OfekItzhaki/horizon-flux/commit/f0cc133787adc30b2fe59f5626dca45f14643719))
+
 ## [1.3.1](https://github.com/OfekItzhaki/horizon-flux/compare/frontend-services-v1.3.0...frontend-services-v1.3.1) (2026-02-08)
 
 

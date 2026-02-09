@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.3.2](https://github.com/OfekItzhaki/horizon-flux/compare/web-app-v1.3.1...web-app-v1.3.2) (2026-02-09)
+
+
+### Bug Fixes
+
+* **config:** resolve API connection failures and CAPTCHA domain mismatch ([#74](https://github.com/OfekItzhaki/horizon-flux/issues/74)) ([f0cc133](https://github.com/OfekItzhaki/horizon-flux/commit/f0cc133787adc30b2fe59f5626dca45f14643719))
+* **ui:** polish login UI and repair auth flow buttons ([#76](https://github.com/OfekItzhaki/horizon-flux/issues/76)) ([669bb92](https://github.com/OfekItzhaki/horizon-flux/commit/669bb92fc81249c9f1a0c2c908e8ebc9b762f3ef))
+
 ## [1.3.1](https://github.com/OfekItzhaki/horizon-flux/compare/web-app-v1.3.0...web-app-v1.3.1) (2026-02-08)
 
 

@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.2](https://github.com/OfekItzhaki/horizon-flux/compare/mobile-app-v1.5.1...mobile-app-v1.5.2) (2026-02-09)
+
+
+### Bug Fixes
+
+* **config:** resolve API connection failures and CAPTCHA domain mismatch ([#74](https://github.com/OfekItzhaki/horizon-flux/issues/74)) ([f0cc133](https://github.com/OfekItzhaki/horizon-flux/commit/f0cc133787adc30b2fe59f5626dca45f14643719))
+
 ## [1.5.1](https://github.com/OfekItzhaki/horizon-flux/compare/mobile-app-v1.5.0...mobile-app-v1.5.1) (2026-02-08)
 
 
