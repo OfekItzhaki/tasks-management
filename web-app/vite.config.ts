@@ -12,9 +12,13 @@ import path from 'path';
 export default defineConfig(({ mode }) => {
   // Load env file based on `mode` in the current working directory.
   // Set the third parameter to '' to load all env regardless of the `VITE_` prefix.
-  loadEnv(mode, process.cwd(), '');
+  const env = loadEnv(mode, process.cwd(), '');
 
   return {
+    define: {
+      'import.meta.env.VITE_API_URL': JSON.stringify(env.VITE_API_URL || ''),
+      'import.meta.env.VITE_TURNSTILE_SITE_KEY': JSON.stringify(env.VITE_TURNSTILE_SITE_KEY || ''),
+    },
     plugins: [
       react(),
       VitePWA({
