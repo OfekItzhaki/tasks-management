@@ -5,7 +5,8 @@ export const configure = (config: { baseURL?: string; turnstileSiteKey?: string 
   if (config.baseURL) {
     internalBaseUrl = config.baseURL;
     // Update the exported config object so immediate consumers get the new value
-    API_CONFIG.baseURL = config.baseURL;
+    // Re-evaluate to ensure /api/v1 prefix and other logic is applied
+    API_CONFIG.baseURL = getApiBaseUrl();
   }
   if (config.turnstileSiteKey) internalTurnstileSiteKey = config.turnstileSiteKey;
 };

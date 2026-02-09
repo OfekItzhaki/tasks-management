@@ -13,7 +13,7 @@ describe('storage', () => {
   });
 
   describe('ReminderAlarmsStorage', () => {
-    const taskId = 1;
+    const taskId = '1';
     const reminderId = 'reminder-1';
 
     it('should return null when no alarms exist', async () => {
@@ -94,7 +94,7 @@ describe('storage', () => {
   });
 
   describe('ReminderTimesStorage', () => {
-    const taskId = 1;
+    const taskId = '1';
     const reminderId = 'reminder-1';
     const time = '09:00';
 
@@ -149,11 +149,11 @@ describe('storage', () => {
     });
 
     it('should handle multiple tasks independently', async () => {
-      await ReminderTimesStorage.setTimeForReminder(1, 'reminder-1', '09:00');
-      await ReminderTimesStorage.setTimeForReminder(2, 'reminder-1', '10:00');
+      await ReminderTimesStorage.setTimeForReminder('1', 'reminder-1', '09:00');
+      await ReminderTimesStorage.setTimeForReminder('2', 'reminder-1', '10:00');
 
-      const task1Times = await ReminderTimesStorage.getTimesForTask(1);
-      const task2Times = await ReminderTimesStorage.getTimesForTask(2);
+      const task1Times = await ReminderTimesStorage.getTimesForTask('1');
+      const task2Times = await ReminderTimesStorage.getTimesForTask('2');
 
       expect(task1Times!['reminder-1']).toBe('09:00');
       expect(task2Times!['reminder-1']).toBe('10:00');

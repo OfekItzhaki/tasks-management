@@ -16,13 +16,13 @@ describe('ListsPage (integration)', () => {
     server.use(
       http.get('*/api/v1/users', () => {
         return HttpResponse.json([
-          { id: 1, email: 'test@example.com', name: 'Test User' },
+          { id: '1', email: 'test@example.com', name: 'Test User' },
         ]);
       }),
       http.get('*/api/v1/todo-lists', () => {
         return HttpResponse.json([
           {
-            id: 101,
+            id: '101',
             title: 'My List',
             iconId: 'list',
             colorId: 'blue',
@@ -45,13 +45,13 @@ describe('ListsPage (integration)', () => {
     server.use(
       http.get('*/api/v1/users', () => {
         return HttpResponse.json([
-          { id: 1, email: 'test@example.com', name: 'Test User' },
+          { id: '1', email: 'test@example.com', name: 'Test User' },
         ]);
       }),
       http.get('*/api/v1/todo-lists', () => {
         return HttpResponse.json([
           {
-            id: 101,
+            id: '101',
             title: 'My List',
             iconId: 'list',
             colorId: 'blue',
@@ -61,7 +61,7 @@ describe('ListsPage (integration)', () => {
       }),
       http.post('*/api/v1/todo-lists', () => {
         return HttpResponse.json({
-          id: 102,
+          id: '102',
           title: 'My Test List',
           iconId: 'list',
           colorId: 'blue',

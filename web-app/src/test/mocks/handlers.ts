@@ -1,18 +1,7 @@
 import { http, HttpResponse } from 'msw';
 
-const API_BASE = 'http://localhost:3000/api/v1';
-
-const mockUser = {
-  id: 1,
-  email: 'test@example.com',
-  name: 'Test User',
-  emailVerified: true,
-  createdAt: new Date().toISOString(),
-  updatedAt: new Date().toISOString(),
-};
-
 export const handlers = [
-  http.post(`${API_BASE}/auth/login`, async ({ request }) => {
+  http.post('*/api/v1/auth/login', async ({ request }) => {
     const body = (await request.json()) as {
       email?: string;
       password?: string;
@@ -35,18 +24,18 @@ export const handlers = [
     });
   }),
 
-  http.get(`${API_BASE}/users`, () => {
+  http.get('*/api/v1/users', () => {
     return HttpResponse.json([mockUser]);
   }),
 
-  http.get(`${API_BASE}/todo-lists`, () => {
+  http.get('*/api/v1/todo-lists', () => {
     return HttpResponse.json([]);
   }),
 
-  http.post(`${API_BASE}/todo-lists`, async ({ request }) => {
+  http.post('*/api/v1/todo-lists', async ({ request }) => {
     const body = (await request.json()) as { name?: string };
     return HttpResponse.json({
-      id: 1,
+      id: '1',
       name: body.name || 'New List',
       ownerId: mockUser.id,
       order: 0,
@@ -59,13 +48,14 @@ export const handlers = [
   }),
 
   http.post(
-    `${API_BASE}/tasks/todo-list/:todoListId`,
+    '*/api/v1/tasks/todo-list/:todoListId',
     async ({ request, params }) => {
       const body = (await request.json()) as { description?: string };
+      const { todoListId } = params as { todoListId: string };
       return HttpResponse.json({
-        id: 1,
+        id: '1',
         description: body.description || 'New task',
-        todoListId: Number((params as { todoListId: string }).todoListId),
+        todoListId: todoListId,
         completed: false,
         dueDate: null,
         specificDayOfWeek: null,
