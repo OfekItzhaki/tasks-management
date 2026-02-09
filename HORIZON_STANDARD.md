@@ -205,6 +205,12 @@ pytest                # Tests
 - **Bugfix Branches**: `fix/description` or `bugfix/description`
 - **Hotfix Branches**: `hotfix/description` for urgent production fixes
 - **Release Branches**: `release/version` for release preparation
+- **Best Practice**: Always create new feature/fix branches from the latest `main` branch after pulling changes.
+  ```bash
+  git checkout main
+  git pull origin main
+  git checkout -b feature/my-new-feature
+  ```
 
 ---
 
