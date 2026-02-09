@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState, useMemo } from 'react';
+import { useQueuedMutation } from '../hooks/useQueuedMutation';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { tasksService } from '../services/tasks.service';
@@ -84,7 +85,7 @@ export default function TaskDetailsPage() {
     );
   }, [task]);
 
-  const updateTaskMutation = useMutation<
+  const updateTaskMutation = useQueuedMutation<
     Task,
     ApiError,
     { id: string; data: UpdateTaskDto },
