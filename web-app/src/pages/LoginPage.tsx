@@ -1,15 +1,15 @@
-﻿import { useState, useEffect, useRef, useCallback } from 'react';
+﻿import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
   LoginDto,
   ApiError,
   authService,
+  getTurnstileSiteKey,
 } from '@tasks-management/frontend-services';
 import { useTranslation } from 'react-i18next';
 import TurnstileWidget from '../components/TurnstileWidget';
 import { type TurnstileInstance } from '@marsidev/react-turnstile';
-import { getTurnstileSiteKey } from '@tasks-management/frontend-services';
 
 export default function LoginPage() {
   const { t } = useTranslation();
@@ -43,19 +43,19 @@ export default function LoginPage() {
   const [resendCooldown, setResendCooldown] = useState(0);
 
   // CAPTCHA handlers
-  const handleCaptchaSuccess = useCallback((token: string) => {
+  const handleCaptchaSuccess = (token: string) => {
     setCaptchaToken(token);
     setError(''); // Clear any previous errors
-  }, []);
+  };
 
-  const handleCaptchaError = useCallback((error: string) => {
+  const handleCaptchaError = (error: string) => {
     setError(error);
     setCaptchaToken('');
-  }, []);
+  };
 
-  const handleCaptchaExpire = useCallback(() => {
+  const handleCaptchaExpire = () => {
     setCaptchaToken('');
-  }, []);
+  };
 
   // Timer effect
   useEffect(() => {
@@ -90,25 +90,18 @@ export default function LoginPage() {
       return;
     }
 
-    console.log('[Login] Starting login attempt...', {
-      email,
-      hasCaptcha: !!captchaToken,
-    });
     setLoading(true);
 
     try {
       const credentials: LoginDto = { email, password, captchaToken };
       await login(credentials);
-      console.log('[Login] Login successful, navigating...');
       navigate('/lists');
     } catch (err: unknown) {
-      console.error('[Login] Login failed:', err);
       // Reset turnstile widget on authentication failure
       turnstileRef.current?.reset();
       setCaptchaToken('');
       setError(getErrorMessage(err, t('login.failed')));
     } finally {
-      console.log('[Login] Login process completed');
       setLoading(false);
     }
   };
@@ -118,7 +111,7 @@ export default function LoginPage() {
     if (!email) return setError('Email is required');
 
     // Prevent submission if CAPTCHA token is missing when required
-    const siteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY;
+    const siteKey = getTurnstileSiteKey();
     if (siteKey && !captchaToken) {
       setError('Please complete the security verification.');
       return;
@@ -185,7 +178,7 @@ export default function LoginPage() {
     if (!email) return setError('Email is required');
 
     // Prevent submission if CAPTCHA token is missing when required
-    const siteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY;
+    const siteKey = getTurnstileSiteKey();
     if (siteKey && !captchaToken) {
       setError('Please complete the security verification.');
       return;
@@ -545,7 +538,7 @@ export default function LoginPage() {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       className="premium-input px-11 pr-24"
-                      placeholder="••••••••"
+                      placeholder="ΓÇóΓÇóΓÇóΓÇóΓÇóΓÇóΓÇóΓÇó"
                     />
                     <div className="absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400 group-focus-within:text-violet-500 transition-colors">
                       <svg
@@ -670,7 +663,7 @@ export default function LoginPage() {
                       value={passwordConfirm}
                       onChange={(e) => setPasswordConfirm(e.target.value)}
                       className="premium-input px-11 pr-14"
-                      placeholder="••••••••"
+                      placeholder="ΓÇóΓÇóΓÇóΓÇóΓÇóΓÇóΓÇóΓÇó"
                     />
                     <div className="absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400 group-focus-within:text-violet-500 transition-colors">
                       <svg

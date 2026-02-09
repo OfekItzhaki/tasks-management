@@ -19,7 +19,7 @@ export function useStepManagement(task: Task | undefined | null) {
   const queryClient = useQueryClient();
   const [showAddStep, setShowAddStep] = useState(false);
   const [newStepDescription, setNewStepDescription] = useState('');
-  const [editingStepId, setEditingStepId] = useState<number | null>(null);
+  const [editingStepId, setEditingStepId] = useState<string | null>(null);
   const [stepDescriptionDraft, setStepDescriptionDraft] = useState('');
 
   const invalidateTask = (taskItem: Task) => {
@@ -29,7 +29,7 @@ export function useStepManagement(task: Task | undefined | null) {
   const updateStepMutation = useQueuedMutation<
     Step,
     ApiError,
-    { task: Task; stepId: number; data: UpdateStepDto },
+    { task: Task; stepId: string; data: UpdateStepDto },
     { previousTask?: Task; previousTasks?: Task[] }
   >({
     mutationFn: ({ stepId, data }) => stepsService.updateStep(stepId, data),
@@ -94,8 +94,7 @@ export function useStepManagement(task: Task | undefined | null) {
     { task: Task; data: CreateStepDto },
     { previousTask?: Task }
   >({
-    mutationFn: ({ task, data }) =>
-      stepsService.createStep(Number(task.id), data),
+    mutationFn: ({ task, data }) => stepsService.createStep(task.id, data),
     onMutate: async (vars) => {
       const previousTask = queryClient.getQueryData<Task>([
         'task',
@@ -103,12 +102,12 @@ export function useStepManagement(task: Task | undefined | null) {
       ]);
 
       const now = new Date().toISOString();
-      const tempId = -Date.now();
+      const tempId = `temp-${Date.now()}`;
       const optimistic: Step = {
         id: tempId,
         description: vars.data.description,
         completed: Boolean(vars.data.completed ?? false),
-        taskId: Number(vars.task.id),
+        taskId: vars.task.id,
         order: Date.now(),
         createdAt: now,
         updatedAt: now,
@@ -152,7 +151,7 @@ export function useStepManagement(task: Task | undefined | null) {
   const deleteStepMutation = useQueuedMutation<
     Step,
     ApiError,
-    { task: Task; id: number },
+    { task: Task; id: string },
     { previousTask?: Task }
   >({
     mutationFn: ({ id }) => stepsService.deleteStep(id),
@@ -195,13 +194,13 @@ export function useStepManagement(task: Task | undefined | null) {
     if (!task) return;
     updateStepMutation.mutate({
       task,
-      stepId: Number(step.id),
+      stepId: step.id,
       data: { completed: !step.completed },
     });
   };
 
   const handleEditStep = (step: Step) => {
-    setEditingStepId(Number(step.id));
+    setEditingStepId(step.id);
     setStepDescriptionDraft(step.description);
   };
 
@@ -229,7 +228,7 @@ export function useStepManagement(task: Task | undefined | null) {
       t('taskDetails.deleteStepConfirm', { description: step.description })
     );
     if (!ok) return;
-    deleteStepMutation.mutate({ task, id: Number(step.id) });
+    deleteStepMutation.mutate({ task, id: step.id });
   };
 
   const handleCreateStep = () => {

@@ -8,7 +8,7 @@ import { useThemedStyles } from '../../utils/useThemedStyles';
 
 interface StepsListProps {
   steps: Step[];
-  editingStepId: number | null;
+  editingStepId: string | null;
   editingStepDescription: string;
   onEditingStepDescriptionChange: (text: string) => void;
   onToggleStep: (step: Step) => void;

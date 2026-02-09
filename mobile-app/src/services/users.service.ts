@@ -23,7 +23,7 @@ export class UsersService {
   /**
    * Get user by ID
    */
-  async getById(id: number): Promise<User> {
+  async getById(id: string): Promise<User> {
     try {
       const response = await apiClient.get<User>(`/users/${id}`);
       return response.data;
@@ -38,7 +38,7 @@ export class UsersService {
   /**
    * Update user profile
    */
-  async update(id: number, data: UpdateUserDto): Promise<User> {
+  async update(id: string, data: UpdateUserDto): Promise<User> {
     try {
       const response = await apiClient.patch<User>(`/users/${id}`, data);
       return response.data;
@@ -53,7 +53,7 @@ export class UsersService {
   /**
    * Upload profile picture
    */
-  async uploadAvatar(id: number, fileUri: string, fileName: string, fileType: string): Promise<User> {
+  async uploadAvatar(id: string, fileUri: string, fileName: string, fileType: string): Promise<User> {
     try {
       // Create FormData for file upload
       const formData = new FormData();

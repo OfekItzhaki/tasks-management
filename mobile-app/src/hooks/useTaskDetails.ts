@@ -13,7 +13,7 @@ import { scheduleTaskReminders, cancelAllTaskNotifications } from '../services/n
 import { ReminderTimesStorage } from '../utils/storage';
 import { handleApiError, isAuthError, showErrorAlert } from '../utils/errorHandler';
 
-export function useTaskDetails(taskId: number) {
+export function useTaskDetails(taskId: string) {
     const [task, setTask] = useState<Task | null>(null);
     const [steps, setSteps] = useState<Step[]>([]);
     const [loading, setLoading] = useState(true);
@@ -170,7 +170,7 @@ export function useTaskDetails(taskId: number) {
         }
     };
 
-    const handleDeleteStep = async (stepId: number) => {
+    const handleDeleteStep = async (stepId: string) => {
         try {
             await stepsService.delete(stepId);
             loadTaskData();
@@ -179,7 +179,7 @@ export function useTaskDetails(taskId: number) {
         }
     };
 
-    const updateStep = async (stepId: number, description: string) => {
+    const updateStep = async (stepId: string, description: string) => {
         try {
             await stepsService.update(stepId, { description: description.trim() });
             loadTaskData();

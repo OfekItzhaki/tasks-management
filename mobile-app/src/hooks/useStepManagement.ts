@@ -3,10 +3,10 @@ import { stepsService } from '../services/steps.service';
 import { Step } from '../types';
 import { handleApiError } from '../utils/errorHandler';
 
-export function useStepManagement(taskId: number, onStepChange: () => void) {
+export function useStepManagement(taskId: string, onStepChange: () => void) {
   const [showAddStepModal, setShowAddStepModal] = useState(false);
   const [newStepDescription, setNewStepDescription] = useState('');
-  const [editingStepId, setEditingStepId] = useState<number | null>(null);
+  const [editingStepId, setEditingStepId] = useState<string | null>(null);
   const [editingStepDescription, setEditingStepDescription] = useState('');
 
   const handleAddStep = async () => {
@@ -33,10 +33,10 @@ export function useStepManagement(taskId: number, onStepChange: () => void) {
   ) => {
     const currentCompleted = Boolean(step.completed);
     const newCompleted = !currentCompleted;
-    
+
     // Optimistic update - update UI immediately
-    setSteps(prevSteps => 
-      prevSteps.map(s => 
+    setSteps(prevSteps =>
+      prevSteps.map(s =>
         s.id === step.id ? { ...s, completed: newCompleted } : s
       )
     );
@@ -47,8 +47,8 @@ export function useStepManagement(taskId: number, onStepChange: () => void) {
       return { success: true };
     } catch (error: unknown) {
       // Revert on error
-      setSteps(prevSteps => 
-        prevSteps.map(s => 
+      setSteps(prevSteps =>
+        prevSteps.map(s =>
           s.id === step.id ? { ...s, completed: currentCompleted } : s
         )
       );

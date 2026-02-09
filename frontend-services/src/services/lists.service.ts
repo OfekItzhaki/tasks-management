@@ -12,7 +12,7 @@ export class ListsService {
   /**
    * Get list by ID
    */
-  async getById(id: number): Promise<ToDoList> {
+  async getById(id: string): Promise<ToDoList> {
     return apiClient.get<ToDoList>(`/todo-lists/${id}`);
   }
 
@@ -26,14 +26,14 @@ export class ListsService {
   /**
    * Update list
    */
-  async update(id: number, data: UpdateToDoListDto): Promise<ToDoList> {
+  async update(id: string, data: UpdateToDoListDto): Promise<ToDoList> {
     return apiClient.patch<ToDoList>(`/todo-lists/${id}`, data);
   }
 
   /**
    * Delete list (soft delete)
    */
-  async delete(id: number): Promise<ToDoList> {
+  async delete(id: string): Promise<ToDoList> {
     return apiClient.delete<ToDoList>(`/todo-lists/${id}`);
   }
 

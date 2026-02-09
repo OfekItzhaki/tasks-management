@@ -6,7 +6,7 @@ export class SharingService {
    * Share a list with a user
    */
   async shareList(
-    todoListId: number,
+    todoListId: string,
     data: ShareListDto,
   ): Promise<ListShare> {
     return apiClient.post<ListShare>(
@@ -18,14 +18,14 @@ export class SharingService {
   /**
    * Get all lists shared with a user
    */
-  async getSharedLists(userId: number): Promise<ToDoList[]> {
+  async getSharedLists(userId: string): Promise<ToDoList[]> {
     return apiClient.get<ToDoList[]>(`/list-shares/user/${userId}`);
   }
 
   /**
    * Get all users a list is shared with
    */
-  async getListShares(todoListId: number): Promise<ListShare[]> {
+  async getListShares(todoListId: string): Promise<ListShare[]> {
     return apiClient.get<ListShare[]>(
       `/list-shares/todo-list/${todoListId}`,
     );
@@ -34,7 +34,7 @@ export class SharingService {
   /**
    * Unshare a list with a user
    */
-  async unshareList(todoListId: number, userId: number): Promise<void> {
+  async unshareList(todoListId: string, userId: string): Promise<void> {
     return apiClient.delete<void>(
       `/list-shares/todo-list/${todoListId}/user/${userId}`,
     );

@@ -70,7 +70,7 @@ export default function TaskDetailsScreen() {
 
   // Local UI state
   const [showAddStepModal, setShowAddStepModal] = useState(false);
-  const [editingStepId, setEditingStepId] = useState<number | null>(null);
+  const [editingStepId, setEditingStepId] = useState<string | null>(null);
   const [editingStepDescription, setEditingStepDescription] = useState('');
 
   // Computed values

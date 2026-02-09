@@ -166,6 +166,7 @@ export class TasksService {
               ) as Prisma.InputJsonValue)
             : undefined,
         completed: updateTaskDto.completed,
+        todoListId: updateTaskDto.todoListId,
         ...(completedAt !== undefined && { completedAt }),
         ...(shouldResetCompletionCount && { completionCount: 0 }),
       },

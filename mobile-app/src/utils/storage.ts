@@ -112,7 +112,7 @@ const REMINDER_ALARMS_KEY = '@tasks_management:reminder_alarms';
 const REMINDER_TIMES_KEY = '@tasks_management:reminder_times';
 
 export const EveryDayRemindersStorage = {
-  async getRemindersForTask(taskId: number): Promise<ReminderConfig[] | null> {
+  async getRemindersForTask(taskId: string): Promise<ReminderConfig[] | null> {
     try {
       const allRemindersJson = await AsyncStorage.getItem(EVERY_DAY_REMINDERS_KEY);
       if (!allRemindersJson) {
@@ -126,26 +126,26 @@ export const EveryDayRemindersStorage = {
     }
   },
 
-  async setRemindersForTask(taskId: number, reminders: ReminderConfig[]): Promise<void> {
+  async setRemindersForTask(taskId: string, reminders: ReminderConfig[]): Promise<void> {
     try {
       const allRemindersJson = await AsyncStorage.getItem(EVERY_DAY_REMINDERS_KEY);
-      const allReminders: Record<string, ReminderConfig[]> = allRemindersJson 
-        ? JSON.parse(allRemindersJson) 
+      const allReminders: Record<string, ReminderConfig[]> = allRemindersJson
+        ? JSON.parse(allRemindersJson)
         : {};
-      
+
       if (reminders.length > 0) {
         allReminders[taskId.toString()] = reminders;
       } else {
         delete allReminders[taskId.toString()];
       }
-      
+
       await AsyncStorage.setItem(EVERY_DAY_REMINDERS_KEY, JSON.stringify(allReminders));
     } catch (error) {
       console.error('Error setting every day reminders:', error);
     }
   },
 
-  async removeRemindersForTask(taskId: number): Promise<void> {
+  async removeRemindersForTask(taskId: string): Promise<void> {
     try {
       const allRemindersJson = await AsyncStorage.getItem(EVERY_DAY_REMINDERS_KEY);
       if (!allRemindersJson) {
@@ -165,7 +165,7 @@ export const EveryDayRemindersStorage = {
  * Since backend doesn't store alarm state, we persist it client-side
  */
 export const ReminderAlarmsStorage = {
-  async getAlarmsForTask(taskId: number): Promise<Record<string, boolean> | null> {
+  async getAlarmsForTask(taskId: string): Promise<Record<string, boolean> | null> {
     try {
       const allAlarmsJson = await AsyncStorage.getItem(REMINDER_ALARMS_KEY);
       if (!allAlarmsJson) {
@@ -190,26 +190,26 @@ export const ReminderAlarmsStorage = {
     }
   },
 
-  async setAlarmForReminder(taskId: number, reminderId: string, hasAlarm: boolean): Promise<void> {
+  async setAlarmForReminder(taskId: string, reminderId: string, hasAlarm: boolean): Promise<void> {
     try {
       const allAlarmsJson = await AsyncStorage.getItem(REMINDER_ALARMS_KEY);
-      const allAlarms: Record<string, Record<string, boolean>> = allAlarmsJson 
-        ? JSON.parse(allAlarmsJson) 
+      const allAlarms: Record<string, Record<string, boolean>> = allAlarmsJson
+        ? JSON.parse(allAlarmsJson)
         : {};
-      
+
       if (!allAlarms[taskId.toString()]) {
         allAlarms[taskId.toString()] = {};
       }
-      
+
       allAlarms[taskId.toString()][reminderId] = hasAlarm;
-      
+
       await AsyncStorage.setItem(REMINDER_ALARMS_KEY, JSON.stringify(allAlarms));
     } catch (error) {
       console.error('Error setting reminder alarm:', error);
     }
   },
 
-  async removeAlarmsForTask(taskId: number): Promise<void> {
+  async removeAlarmsForTask(taskId: string): Promise<void> {
     try {
       const allAlarmsJson = await AsyncStorage.getItem(REMINDER_ALARMS_KEY);
       if (!allAlarmsJson) {
@@ -230,7 +230,7 @@ export const ReminderAlarmsStorage = {
  * Keyed by taskId and reminderId
  */
 export const ReminderTimesStorage = {
-  async getTimesForTask(taskId: number): Promise<Record<string, string> | null> {
+  async getTimesForTask(taskId: string): Promise<Record<string, string> | null> {
     try {
       const allTimesJson = await AsyncStorage.getItem(REMINDER_TIMES_KEY);
       if (!allTimesJson) {
@@ -244,45 +244,45 @@ export const ReminderTimesStorage = {
     }
   },
 
-  async setTimeForReminder(taskId: number, reminderId: string, time: string): Promise<void> {
+  async setTimeForReminder(taskId: string, reminderId: string, time: string): Promise<void> {
     try {
       const allTimesJson = await AsyncStorage.getItem(REMINDER_TIMES_KEY);
-      const allTimes: Record<string, Record<string, string>> = allTimesJson 
-        ? JSON.parse(allTimesJson) 
+      const allTimes: Record<string, Record<string, string>> = allTimesJson
+        ? JSON.parse(allTimesJson)
         : {};
-      
+
       if (!allTimes[taskId.toString()]) {
         allTimes[taskId.toString()] = {};
       }
-      
+
       allTimes[taskId.toString()][reminderId] = time;
-      
+
       await AsyncStorage.setItem(REMINDER_TIMES_KEY, JSON.stringify(allTimes));
     } catch (error) {
       console.error('Error setting reminder time:', error);
     }
   },
 
-  async setTimesForTask(taskId: number, times: Record<string, string>): Promise<void> {
+  async setTimesForTask(taskId: string, times: Record<string, string>): Promise<void> {
     try {
       const allTimesJson = await AsyncStorage.getItem(REMINDER_TIMES_KEY);
-      const allTimes: Record<string, Record<string, string>> = allTimesJson 
-        ? JSON.parse(allTimesJson) 
+      const allTimes: Record<string, Record<string, string>> = allTimesJson
+        ? JSON.parse(allTimesJson)
         : {};
-      
+
       if (Object.keys(times).length > 0) {
         allTimes[taskId.toString()] = times;
       } else {
         delete allTimes[taskId.toString()];
       }
-      
+
       await AsyncStorage.setItem(REMINDER_TIMES_KEY, JSON.stringify(allTimes));
     } catch (error) {
       console.error('Error setting reminder times:', error);
     }
   },
 
-  async removeTimesForTask(taskId: number): Promise<void> {
+  async removeTimesForTask(taskId: string): Promise<void> {
     try {
       const allTimesJson = await AsyncStorage.getItem(REMINDER_TIMES_KEY);
       if (!allTimesJson) {
