@@ -1,8 +1,10 @@
-// Inject Vite environment variables into window IMMEDIATELY for frontend-services
-if (typeof window !== 'undefined') {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (window as any).__VITE_API_URL__ = import.meta.env.VITE_API_URL;
-}
+import { configure } from '@tasks-management/frontend-services';
+
+// Configure shared services immediately with Vite environment variables
+configure({
+  baseURL: import.meta.env.VITE_API_URL,
+  turnstileSiteKey: import.meta.env.VITE_TURNSTILE_SITE_KEY,
+});
 
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';

@@ -1,10 +1,10 @@
-// Ensure API base URL matches MSW handlers (http://localhost:3000)
-if (typeof process !== 'undefined' && process.env) {
-  process.env.API_BASE_URL = 'http://localhost:3000';
-}
+import { configure } from '@tasks-management/frontend-services';
 
-// Set Turnstile site key for testing
-import.meta.env.VITE_TURNSTILE_SITE_KEY = '1x00000000000000000000AA';
+// Ensure API base URL matches MSW handlers (http://localhost:3000)
+configure({
+  baseURL: 'http://localhost:3000',
+  turnstileSiteKey: '1x00000000000000000000AA',
+});
 
 import { afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { cleanup } from '@testing-library/react';

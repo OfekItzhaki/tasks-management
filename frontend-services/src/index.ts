@@ -18,7 +18,7 @@ export { CompletionPolicy } from './types';
 export * from './i18n';
 
 // Export config
-export { API_CONFIG, getApiUrl, getAssetUrl } from './config';
+export { API_CONFIG, getApiUrl, getAssetUrl, configure, getTurnstileSiteKey } from './config';
 
 // Export storage utilities
 export { TokenStorage } from './utils/storage';

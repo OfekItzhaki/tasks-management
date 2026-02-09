@@ -1,24 +1,34 @@
+let internalBaseUrl: string | null = null;
+let internalTurnstileSiteKey: string | null = null;
+
+export const configure = (config: { baseURL?: string; turnstileSiteKey?: string }) => {
+  if (config.baseURL) internalBaseUrl = config.baseURL;
+  if (config.turnstileSiteKey) internalTurnstileSiteKey = config.turnstileSiteKey;
+};
+
 // Get API base URL - works in both Node.js and browser environments
 const getApiBaseUrl = (): string => {
-  let url = '';
+  let url = internalBaseUrl || '';
 
-  // Check for Vite environment variables (import.meta.env is injected at build time)
-  if (typeof window !== 'undefined') {
-    const win = window as any;
-    if (win.__VITE_API_URL__) {
-      url = win.__VITE_API_URL__;
+  if (!url) {
+    // Check for Vite environment variables (import.meta.env is injected at build time)
+    if (typeof window !== 'undefined') {
+      const win = window as any;
+      if (win.__VITE_API_URL__) {
+        url = win.__VITE_API_URL__;
+      }
     }
-  }
-  // In Node.js/SSR, check process.env
-  else if (typeof process !== 'undefined' && (process as any).env) {
-    const env = (process as any).env;
-    const vUrl = env['VITE_API_URL'];
-    const aUrl = env['API_BASE_URL'];
-    const eUrl = env['EXPO_PUBLIC_API_URL'];
+    // In Node.js/SSR, check process.env
+    else if (typeof process !== 'undefined' && (process as any).env) {
+      const env = (process as any).env;
+      const vUrl = env['VITE_API_URL'];
+      const aUrl = env['API_BASE_URL'];
+      const eUrl = env['EXPO_PUBLIC_API_URL'];
 
-    if (vUrl && vUrl.trim().length > 0) url = vUrl;
-    else if (aUrl && aUrl.trim().length > 0) url = aUrl;
-    else if (eUrl && eUrl.trim().length > 0) url = eUrl;
+      if (vUrl && vUrl.trim().length > 0) url = vUrl;
+      else if (aUrl && aUrl.trim().length > 0) url = aUrl;
+      else if (eUrl && eUrl.trim().length > 0) url = eUrl;
+    }
   }
 
   // Cleanup: Remove trailing slash
@@ -34,6 +44,14 @@ const getApiBaseUrl = (): string => {
 
   return url;
 };
+
+export const getTurnstileSiteKey = (): string | null => {
+  if (internalTurnstileSiteKey) return internalTurnstileSiteKey;
+  if (typeof window !== 'undefined') {
+    return (window as any).__VITE_TURNSTILE_SITE_KEY__ || null;
+  }
+  return null;
+}
 
 export const API_CONFIG = {
   get baseURL() {

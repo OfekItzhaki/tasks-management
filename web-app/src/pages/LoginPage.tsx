@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useRef } from 'react';
+﻿import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
@@ -42,19 +42,19 @@ export default function LoginPage() {
   const [resendCooldown, setResendCooldown] = useState(0);
 
   // CAPTCHA handlers
-  const handleCaptchaSuccess = (token: string) => {
+  const handleCaptchaSuccess = useCallback((token: string) => {
     setCaptchaToken(token);
     setError(''); // Clear any previous errors
-  };
+  }, []);
 
-  const handleCaptchaError = (error: string) => {
+  const handleCaptchaError = useCallback((error: string) => {
     setError(error);
     setCaptchaToken('');
-  };
+  }, []);
 
-  const handleCaptchaExpire = () => {
+  const handleCaptchaExpire = useCallback(() => {
     setCaptchaToken('');
-  };
+  }, []);
 
   // Timer effect
   useEffect(() => {
