@@ -7,6 +7,12 @@ const getApiBaseUrl = (): string => {
     const win = window as any;
     if (win.__VITE_API_URL__) {
       url = win.__VITE_API_URL__;
+    } else {
+      // Fallback: Detect production domain and use corresponding API URL
+      const hostname = window.location.hostname;
+      if (hostname === 'horizon-flux.ofeklabs.dev' || hostname.includes('vercel.app')) {
+        url = 'https://api.horizon-flux.ofeklabs.dev';
+      }
     }
   }
   // In Node.js/SSR, check process.env
@@ -19,23 +25,6 @@ const getApiBaseUrl = (): string => {
     if (vUrl && vUrl.trim().length > 0) url = vUrl;
     else if (aUrl && aUrl.trim().length > 0) url = aUrl;
     else if (eUrl && eUrl.trim().length > 0) url = eUrl;
-  }
-
-  // Final Safety Check for Production Domains
-  if (typeof window !== 'undefined' && window.location) {
-    const hostname = window.location.hostname;
-    const isProdDomain =
-      hostname.includes('ofeklabs.dev') ||
-      hostname.includes('onrender.com') ||
-      hostname.includes('vercel.app') ||
-      hostname.includes('netlify.app');
-
-    if (isProdDomain && url.includes('localhost')) {
-      throw new Error(
-        'Production environment detected but API_URL not configured. ' +
-        'Please set VITE_API_URL environment variable.'
-      );
-    }
   }
 
   // Cleanup: Remove trailing slash
