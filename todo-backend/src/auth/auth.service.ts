@@ -311,16 +311,17 @@ export class AuthService {
     }
 
     try {
-      // Cloudflare Turnstile verification
+      // Cloudflare Turnstile verification requires x-www-form-urlencoded or multipart/form-data
+      const params = new URLSearchParams();
+      params.append('secret', secretKey);
+      params.append('response', token);
+
       const response = await axios.post(
         'https://challenges.cloudflare.com/turnstile/v0/siteverify',
-        {
-          secret: secretKey,
-          response: token,
-        },
+        params.toString(),
         {
           headers: {
-            'Content-Type': 'application/json',
+            'Content-Type': 'application/x-www-form-urlencoded',
           },
         },
       );

@@ -72,6 +72,12 @@ const TurnstileWidget = forwardRef<TurnstileInstance, TurnstileWidgetProps>(
       );
     }
 
+    // For debugging: log the site key being used (first 6 chars)
+    console.log(
+      '[Turnstile] Initializing with siteKey:',
+      siteKey?.substring(0, 10) + '...'
+    );
+
     return (
       <Turnstile
         ref={ref}
@@ -79,18 +85,25 @@ const TurnstileWidget = forwardRef<TurnstileInstance, TurnstileWidgetProps>(
         options={{
           theme: 'auto',
           size: 'normal',
-          appearance: 'interaction-only', // Managed mode - minimal user interaction
+          appearance: 'always', // Force visibility for debugging
         }}
         scriptOptions={{
           appendTo: 'head',
         }}
-        onSuccess={onSuccess}
+        onSuccess={(token) => {
+          console.log('[Turnstile] Token generated successfully');
+          onSuccess(token);
+        }}
         onError={() => {
+          console.error('[Turnstile] Verification error');
           if (onError) {
             onError('CAPTCHA verification failed. Please try again.');
           }
         }}
-        onExpire={onExpire}
+        onExpire={() => {
+          console.warn('[Turnstile] Token expired');
+          if (onExpire) onExpire();
+        }}
       />
     );
   }
