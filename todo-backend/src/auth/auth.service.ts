@@ -52,7 +52,6 @@ export class AuthService {
         throw new UnauthorizedException('Invalid credentials');
       }
 
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { passwordHash: _passwordHash, ...safeUser } = user;
       return safeUser;
     } catch (error) {
@@ -112,7 +111,7 @@ export class AuthService {
 
   async refreshAccessToken(token: string) {
     try {
-      const payload = this.jwtService.verify<JwtPayload>(token, {
+      const payload = this.jwtService.verify(token, {
         secret: process.env.JWT_REFRESH_SECRET || 'refresh-secret',
       });
 
