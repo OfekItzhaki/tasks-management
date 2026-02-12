@@ -43,10 +43,7 @@ export class RemindersService {
     ownerId: string,
     date: Date = new Date(),
   ): Promise<ReminderNotification[]> {
-    const tasksWithReminders = await this.tasksService.getTasksWithReminders(
-      ownerId,
-      date,
-    );
+    const tasksWithReminders = await this.tasksService.getTasksWithReminders(ownerId, date);
 
     const notifications: ReminderNotification[] = [];
 
@@ -96,10 +93,7 @@ export class RemindersService {
   /**
    * Send reminders to user via multi-channel
    */
-  async sendReminders(
-    userId: string,
-    notifications: ReminderNotification[],
-  ): Promise<void> {
+  async sendReminders(userId: string, notifications: ReminderNotification[]): Promise<void> {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
       select: { email: true, notificationFrequency: true },
@@ -136,10 +130,7 @@ export class RemindersService {
     const currentDate = new Date(startDate);
 
     while (currentDate <= endDate) {
-      const reminders = await this.getReminderNotifications(
-        ownerId,
-        new Date(currentDate),
-      );
+      const reminders = await this.getReminderNotifications(ownerId, new Date(currentDate));
       allReminders.push(...reminders);
       currentDate.setDate(currentDate.getDate() + 1);
     }
@@ -154,10 +145,7 @@ export class RemindersService {
     return Array.from(uniqueReminders.values());
   }
 
-  private calculateTaskDueDate(
-    task: TaskWithList,
-    currentDate: Date,
-  ): Date | null {
+  private calculateTaskDueDate(task: TaskWithList, currentDate: Date): Date | null {
     if (task.dueDate) {
       const dueDate = new Date(task.dueDate);
       dueDate.setHours(0, 0, 0, 0);
@@ -182,11 +170,7 @@ export class RemindersService {
         return weeklyDue;
       }
       case 'MONTHLY': {
-        const monthlyDue = new Date(
-          currentDate.getFullYear(),
-          currentDate.getMonth() + 1,
-          1,
-        );
+        const monthlyDue = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
         monthlyDue.setHours(0, 0, 0, 0);
         return monthlyDue;
       }
@@ -204,17 +188,13 @@ export class RemindersService {
     return `Reminder: ${task.description}`;
   }
 
-  private formatReminderMessage(
-    task: TaskWithList,
-    dueDate: Date | null,
-  ): string {
+  private formatReminderMessage(task: TaskWithList, dueDate: Date | null): string {
     const listName = task.todoList.name;
     const taskDesc = task.description;
 
     if (dueDate) {
       const daysUntilDue = Math.ceil(
-        (dueDate.getTime() - new Date().setHours(0, 0, 0, 0)) /
-          (1000 * 60 * 60 * 24),
+        (dueDate.getTime() - new Date().setHours(0, 0, 0, 0)) / (1000 * 60 * 60 * 24),
       );
 
       if (daysUntilDue === 0) {

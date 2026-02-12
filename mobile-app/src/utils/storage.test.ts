@@ -1,10 +1,7 @@
 import { describe, it, expect, beforeEach } from '@jest/globals';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { type ReminderConfig, ReminderTimeframe } from '@tasks-management/frontend-services';
-import {
-  ReminderAlarmsStorage,
-  ReminderTimesStorage,
-} from './storage';
+import { ReminderAlarmsStorage, ReminderTimesStorage } from './storage';
 
 describe('storage', () => {
   beforeEach(() => {

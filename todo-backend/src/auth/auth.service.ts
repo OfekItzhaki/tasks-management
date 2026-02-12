@@ -47,9 +47,7 @@ export class AuthService {
 
       const isValid = await bcrypt.compare(password, user.passwordHash);
       if (!isValid) {
-        this.logger.error(
-          `Login failed: invalid password for userId=${user.id}`,
-        );
+        this.logger.error(`Login failed: invalid password for userId=${user.id}`);
         throw new UnauthorizedException('Invalid credentials');
       }
 
@@ -182,11 +180,8 @@ export class AuthService {
           user.name || undefined,
         );
       } catch (emailError) {
-        const message =
-          emailError instanceof Error ? emailError.message : String(emailError);
-        this.logger.warn(
-          `Failed to send OTP email to ${email}, but proceeding: ${message}`,
-        );
+        const message = emailError instanceof Error ? emailError.message : String(emailError);
+        this.logger.warn(`Failed to send OTP email to ${email}, but proceeding: ${message}`);
       }
 
       this.logger.log(`Registration started: email=${email}`);
@@ -204,10 +199,7 @@ export class AuthService {
       throw new BadRequestException('Invalid OTP');
     }
     const now = new Date();
-    if (
-      user.emailVerificationExpiresAt &&
-      user.emailVerificationExpiresAt < now
-    ) {
+    if (user.emailVerificationExpiresAt && user.emailVerificationExpiresAt < now) {
       throw new BadRequestException('OTP expired');
     }
 
@@ -233,10 +225,7 @@ export class AuthService {
       }
 
       const passwordHash = await bcrypt.hash(password, 10);
-      const user = await this.usersService.setPassword(
-        payload.sub,
-        passwordHash,
-      );
+      const user = await this.usersService.setPassword(payload.sub, passwordHash);
 
       // Seed default lists for the new user
       await this.todoListsService.seedDefaultLists(user.id);
@@ -324,9 +313,7 @@ export class AuthService {
 
       const data = response.data as { success: boolean };
       if (!data.success) {
-        this.logger.warn(
-          `Turnstile verification failed: ${JSON.stringify(data)}`,
-        );
+        this.logger.warn(`Turnstile verification failed: ${JSON.stringify(data)}`);
         throw new ForbiddenException('CAPTCHA verification failed');
       }
     } catch (error) {

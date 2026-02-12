@@ -37,10 +37,7 @@ export class TaskSchedulerService implements OnModuleInit {
     return false;
   }
 
-  private async runIfDbAvailable(
-    jobName: string,
-    fn: () => Promise<void>,
-  ): Promise<void> {
+  private async runIfDbAvailable(jobName: string, fn: () => Promise<void>): Promise<void> {
     if (this.isSchedulerDisabled()) {
       return;
     }
@@ -116,9 +113,7 @@ export class TaskSchedulerService implements OnModuleInit {
   async archiveCompletedTasks() {
     await this.runIfDbAvailable('archiveCompletedTasks', async () => {
       const archiveThreshold = new Date();
-      archiveThreshold.setMinutes(
-        archiveThreshold.getMinutes() - this.ARCHIVE_DELAY_MINUTES,
-      );
+      archiveThreshold.setMinutes(archiveThreshold.getMinutes() - this.ARCHIVE_DELAY_MINUTES);
 
       // Find all completed tasks in CUSTOM lists that have been completed for more than ARCHIVE_DELAY_MINUTES
       const tasksToArchive = await this.prisma.task.findMany({
@@ -270,9 +265,7 @@ export class TaskSchedulerService implements OnModuleInit {
     });
 
     if (result.count > 0) {
-      this.logger.log(
-        `Reset ${result.count} daily tasks (completion counts incremented)`,
-      );
+      this.logger.log(`Reset ${result.count} daily tasks (completion counts incremented)`);
     }
 
     // Reset steps for these specific tasks (more reliable than nested relation query)
@@ -326,9 +319,7 @@ export class TaskSchedulerService implements OnModuleInit {
       });
 
       if (result.count > 0) {
-        this.logger.log(
-          `Reset ${result.count} weekly tasks (completion counts incremented)`,
-        );
+        this.logger.log(`Reset ${result.count} weekly tasks (completion counts incremented)`);
       }
 
       // Also reset steps for these tasks
@@ -385,9 +376,7 @@ export class TaskSchedulerService implements OnModuleInit {
       });
 
       if (result.count > 0) {
-        this.logger.log(
-          `Reset ${result.count} monthly tasks (completion counts incremented)`,
-        );
+        this.logger.log(`Reset ${result.count} monthly tasks (completion counts incremented)`);
       }
 
       // Also reset steps for these tasks
@@ -444,9 +433,7 @@ export class TaskSchedulerService implements OnModuleInit {
       });
 
       if (result.count > 0) {
-        this.logger.log(
-          `Reset ${result.count} yearly tasks (completion counts incremented)`,
-        );
+        this.logger.log(`Reset ${result.count} yearly tasks (completion counts incremented)`);
       }
 
       // Also reset steps for these tasks
@@ -486,9 +473,7 @@ export class TaskSchedulerService implements OnModuleInit {
 
       for (const user of users) {
         const purgeThreshold = new Date();
-        purgeThreshold.setDate(
-          purgeThreshold.getDate() - (user.trashRetentionDays || 30),
-        );
+        purgeThreshold.setDate(purgeThreshold.getDate() - (user.trashRetentionDays || 30));
 
         // 1. Purge user's old soft-deleted tasks
         const tasksToPurge = await this.prisma.task.findMany({
@@ -545,6 +530,7 @@ export class TaskSchedulerService implements OnModuleInit {
       }
     });
   }
+
   /**
    * Runs daily at 9 AM to trigger reminder processing for all users
    */

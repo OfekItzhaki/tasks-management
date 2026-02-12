@@ -66,25 +66,19 @@ describe('EventsService', () => {
 
       // Should send to owner
       // eslint-disable-next-line @typescript-eslint/unbound-method
-      expect(eventsGateway.sendToUser).toHaveBeenCalledWith(
-        'owner-1',
-        'task-updated',
-        { taskId: 'task-1' },
-      );
+      expect(eventsGateway.sendToUser).toHaveBeenCalledWith('owner-1', 'task-updated', {
+        taskId: 'task-1',
+      });
 
       // Should send to shared users
       // eslint-disable-next-line @typescript-eslint/unbound-method
-      expect(eventsGateway.sendToUser).toHaveBeenCalledWith(
-        'user-2',
-        'task-updated',
-        { taskId: 'task-1' },
-      );
+      expect(eventsGateway.sendToUser).toHaveBeenCalledWith('user-2', 'task-updated', {
+        taskId: 'task-1',
+      });
       // eslint-disable-next-line @typescript-eslint/unbound-method
-      expect(eventsGateway.sendToUser).toHaveBeenCalledWith(
-        'user-3',
-        'task-updated',
-        { taskId: 'task-1' },
-      );
+      expect(eventsGateway.sendToUser).toHaveBeenCalledWith('user-3', 'task-updated', {
+        taskId: 'task-1',
+      });
 
       // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(eventsGateway.sendToUser).toHaveBeenCalledTimes(3);
@@ -111,11 +105,9 @@ describe('EventsService', () => {
       // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(eventsGateway.sendToUser).toHaveBeenCalledTimes(1);
       // eslint-disable-next-line @typescript-eslint/unbound-method
-      expect(eventsGateway.sendToUser).toHaveBeenCalledWith(
-        'owner-1',
-        'task-updated',
-        { taskId: 'task-1' },
-      );
+      expect(eventsGateway.sendToUser).toHaveBeenCalledWith('owner-1', 'task-updated', {
+        taskId: 'task-1',
+      });
     });
 
     it('should handle task not found gracefully', async () => {
@@ -145,14 +137,10 @@ describe('EventsService', () => {
     });
 
     it('should handle database errors gracefully', async () => {
-      mockPrismaService.task.findUnique.mockRejectedValue(
-        new Error('Database error'),
-      );
+      mockPrismaService.task.findUnique.mockRejectedValue(new Error('Database error'));
 
       // Should not throw
-      await expect(
-        service.broadcastTaskEvent('task-1', 'task-updated', {}),
-      ).resolves.not.toThrow();
+      await expect(service.broadcastTaskEvent('task-1', 'task-updated', {})).resolves.not.toThrow();
 
       // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(eventsGateway.sendToUser).not.toHaveBeenCalled();
@@ -177,11 +165,9 @@ describe('EventsService', () => {
       // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(eventsGateway.sendToUser).toHaveBeenCalledTimes(3);
       // eslint-disable-next-line @typescript-eslint/unbound-method
-      expect(eventsGateway.sendToUser).toHaveBeenCalledWith(
-        'owner-1',
-        'list-updated',
-        { listId: 'list-1' },
-      );
+      expect(eventsGateway.sendToUser).toHaveBeenCalledWith('owner-1', 'list-updated', {
+        listId: 'list-1',
+      });
     });
 
     it('should handle list not found gracefully', async () => {
@@ -246,11 +232,9 @@ describe('EventsService', () => {
       });
 
       // eslint-disable-next-line @typescript-eslint/unbound-method
-      expect(eventsGateway.sendToUser).toHaveBeenCalledWith(
-        'owner-1',
-        'step-updated',
-        { stepId: 'step-1' },
-      );
+      expect(eventsGateway.sendToUser).toHaveBeenCalledWith('owner-1', 'step-updated', {
+        stepId: 'step-1',
+      });
     });
   });
 });

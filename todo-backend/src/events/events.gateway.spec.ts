@@ -140,9 +140,7 @@ describe('EventsGateway', () => {
 
       gateway.handleConnection(mockSocket);
       gateway.handleDisconnect(mockSocket);
-      expect(
-        gateway['userSockets'].get('user-1')?.includes('socket-1'),
-      ).not.toBe(true);
+      expect(gateway['userSockets'].get('user-1')?.includes('socket-1')).not.toBe(true);
     });
 
     it('should remove user entry when last socket disconnects', () => {

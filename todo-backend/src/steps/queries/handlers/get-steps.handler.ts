@@ -17,10 +17,7 @@ export class GetStepsHandler implements IQueryHandler<GetStepsQuery> {
         deletedAt: null,
         todoList: {
           deletedAt: null,
-          OR: [
-            { ownerId: userId },
-            { shares: { some: { sharedWithId: userId } } },
-          ],
+          OR: [{ ownerId: userId }, { shares: { some: { sharedWithId: userId } } }],
         },
       },
     });

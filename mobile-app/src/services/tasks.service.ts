@@ -1,9 +1,5 @@
 import { apiClient, ApiError } from '../utils/api-client';
-import {
-  Task,
-  CreateTaskDto,
-  UpdateTaskDto,
-} from '../types';
+import { Task, CreateTaskDto, UpdateTaskDto } from '../types';
 
 export class TasksService {
   /**
@@ -59,10 +55,7 @@ export class TasksService {
    */
   async create(todoListId: string, data: CreateTaskDto): Promise<Task> {
     try {
-      const response = await apiClient.post<Task>(
-        `/tasks/todo-list/${todoListId}`,
-        data,
-      );
+      const response = await apiClient.post<Task>(`/tasks/todo-list/${todoListId}`, data);
       return response.data;
     } catch (error) {
       if (error instanceof ApiError) {

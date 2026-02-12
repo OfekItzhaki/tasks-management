@@ -9,22 +9,13 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiBearerAuth,
-  ApiQuery,
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { GetTasksByDateDto } from './dto/get-tasks-by-date.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import {
-  CurrentUser,
-  CurrentUserPayload,
-} from '../auth/current-user.decorator';
+import { CurrentUser, CurrentUserPayload } from '../auth/current-user.decorator';
 import { CreateTaskCommand } from './commands/create-task.command';
 import { UpdateTaskCommand } from './commands/update-task.command';
 import { RemoveTaskCommand } from './commands/remove-task.command';
@@ -54,9 +45,7 @@ export class TasksController {
     @Body() createTaskDto: CreateTaskDto,
     @CurrentUser() user: CurrentUserPayload,
   ) {
-    return this.commandBus.execute(
-      new CreateTaskCommand(todoListId, createTaskDto, user.userId),
-    );
+    return this.commandBus.execute(new CreateTaskCommand(todoListId, createTaskDto, user.userId));
   }
 
   @Get()
@@ -68,20 +57,14 @@ export class TasksController {
     description: 'Filter tasks by list ID',
   })
   @ApiResponse({ status: 200, description: 'Returns tasks' })
-  findAll(
-    @CurrentUser() user: CurrentUserPayload,
-    @Query('todoListId') todoListId?: string,
-  ) {
+  findAll(@CurrentUser() user: CurrentUserPayload, @Query('todoListId') todoListId?: string) {
     return this.queryBus.execute(new GetTasksQuery(user.userId, todoListId));
   }
 
   @Get('by-date')
   @ApiOperation({ summary: 'Get tasks for a specific date' })
   @ApiResponse({ status: 200, description: 'Returns tasks for the date' })
-  getTasksByDate(
-    @Query() query: GetTasksByDateDto,
-    @CurrentUser() user: CurrentUserPayload,
-  ) {
+  getTasksByDate(@Query() query: GetTasksByDateDto, @CurrentUser() user: CurrentUserPayload) {
     const date = query.date ? new Date(query.date) : new Date();
     return this.queryBus.execute(new GetTasksByDateQuery(user.userId, date));
   }
@@ -97,9 +80,7 @@ export class TasksController {
     @CurrentUser() user: CurrentUserPayload,
   ) {
     const date = query.date ? new Date(query.date) : new Date();
-    return this.queryBus.execute(
-      new GetTasksWithRemindersQuery(user.userId, date),
-    );
+    return this.queryBus.execute(new GetTasksWithRemindersQuery(user.userId, date));
   }
 
   @Get(':id')
@@ -119,9 +100,7 @@ export class TasksController {
     @Body() updateTaskDto: UpdateTaskDto,
     @CurrentUser() user: CurrentUserPayload,
   ) {
-    return this.commandBus.execute(
-      new UpdateTaskCommand(id, updateTaskDto, user.userId),
-    );
+    return this.commandBus.execute(new UpdateTaskCommand(id, updateTaskDto, user.userId));
   }
 
   @Delete(':id')
@@ -149,12 +128,7 @@ export class TasksController {
     description: 'Task cannot be permanently deleted',
   })
   @ApiResponse({ status: 404, description: 'Task not found' })
-  permanentDelete(
-    @Param('id') id: string,
-    @CurrentUser() user: CurrentUserPayload,
-  ) {
-    return this.commandBus.execute(
-      new PermanentDeleteTaskCommand(id, user.userId),
-    );
+  permanentDelete(@Param('id') id: string, @CurrentUser() user: CurrentUserPayload) {
+    return this.commandBus.execute(new PermanentDeleteTaskCommand(id, user.userId));
   }
 }

@@ -14,11 +14,7 @@ import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
 import { CurrentUser, CurrentUserPayload } from './current-user.decorator';
-import {
-  ForgotPasswordDto,
-  VerifyResetOtpDto,
-  ResetPasswordDto,
-} from './dto/forgot-password.dto';
+import { ForgotPasswordDto, VerifyResetOtpDto, ResetPasswordDto } from './dto/forgot-password.dto';
 import { LoginDto } from './dto/login.dto';
 import {
   RegisterStartDto,
@@ -44,14 +40,10 @@ export class AuthController {
   @ApiOperation({ summary: 'Login with email and password' })
   @ApiResponse({
     status: 200,
-    description:
-      'Returns JWT access token and user data, sets refresh token cookie',
+    description: 'Returns JWT access token and user data, sets refresh token cookie',
   })
   @ApiResponse({ status: 401, description: 'Invalid credentials' })
-  async login(
-    @Body() loginDto: LoginDto,
-    @Res({ passthrough: true }) response: Response,
-  ) {
+  async login(@Body() loginDto: LoginDto, @Res({ passthrough: true }) response: Response) {
     const [userValidationResult] = await Promise.all([
       this.authService.login(loginDto.email, loginDto.password),
       loginDto.captchaToken
@@ -73,10 +65,7 @@ export class AuthController {
   @ApiOperation({ summary: 'Refresh access token' })
   @ApiResponse({ status: 200, description: 'Returns new access token' })
   @ApiResponse({ status: 401, description: 'Invalid refresh token' })
-  async refresh(
-    @Req() request: Request,
-    @Res({ passthrough: true }) response: Response,
-  ) {
+  async refresh(@Req() request: Request, @Res({ passthrough: true }) response: Response) {
     const refreshToken = request.cookies['refresh_token'] as string | undefined;
     if (!refreshToken) {
       throw new UnauthorizedException('Refresh token missing');
@@ -115,7 +104,7 @@ export class AuthController {
       httpOnly: true,
       secure: isProd,
       sameSite: isProd ? 'strict' : 'lax', // Use lax in dev for better cross-port support
-      path: '/api/v1/auth/refresh',
+      path: '/api/v1/auth/refresh', // Only send to refresh endpoint
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
   }
@@ -135,12 +124,8 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'Verification email sent' })
   @ApiResponse({ status: 400, description: 'Email already verified' })
   @ApiResponse({ status: 404, description: 'User not found' })
-  async resendVerification(
-    @Body() resendVerificationDto: ResendVerificationDto,
-  ) {
-    return this.usersService.resendVerificationEmail(
-      resendVerificationDto.email,
-    );
+  async resendVerification(@Body() resendVerificationDto: ResendVerificationDto) {
+    return this.usersService.resendVerificationEmail(resendVerificationDto.email);
   }
 
   @Post('register/start')
@@ -176,10 +161,7 @@ export class AuthController {
     if (dto.password !== dto.passwordConfirm) {
       throw new BadRequestException('Passwords do not match');
     }
-    const result = await this.authService.registerFinish(
-      dto.registrationToken,
-      dto.password,
-    );
+    const result = await this.authService.registerFinish(dto.registrationToken, dto.password);
     this.setRefreshTokenCookie(response, result.refreshToken);
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars

@@ -192,6 +192,7 @@ export enum ShareRole {
 export interface ShareListDto {
   email: string;
   role?: ShareRole;
+  sharedWithId?: string; // Temporarily keeping both to see backend preference
 }
 
 export interface ListShare {
@@ -219,5 +220,3 @@ export interface ApiError {
   message: string | string[];
   error?: string;
 }
-
-

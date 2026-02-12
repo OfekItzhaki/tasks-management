@@ -1,11 +1,6 @@
 import { apiClient, ApiError } from '../utils/api-client';
 import { TokenStorage, UserStorage } from '../utils/storage';
-import {
-  LoginDto,
-  LoginResponse,
-  User,
-  CreateUserDto,
-} from '../types';
+import { LoginDto, LoginResponse, User, CreateUserDto } from '../types';
 
 export class AuthService {
   /**
@@ -13,10 +8,7 @@ export class AuthService {
    */
   async login(credentials: LoginDto): Promise<LoginResponse> {
     try {
-      const response = await apiClient.post<LoginResponse>(
-        '/auth/login',
-        credentials,
-      );
+      const response = await apiClient.post<LoginResponse>('/auth/login', credentials);
       // response.data is already normalized by api-client interceptor
       await TokenStorage.setToken(response.data.accessToken);
       await UserStorage.setUser(response.data.user);

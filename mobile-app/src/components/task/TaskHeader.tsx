@@ -65,10 +65,7 @@ export function TaskHeader({
         </View>
 
         {!isEditing && (
-          <TouchableOpacity
-            style={styles.headerEditButton}
-            onPress={onEditPress}
-          >
+          <TouchableOpacity style={styles.headerEditButton} onPress={onEditPress}>
             <Ionicons name="create-outline" size={22} color={colors.primary} />
           </TouchableOpacity>
         )}

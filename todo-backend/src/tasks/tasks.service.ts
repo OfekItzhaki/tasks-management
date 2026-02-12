@@ -27,16 +27,8 @@ export class TasksService {
     private taskScheduler: TaskSchedulerService,
   ) {}
 
-  async create(
-    todoListId: string,
-    createTaskDto: CreateTaskDto,
-    ownerId: string,
-  ) {
-    await this.taskAccess.ensureListAccess(
-      todoListId,
-      ownerId,
-      ShareRole.EDITOR,
-    );
+  async create(todoListId: string, createTaskDto: CreateTaskDto, ownerId: string) {
+    await this.taskAccess.ensureListAccess(todoListId, ownerId, ShareRole.EDITOR);
 
     const task = await this.prisma.task.create({
       data: {
@@ -45,17 +37,13 @@ export class TasksService {
         specificDayOfWeek: createTaskDto.specificDayOfWeek,
         reminderDaysBefore: createTaskDto.reminderDaysBefore ?? [],
         reminderConfig: createTaskDto.reminderConfig
-          ? (JSON.parse(
-              JSON.stringify(createTaskDto.reminderConfig),
-            ) as Prisma.InputJsonValue)
+          ? (JSON.parse(JSON.stringify(createTaskDto.reminderConfig)) as Prisma.InputJsonValue)
           : Prisma.JsonNull,
         completed: createTaskDto.completed ?? false,
         todoListId,
       },
     });
-    this.logger.log(
-      `Task created: taskId=${task.id} todoListId=${todoListId} userId=${ownerId}`,
-    );
+    this.logger.log(`Task created: taskId=${task.id} todoListId=${todoListId} userId=${ownerId}`);
     return task;
   }
 
@@ -122,11 +110,7 @@ export class TasksService {
   }
 
   async update(id: string, updateTaskDto: UpdateTaskDto, userId: string) {
-    const task = await this.taskAccess.findTaskForUser(
-      id,
-      userId,
-      ShareRole.EDITOR,
-    );
+    const task = await this.taskAccess.findTaskForUser(id, userId, ShareRole.EDITOR);
 
     // Track completedAt timestamp
     let completedAt: Date | null | undefined = undefined;
@@ -161,9 +145,7 @@ export class TasksService {
         reminderDaysBefore: updateTaskDto.reminderDaysBefore,
         reminderConfig:
           updateTaskDto.reminderConfig !== undefined
-            ? (JSON.parse(
-                JSON.stringify(updateTaskDto.reminderConfig),
-              ) as Prisma.InputJsonValue)
+            ? (JSON.parse(JSON.stringify(updateTaskDto.reminderConfig)) as Prisma.InputJsonValue)
             : undefined,
         completed: updateTaskDto.completed,
         todoListId: updateTaskDto.todoListId,
@@ -202,9 +184,7 @@ export class TasksService {
             },
           });
         } else {
-          this.logger.warn(
-            `Could not find Done list for user ${userId}, skipping move`,
-          );
+          this.logger.warn(`Could not find Done list for user ${userId}, skipping move`);
         }
       }
     }
@@ -214,11 +194,7 @@ export class TasksService {
   }
 
   async remove(id: string, userId: string) {
-    const task = await this.taskAccess.findTaskForUser(
-      id,
-      userId,
-      ShareRole.EDITOR,
-    );
+    const task = await this.taskAccess.findTaskForUser(id, userId, ShareRole.EDITOR);
 
     // Find the user's trash list
     const trashList = await this.prisma.toDoList.findFirst({
@@ -231,9 +207,7 @@ export class TasksService {
 
     if (!trashList) {
       // Fallback: Just soft delete if no trash list (shouldn't happen with lazy seeding)
-      this.logger.warn(
-        `Trash list not found for user ${userId}, soft deleting`,
-      );
+      this.logger.warn(`Trash list not found for user ${userId}, soft deleting`);
       return this.prisma.task.update({
         where: { id },
         data: {
@@ -261,10 +235,7 @@ export class TasksService {
         completed: false,
         todoList: {
           deletedAt: null,
-          OR: [
-            { ownerId: userId },
-            { shares: { some: { sharedWithId: userId } } },
-          ],
+          OR: [{ ownerId: userId }, { shares: { some: { sharedWithId: userId } } }],
         },
       },
       include: {
@@ -273,9 +244,7 @@ export class TasksService {
       },
     });
 
-    return allTasks.filter((task) =>
-      TaskOccurrenceHelper.shouldAppearOnDate(task, date),
-    );
+    return allTasks.filter((task) => TaskOccurrenceHelper.shouldAppearOnDate(task, date));
   }
 
   async getTasksWithReminders(userId: string, date: Date = new Date()) {
@@ -285,10 +254,7 @@ export class TasksService {
         completed: false,
         todoList: {
           deletedAt: null,
-          OR: [
-            { ownerId: userId },
-            { shares: { some: { sharedWithId: userId } } },
-          ],
+          OR: [{ ownerId: userId }, { shares: { some: { sharedWithId: userId } } }],
         },
       },
       include: {
@@ -297,9 +263,7 @@ export class TasksService {
       },
     });
 
-    return allTasks.filter((task) =>
-      TaskOccurrenceHelper.shouldRemindOnDate(task, date),
-    );
+    return allTasks.filter((task) => TaskOccurrenceHelper.shouldRemindOnDate(task, date));
   }
 
   /**
@@ -338,9 +302,7 @@ export class TasksService {
     // Case 2: Task was archived (completed in a system list)
     if (task.todoList.type === ListType.FINISHED) {
       if (!task.originalListId) {
-        throw new BadRequestException(
-          'Original list information not available',
-        );
+        throw new BadRequestException('Original list information not available');
       }
 
       const originalList = await this.prisma.toDoList.findFirst({
@@ -390,14 +352,8 @@ export class TasksService {
       throw new NotFoundException(`Task with ID ${id} not found`);
     }
 
-    if (
-      !allowActive &&
-      !task.deletedAt &&
-      task.todoList.type !== ListType.FINISHED
-    ) {
-      throw new BadRequestException(
-        'Only deleted or archived tasks can be permanently deleted.',
-      );
+    if (!allowActive && !task.deletedAt && task.todoList.type !== ListType.FINISHED) {
+      throw new BadRequestException('Only deleted or archived tasks can be permanently deleted.');
     }
 
     await this.prisma.step.deleteMany({ where: { taskId: id } });

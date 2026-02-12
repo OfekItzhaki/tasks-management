@@ -13,16 +13,11 @@ export class PermanentDeleteTodoListHandler
   ) {}
 
   async execute(command: PermanentDeleteTodoListCommand) {
-    const result = await this.todoListsService.permanentDelete(
-      command.id,
-      command.userId,
-    );
+    const result = await this.todoListsService.permanentDelete(command.id, command.userId);
     // Notify about permanent deletion (useful for multi-device sync)
-    await this.eventsService.broadcastListEvent(
-      command.id,
-      'list_permanently_deleted',
-      { id: command.id },
-    );
+    await this.eventsService.broadcastListEvent(command.id, 'list_permanently_deleted', {
+      id: command.id,
+    });
     return result;
   }
 }

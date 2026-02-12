@@ -26,22 +26,11 @@ export const fileStorageConfig = {
     file: { mimetype: string },
     cb: (error: Error | null, acceptFile: boolean) => void,
   ) => {
-    const allowedMimeTypes = [
-      'image/jpeg',
-      'image/jpg',
-      'image/png',
-      'image/gif',
-      'image/webp',
-    ];
+    const allowedMimeTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
     if (allowedMimeTypes.includes(file.mimetype)) {
       cb(null, true);
     } else {
-      cb(
-        new Error(
-          `Invalid file type. Allowed types: ${allowedMimeTypes.join(', ')}`,
-        ),
-        false,
-      );
+      cb(new Error(`Invalid file type. Allowed types: ${allowedMimeTypes.join(', ')}`), false);
     }
   },
   limits: {

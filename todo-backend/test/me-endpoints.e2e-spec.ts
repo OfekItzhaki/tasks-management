@@ -48,10 +48,7 @@ describe('Me Endpoints (e2e)', () => {
       });
       await (prisma.listShare as any).deleteMany({
         where: {
-          OR: [
-            { sharedWithId: { in: userIds } },
-            { toDoList: { ownerId: { in: userIds } } },
-          ],
+          OR: [{ sharedWithId: { in: userIds } }, { toDoList: { ownerId: { in: userIds } } }],
         },
       });
       await (prisma.toDoList as any).deleteMany({
@@ -64,22 +61,18 @@ describe('Me Endpoints (e2e)', () => {
     }
 
     // Create test user and login
-    const userResponse = await request(app.getHttpServer())
-      .post('/users')
-      .send({
-        email: 'metest@example.com',
-        password: 'password123',
-        name: 'Me Test User',
-      });
+    const userResponse = await request(app.getHttpServer()).post('/users').send({
+      email: 'metest@example.com',
+      password: 'password123',
+      name: 'Me Test User',
+    });
 
     userId = userResponse.body.id;
 
-    const loginResponse = await request(app.getHttpServer())
-      .post('/auth/login')
-      .send({
-        email: 'metest@example.com',
-        password: 'password123',
-      });
+    const loginResponse = await request(app.getHttpServer()).post('/auth/login').send({
+      email: 'metest@example.com',
+      password: 'password123',
+    });
 
     authToken = loginResponse.body.accessToken;
 
@@ -116,10 +109,7 @@ describe('Me Endpoints (e2e)', () => {
         });
         await (prisma.listShare as any).deleteMany({
           where: {
-            OR: [
-              { sharedWithId: { in: userIds } },
-              { toDoList: { ownerId: { in: userIds } } },
-            ],
+            OR: [{ sharedWithId: { in: userIds } }, { toDoList: { ownerId: { in: userIds } } }],
           },
         });
         await (prisma.toDoList as any).deleteMany({
@@ -143,9 +133,7 @@ describe('Me Endpoints (e2e)', () => {
         .expect((res) => {
           expect(Array.isArray(res.body)).toBe(true);
           expect(res.body.length).toBeGreaterThanOrEqual(1);
-          const hasCreatedList = res.body.some(
-            (list: any) => list.id === listId,
-          );
+          const hasCreatedList = res.body.some((list: any) => list.id === listId);
           expect(hasCreatedList).toBe(true);
         });
     });
@@ -163,9 +151,7 @@ describe('Me Endpoints (e2e)', () => {
         .expect(200)
         .expect((res) => {
           expect(Array.isArray(res.body)).toBe(true);
-          const hasCreatedTask = res.body.some(
-            (task: any) => task.id === taskId,
-          );
+          const hasCreatedTask = res.body.some((task: any) => task.id === taskId);
           expect(hasCreatedTask).toBe(true);
         });
     });

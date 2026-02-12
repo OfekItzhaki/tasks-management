@@ -1,7 +1,9 @@
 # Horizon Flux
+
 > by **Ofek Labs** 🧪
 
 ## Overview
+
 **Horizon Flux** is a powerful, full-stack task management solution designed to help you organize your life with clarity and precision. Built with a modern tech stack, it seamlessly syncs across Web and Mobile.
 
 - **Lists & tasks** — Daily, weekly, monthly, yearly, and custom lists with tasks, steps, and due dates.
@@ -11,12 +13,12 @@
 
 ## Repo structure
 
-| Package            | Description                                      |
-|--------------------|--------------------------------------------------|
-| `todo-backend`     | NestJS API (Prisma, JWT auth, reminderConfig)   |
-| `frontend-services`| Shared API client, types, **reminders module**  |
-| `web-app`          | React + Vite SPA                                |
-| `mobile-app`       | React Native + Expo                             |
+| Package             | Description                                    |
+| ------------------- | ---------------------------------------------- |
+| `todo-backend`      | NestJS API (Prisma, JWT auth, reminderConfig)  |
+| `frontend-services` | Shared API client, types, **reminders module** |
+| `web-app`           | React + Vite SPA                               |
+| `mobile-app`        | React Native + Expo                            |
 
 ### Local Development (Getting Started)
 
@@ -39,6 +41,7 @@ To get the project running locally for demoing or testing:
    - Start web-app: `cd ../web-app && npm run dev`
 
 ### 🔑 Key Features
+
 - **100% Test Stability**: Industrial-grade test coverage (96+ tests) across all core services.
 - **Forgot Password**: Full-stack recovery flow with OTP verification and secure reset tokens.
 - **Industrial Standards**: Security headers (`helmet`), Rate Limiting (`throttler`), and Health Monitoring (`/health`).

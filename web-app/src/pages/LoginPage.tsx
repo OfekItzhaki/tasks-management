@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
@@ -41,13 +41,11 @@ export default function LoginPage() {
   const navigate = useNavigate();
 
   const [resendCooldown, setResendCooldown] = useState(0);
-
   // CAPTCHA handlers
   const handleCaptchaSuccess = (token: string) => {
     setCaptchaToken(token);
     setError(''); // Clear any previous errors
   };
-
   const handleCaptchaError = (error: string) => {
     setError(error);
     setCaptchaToken('');
@@ -73,7 +71,9 @@ export default function LoginPage() {
       setResendCooldown(30); // 30 seconds cooldown
       setError('');
     } catch (err: unknown) {
-      setError(getErrorMessage(err, 'Failed to resend code'));
+      setError(
+        getErrorMessage(err, t('login.failed') || 'Failed to resend code')
+      );
     } finally {
       setLoading(false);
     }
@@ -176,6 +176,8 @@ export default function LoginPage() {
   const handleForgotPasswordStart = async (e?: React.FormEvent) => {
     e?.preventDefault();
     if (!email) return setError('Email is required');
+    setLoading(true);
+    setError('');
 
     // Prevent submission if CAPTCHA token is missing when required
     const siteKey = getTurnstileSiteKey();
@@ -184,8 +186,6 @@ export default function LoginPage() {
       return;
     }
 
-    setLoading(true);
-    setError('');
     try {
       await authService.forgotPassword(email, captchaToken);
       setResetStep(2);
@@ -380,10 +380,7 @@ export default function LoginPage() {
                               : handleForgotPasswordStart
                           }
                           disabled={loading || !email.includes('@')}
-                          aria-label={
-                            isRegistering ? 'Verify Email' : 'Reset Password'
-                          }
-                          className="px-4 py-1.5 bg-accent hover:bg-accent/90 text-white text-[10px] font-black uppercase tracking-widest rounded-lg shadow-lg shadow-accent/20 transition-all disabled:opacity-50 disabled:grayscale active:scale-95"
+                          className="px-4 py-1.5 bg-accent hover:bg-accent/90 text-white text-[10px] font-black uppercase tracking-widest rounded-lg shadow-lg shadow-accent/20 transition-all disabled:opacity-50"
                         >
                           {loading ? (
                             <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
@@ -400,13 +397,14 @@ export default function LoginPage() {
               )}
 
               {/* Step 2: OTP */}
-              {isRegistering && regStep === 2 && (
+              {((isRegistering && regStep === 2) ||
+                (isResettingPassword && resetStep === 2)) && (
                 <div className="group animate-scale-in">
                   <label
                     htmlFor="otp"
                     className="block text-xs font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2 ml-1 transition-colors group-focus-within:text-violet-600 dark:group-focus-within:text-violet-400"
                   >
-                    6-Digit Code
+                    {isResettingPassword ? 'Reset Code' : '6-Digit Code'}
                   </label>
                   <div className="relative">
                     <input
@@ -422,8 +420,11 @@ export default function LoginPage() {
                         const val = e.target.value.replace(/\D/g, '');
                         setOtp(val);
                         if (val.length === 6) {
-                          // Auto trigger verification
-                          void handleRegisterVerify(undefined, val);
+                          if (isRegistering) {
+                            void handleRegisterVerify(undefined, val);
+                          } else {
+                            void handleForgotPasswordVerify(undefined, val);
+                          }
                         }
                       }}
                       className="premium-input px-11 tracking-[0.5em] text-center font-bold text-lg"
@@ -445,11 +446,7 @@ export default function LoginPage() {
                       </svg>
                     </div>
                   </div>
-                  <p className="mt-3 text-center text-[10px] font-bold text-tertiary uppercase tracking-widest">
-                    Automatically verifying when filled...
-                  </p>
 
-                  {/* Resend Code Button */}
                   <div className="mt-4 flex justify-center">
                     <button
                       type="button"
@@ -465,72 +462,11 @@ export default function LoginPage() {
                 </div>
               )}
 
-              {/* Reset Password: Step 2 OTP */}
-              {isResettingPassword && resetStep === 2 && (
-                <div className="group animate-scale-in">
-                  <label
-                    htmlFor="otp"
-                    className="block text-xs font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2 ml-1 transition-colors group-focus-within:text-violet-600 dark:group-focus-within:text-violet-400"
-                  >
-                    Reset Code
-                  </label>
-                  <div className="relative">
-                    <input
-                      id="otp"
-                      name="otp"
-                      type="text"
-                      inputMode="numeric"
-                      autoComplete="one-time-code"
-                      maxLength={6}
-                      required
-                      value={otp}
-                      onChange={(e) => {
-                        const val = e.target.value.replace(/\D/g, '');
-                        setOtp(val);
-                        if (val.length === 6) {
-                          void handleForgotPasswordVerify(undefined, val);
-                        }
-                      }}
-                      className="premium-input px-11 tracking-[0.5em] text-center font-bold text-lg"
-                      placeholder="000000"
-                    />
-                    <div className="absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400 group-focus-within:text-violet-500 transition-colors">
-                      <svg
-                        className="w-5 h-5"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-                        />
-                      </svg>
-                    </div>
-                  </div>
-                  {/* Resend Code Button */}
-                  <div className="mt-4 flex justify-center">
-                    <button
-                      type="button"
-                      onClick={handleResendCode}
-                      disabled={loading || resendCooldown > 0}
-                      className="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-violet-600 dark:hover:text-violet-400 transition-all disabled:opacity-50"
-                    >
-                      {resendCooldown > 0
-                        ? `Resend in ${resendCooldown}s`
-                        : 'Resend Code'}
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {/* Login, Registration Step 3, or Reset Step 3: Password */}
+              {/* Step 3: Password */}
               {((!isRegistering && !isResettingPassword) ||
                 (isRegistering && regStep === 3) ||
                 (isResettingPassword && resetStep === 3)) && (
-                <div className="group">
+                <div className="group animate-scale-in">
                   <label
                     htmlFor="password"
                     className="block text-xs font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2 ml-1 transition-colors group-focus-within:text-violet-600 dark:group-focus-within:text-violet-400"
@@ -606,12 +542,12 @@ export default function LoginPage() {
                           </svg>
                         )}
                       </button>
-                      {!isRegistering && (
+                      {!isRegistering && !isResettingPassword && (
                         <button
                           type="submit"
                           disabled={loading || !password}
                           aria-label="Sign In"
-                          className="p-2 bg-accent hover:bg-accent/90 text-white rounded-lg shadow-lg shadow-accent/20 transition-all disabled:opacity-50 disabled:grayscale active:scale-95"
+                          className="p-2 bg-accent hover:bg-accent/90 text-white rounded-lg shadow-lg shadow-accent/20 transition-all active:scale-95 disabled:opacity-50"
                         >
                           {loading ? (
                             <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
@@ -653,10 +589,10 @@ export default function LoginPage() {
                 </div>
               )}
 
-              {/* Registration Step 3 or Reset Step 3 only: Confirm Password */}
+              {/* Step 3: Confirm Password (Registration or Reset) */}
               {((isRegistering && regStep === 3) ||
                 (isResettingPassword && resetStep === 3)) && (
-                <div className="group">
+                <div className="group animate-scale-in">
                   <label
                     htmlFor="passwordConfirm"
                     className="block text-xs font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2 ml-1 transition-colors group-focus-within:text-violet-600 dark:group-focus-within:text-violet-400"
@@ -689,13 +625,11 @@ export default function LoginPage() {
                         />
                       </svg>
                     </div>
-                    {/* Integrated Complete Button */}
                     <div className="absolute inset-y-0 right-2 flex items-center">
                       <button
                         type="submit"
                         disabled={loading || !passwordConfirm}
-                        aria-label="Complete Registration"
-                        className="p-2 bg-accent hover:bg-accent/90 text-white rounded-lg shadow-lg shadow-accent/20 transition-all disabled:opacity-50 disabled:grayscale active:scale-95"
+                        className="p-2 bg-accent hover:bg-accent/90 text-white rounded-lg shadow-lg shadow-accent/20 transition-all active:scale-95 disabled:opacity-50"
                       >
                         {loading ? (
                           <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
@@ -720,30 +654,31 @@ export default function LoginPage() {
                 </div>
               )}
             </div>
-
-            <div className="flex flex-col items-center text-center gap-6 mt-8">
-              <button
-                type="button"
-                onClick={() => {
-                  if (isResettingPassword) {
-                    setIsResettingPassword(false);
-                    setResetStep(1);
-                  } else {
-                    setIsRegistering(!isRegistering);
-                    setRegStep(1);
-                  }
-                  setError('');
-                }}
-                className="text-[11px] font-bold text-slate-400 hover:text-violet-600 dark:hover:text-violet-400 transition-all uppercase tracking-[0.2em] py-2 px-4 rounded-xl hover:bg-violet-500/5"
-              >
-                {isResettingPassword
-                  ? 'Back to Sign In'
-                  : isRegistering
-                    ? 'Back to Sign In'
-                    : "Don't have an account? Sign Up"}
-              </button>
-            </div>
           </form>
+        </div>
+
+        {/* Footer Toggle */}
+        <div className="flex flex-col items-center text-center gap-6 mt-8">
+          <button
+            type="button"
+            onClick={() => {
+              if (isResettingPassword) {
+                setIsResettingPassword(false);
+                setResetStep(1);
+              } else {
+                setIsRegistering(!isRegistering);
+                setRegStep(1);
+              }
+              setError('');
+            }}
+            className="text-[11px] font-bold text-slate-400 hover:text-violet-600 dark:hover:text-violet-400 transition-all uppercase tracking-[0.2em] py-2 px-4 rounded-xl hover:bg-violet-500/5"
+          >
+            {isResettingPassword
+              ? 'Back to Sign In'
+              : isRegistering
+                ? 'Back to Sign In'
+                : "Don't have an account? Sign Up"}
+          </button>
         </div>
 
         <div className="mt-12 flex flex-col items-center">

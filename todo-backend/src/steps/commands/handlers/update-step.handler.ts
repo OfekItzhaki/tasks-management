@@ -22,10 +22,7 @@ export class UpdateStepHandler implements ICommandHandler<UpdateStepCommand> {
           deletedAt: null,
           todoList: {
             deletedAt: null,
-            OR: [
-              { ownerId: userId },
-              { shares: { some: { sharedWithId: userId } } },
-            ],
+            OR: [{ ownerId: userId }, { shares: { some: { sharedWithId: userId } } }],
           },
         },
       },

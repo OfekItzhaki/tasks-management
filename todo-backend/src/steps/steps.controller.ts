@@ -1,28 +1,11 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Patch,
-  Post,
-  UseGuards,
-} from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiBearerAuth,
-} from '@nestjs/swagger';
+import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { CreateStepDto } from './dto/create-step.dto';
 import { UpdateStepDto } from './dto/update-step.dto';
 import { ReorderStepsDto } from './dto/reorder-steps.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import {
-  CurrentUser,
-  CurrentUserPayload,
-} from '../auth/current-user.decorator';
+import { CurrentUser, CurrentUserPayload } from '../auth/current-user.decorator';
 import { CreateStepCommand } from './commands/create-step.command';
 import { GetStepsQuery } from './queries/get-steps.query';
 import { UpdateStepCommand } from './commands/update-step.command';
@@ -48,19 +31,14 @@ export class StepsController {
     @Body() createStepDto: CreateStepDto,
     @CurrentUser() user: CurrentUserPayload,
   ) {
-    return this.commandBus.execute(
-      new CreateStepCommand(taskId, createStepDto, user.userId),
-    );
+    return this.commandBus.execute(new CreateStepCommand(taskId, createStepDto, user.userId));
   }
 
   @Get('tasks/:taskId/steps')
   @ApiOperation({ summary: 'Get all steps for a task' })
   @ApiResponse({ status: 200, description: 'Returns ordered steps' })
   @ApiResponse({ status: 404, description: 'Task not found' })
-  findAll(
-    @Param('taskId') taskId: string,
-    @CurrentUser() user: CurrentUserPayload,
-  ) {
+  findAll(@Param('taskId') taskId: string, @CurrentUser() user: CurrentUserPayload) {
     return this.queryBus.execute(new GetStepsQuery(taskId, user.userId));
   }
 
@@ -73,9 +51,7 @@ export class StepsController {
     @Body() updateStepDto: UpdateStepDto,
     @CurrentUser() user: CurrentUserPayload,
   ) {
-    return this.commandBus.execute(
-      new UpdateStepCommand(stepId, updateStepDto, user.userId),
-    );
+    return this.commandBus.execute(new UpdateStepCommand(stepId, updateStepDto, user.userId));
   }
 
   @Delete('steps/:id')
@@ -96,8 +72,6 @@ export class StepsController {
     @Body() { stepIds }: ReorderStepsDto,
     @CurrentUser() user: CurrentUserPayload,
   ) {
-    return this.commandBus.execute(
-      new ReorderStepsCommand(taskId, user.userId, stepIds),
-    );
+    return this.commandBus.execute(new ReorderStepsCommand(taskId, user.userId, stepIds));
   }
 }

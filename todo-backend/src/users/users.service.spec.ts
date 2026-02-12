@@ -1,9 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import {
-  NotFoundException,
-  ForbiddenException,
-  BadRequestException,
-} from '@nestjs/common';
+import { NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
 import UsersService from './users.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { EmailService } from '../email/email.service';
@@ -76,9 +72,7 @@ describe('UsersService', () => {
       };
 
       (bcrypt.hash as jest.Mock).mockResolvedValue('hashed');
-      (crypto.randomBytes as unknown as jest.Mock).mockReturnValue(
-        Buffer.from('mock-token-bytes'),
-      );
+      (crypto.randomBytes as unknown as jest.Mock).mockReturnValue(Buffer.from('mock-token-bytes'));
       mockPrismaService.user.create.mockResolvedValue(mockUser);
       mockPrismaService.toDoList.createMany.mockResolvedValue({ count: 5 });
 
@@ -136,9 +130,7 @@ describe('UsersService', () => {
       };
 
       (bcrypt.hash as jest.Mock).mockResolvedValue('hashed');
-      (crypto.randomBytes as unknown as jest.Mock).mockReturnValue(
-        Buffer.from('mock-token-bytes'),
-      );
+      (crypto.randomBytes as unknown as jest.Mock).mockReturnValue(Buffer.from('mock-token-bytes'));
       mockPrismaService.user.create.mockResolvedValue(mockUser);
       mockPrismaService.toDoList.createMany.mockResolvedValue({ count: 5 });
 
@@ -178,9 +170,7 @@ describe('UsersService', () => {
     });
 
     it('should throw ForbiddenException if accessing another user', async () => {
-      await expect(service.getUser('1', '2')).rejects.toThrow(
-        ForbiddenException,
-      );
+      await expect(service.getUser('1', '2')).rejects.toThrow(ForbiddenException);
       await expect(service.getUser('1', '2')).rejects.toThrow(
         'You can only access your own profile',
       );
@@ -189,9 +179,7 @@ describe('UsersService', () => {
     it('should throw NotFoundException if user not found', async () => {
       mockPrismaService.user.findFirst.mockResolvedValue(null);
 
-      await expect(service.getUser('999', '999')).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(service.getUser('999', '999')).rejects.toThrow(NotFoundException);
     });
   });
 
@@ -225,11 +213,7 @@ describe('UsersService', () => {
         name: 'New Name',
       });
 
-      const result = await service.updateUser(
-        userId,
-        updateDto,
-        requestingUserId,
-      );
+      const result = await service.updateUser(userId, updateDto, requestingUserId);
 
       expect(mockPrismaService.user.update).toHaveBeenCalled();
       expect(result.name).toBe('New Name');
@@ -310,9 +294,7 @@ describe('UsersService', () => {
     it('should throw BadRequestException for invalid token', async () => {
       mockPrismaService.user.findFirst.mockResolvedValue(null);
 
-      await expect(service.verifyEmail('invalid-token')).rejects.toThrow(
-        BadRequestException,
-      );
+      await expect(service.verifyEmail('invalid-token')).rejects.toThrow(BadRequestException);
       await expect(service.verifyEmail('invalid-token')).rejects.toThrow(
         'Invalid or expired verification code',
       );
@@ -335,12 +317,8 @@ describe('UsersService', () => {
 
       mockPrismaService.user.findFirst.mockResolvedValue(mockUser);
 
-      await expect(service.verifyEmail('123456')).rejects.toThrow(
-        BadRequestException,
-      );
-      await expect(service.verifyEmail('123456')).rejects.toThrow(
-        'Email is already verified',
-      );
+      await expect(service.verifyEmail('123456')).rejects.toThrow(BadRequestException);
+      await expect(service.verifyEmail('123456')).rejects.toThrow('Email is already verified');
     });
   });
 

@@ -25,8 +25,7 @@ export class HealthController {
         },
       };
     } catch (error: unknown) {
-      const errorMessage =
-        error instanceof Error ? error.message : String(error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
       return {
         status: 'error',
         timestamp: new Date().toISOString(),
@@ -34,8 +33,7 @@ export class HealthController {
           database: 'down',
           api: 'up',
         },
-        error:
-          process.env.NODE_ENV === 'development' ? errorMessage : undefined,
+        error: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
       };
     }
   }

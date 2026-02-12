@@ -22,10 +22,7 @@ export class RemoveStepHandler implements ICommandHandler<RemoveStepCommand> {
           deletedAt: null,
           todoList: {
             deletedAt: null,
-            OR: [
-              { ownerId: userId },
-              { shares: { some: { sharedWithId: userId } } },
-            ],
+            OR: [{ ownerId: userId }, { shares: { some: { sharedWithId: userId } } }],
           },
         },
       },

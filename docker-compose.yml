@@ -4,11 +4,11 @@ services:
     image: postgres:15-alpine
     container_name: horizon-db
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: horizon_tasks
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-horizon_tasks}
     ports:
-      - "${DB_PORT:-5433}:5432"
+      - '${DB_PORT:-5433}:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
@@ -19,7 +19,7 @@ services:
     image: redis:7-alpine
     container_name: horizon-redis
     ports:
-      - "${REDIS_PORT:-6379}:6379"
+      - '${REDIS_PORT:-6379}:6379'
     networks:
       - horizon-network
 
@@ -30,7 +30,7 @@ services:
     environment:
       ACCEPT_EULA: Y
     ports:
-      - "${SEQ_PORT:-5341}:80"
+      - '${SEQ_PORT:-5341}:80'
     networks:
       - horizon-network
 

@@ -1,28 +1,8 @@
-import {
-  IsBoolean,
-  IsIn,
-  IsInt,
-  IsOptional,
-  IsString,
-  Matches,
-  Min,
-  Max,
-} from 'class-validator';
+import { IsBoolean, IsIn, IsInt, IsOptional, IsString, Matches, Min, Max } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
-const TIMEFRAME = [
-  'SPECIFIC_DATE',
-  'EVERY_DAY',
-  'EVERY_WEEK',
-  'EVERY_MONTH',
-  'EVERY_YEAR',
-];
-const SPECIFIC_DATE_OPTIONS = [
-  'START_OF_WEEK',
-  'START_OF_MONTH',
-  'START_OF_YEAR',
-  'CUSTOM_DATE',
-];
+const TIMEFRAME = ['SPECIFIC_DATE', 'EVERY_DAY', 'EVERY_WEEK', 'EVERY_MONTH', 'EVERY_YEAR'];
+const SPECIFIC_DATE_OPTIONS = ['START_OF_WEEK', 'START_OF_MONTH', 'START_OF_YEAR', 'CUSTOM_DATE'];
 
 export class ReminderConfigItemDto {
   @ApiPropertyOptional({ description: 'Unique id for the reminder entry' })

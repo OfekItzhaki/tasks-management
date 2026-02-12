@@ -24,10 +24,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import UsersService from './users.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import {
-  CurrentUser,
-  CurrentUserPayload,
-} from '../auth/current-user.decorator';
+import { CurrentUser, CurrentUserPayload } from '../auth/current-user.decorator';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface CloudinaryResponse {
@@ -82,10 +79,7 @@ class UsersController {
     description: 'Forbidden - can only access own profile',
   })
   @ApiResponse({ status: 404, description: 'User not found' })
-  async getUser(
-    @Param('id') id: string,
-    @CurrentUser() user: CurrentUserPayload,
-  ) {
+  async getUser(@Param('id') id: string, @CurrentUser() user: CurrentUserPayload) {
     return this.userService.getUser(id, user.userId);
   }
 
@@ -159,11 +153,7 @@ class UsersController {
     const secureUrl = uploadResponse.secure_url as string;
 
     // Update user profile with the Cloudinary secure URL
-    return this.userService.updateUser(
-      id,
-      { profilePicture: secureUrl },
-      user.userId,
-    );
+    return this.userService.updateUser(id, { profilePicture: secureUrl }, user.userId);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -175,10 +165,7 @@ class UsersController {
     status: 403,
     description: 'Forbidden - can only delete own account',
   })
-  async deleteUser(
-    @Param('id') id: string,
-    @CurrentUser() user: CurrentUserPayload,
-  ) {
+  async deleteUser(@Param('id') id: string, @CurrentUser() user: CurrentUserPayload) {
     return this.userService.deleteUser(id, user.userId);
   }
 }

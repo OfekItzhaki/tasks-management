@@ -72,9 +72,7 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const listId = this.userPresence.get(client.id);
     if (listId) {
       this.userPresence.delete(client.id);
-      this.server
-        .to(`list:${listId}`)
-        .emit('user-left-list', { userId, listId });
+      this.server.to(`list:${listId}`).emit('user-left-list', { userId, listId });
     }
 
     this.logger.log(`Client disconnected: ${client.id}`);
@@ -87,9 +85,7 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     void client.join(`list:${listId}`);
     this.userPresence.set(client.id, listId);
     this.logger.log(`User ${userId} entered list ${listId}`);
-    this.server
-      .to(`list:${listId}`)
-      .emit('user-entered-list', { userId, listId });
+    this.server.to(`list:${listId}`).emit('user-entered-list', { userId, listId });
   }
 
   @SubscribeMessage('leave-list')

@@ -336,7 +336,7 @@ export default function ListsScreen() {
   useFocusEffect(
     React.useCallback(() => {
       loadLists();
-    }, [loadLists])
+    }, [loadLists]),
   );
 
   const onRefresh = () => {
@@ -414,16 +414,16 @@ export default function ListsScreen() {
           style={styles.headerGradient}
         />
         <Text style={styles.title}>My Lists</Text>
-        <Text style={styles.listCount}>{lists.length} list{lists.length !== 1 ? 's' : ''}</Text>
+        <Text style={styles.listCount}>
+          {lists.length} list{lists.length !== 1 ? 's' : ''}
+        </Text>
       </View>
 
       <FlatList
         data={lists}
         keyExtractor={(item) => item.id.toString()}
         showsVerticalScrollIndicator={true}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         renderItem={({ item }) => (
           <TouchableOpacity
             style={styles.listItem}
@@ -431,22 +431,16 @@ export default function ListsScreen() {
             onLongPress={() => {
               // System lists (like Finished Tasks) cannot be edited or deleted
               if (item.isSystem) {
-                Alert.alert(
-                  item.name,
-                  'This is a system list and cannot be modified.',
-                  [{ text: 'OK' }],
-                );
+                Alert.alert(item.name, 'This is a system list and cannot be modified.', [
+                  { text: 'OK' },
+                ]);
                 return;
               }
-              Alert.alert(
-                item.name,
-                'Choose an action',
-                [
-                  { text: 'Cancel', style: 'cancel' },
-                  { text: 'Edit', onPress: () => handleEditList(item) },
-                  { text: 'Delete', style: 'destructive', onPress: () => handleDeleteList(item) },
-                ],
-              );
+              Alert.alert(item.name, 'Choose an action', [
+                { text: 'Cancel', style: 'cancel' },
+                { text: 'Edit', onPress: () => handleEditList(item) },
+                { text: 'Delete', style: 'destructive', onPress: () => handleDeleteList(item) },
+              ]);
             }}
           >
             <View style={styles.listContent}>
@@ -478,7 +472,13 @@ export default function ListsScreen() {
           colors={['#6366f1', '#a855f7']}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
-          style={{ width: '100%', height: '100%', borderRadius: 34, justifyContent: 'center', alignItems: 'center' }}
+          style={{
+            width: '100%',
+            height: '100%',
+            borderRadius: 34,
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
         >
           <Text style={styles.fabText}>+</Text>
         </LinearGradient>
@@ -493,9 +493,7 @@ export default function ListsScreen() {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>
-              {editingList ? 'Edit List' : 'Create New List'}
-            </Text>
+            <Text style={styles.modalTitle}>{editingList ? 'Edit List' : 'Create New List'}</Text>
 
             <TextInput
               style={styles.input}
@@ -537,4 +535,3 @@ export default function ListsScreen() {
     </View>
   );
 }
-

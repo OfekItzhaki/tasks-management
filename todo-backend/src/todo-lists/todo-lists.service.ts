@@ -201,24 +201,15 @@ export class TodoListsService {
     return list;
   }
 
-  async update(
-    id: string,
-    updateToDoListDto: UpdateToDoListDto,
-    userId: string,
-  ) {
-    const list = await this.taskAccess.ensureListAccess(
-      id,
-      userId,
-      ShareRole.EDITOR,
-    );
+  async update(id: string, updateToDoListDto: UpdateToDoListDto, userId: string) {
+    const list = await this.taskAccess.ensureListAccess(id, userId, ShareRole.EDITOR);
 
     const updated = await this.prisma.toDoList.update({
       where: { id },
       data: {
         name: updateToDoListDto.name ?? list.name,
         taskBehavior: updateToDoListDto.taskBehavior ?? list.taskBehavior,
-        completionPolicy:
-          updateToDoListDto.completionPolicy ?? list.completionPolicy,
+        completionPolicy: updateToDoListDto.completionPolicy ?? list.completionPolicy,
       },
     });
     this.logger.log(`List updated: listId=${id} userId=${userId}`);

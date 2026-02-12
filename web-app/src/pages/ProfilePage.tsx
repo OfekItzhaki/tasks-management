@@ -51,7 +51,10 @@ export default function ProfilePage() {
       // console.error('Failed to update notification frequency:', error);
       // Revert on error
       setUser({ ...user, notificationFrequency: previousFrequency });
-      alert('Failed to update notification frequency. Please try again.');
+      alert(
+        t('profile.updateFailed') ||
+          'Failed to update notification frequency. Please try again.'
+      );
     }
   };
 
@@ -68,7 +71,10 @@ export default function ProfilePage() {
       setUser(updatedUser);
     } catch {
       setUser({ ...user, trashRetentionDays: previousDays });
-      alert('Failed to update trash retention. Please try again.');
+      alert(
+        t('profile.updateFailed') ||
+          'Failed to update trash retention. Please try again.'
+      );
     }
   };
 
@@ -265,7 +271,7 @@ export default function ProfilePage() {
 
               <div className="space-y-4">
                 <label className="text-xs font-semibold uppercase tracking-wider text-tertiary">
-                  {t('profile.trashRetention', {
+                  {t('profile.trashRetention.title', {
                     defaultValue: 'Trash Retention (Days)',
                   })}
                 </label>

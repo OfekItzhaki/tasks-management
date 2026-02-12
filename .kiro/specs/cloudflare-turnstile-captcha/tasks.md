@@ -5,6 +5,7 @@
 This implementation plan breaks down the Cloudflare Turnstile CAPTCHA integration into discrete coding tasks. The implementation will add CAPTCHA protection to login, registration, and forgot password flows in both the web frontend and backend API.
 
 The backend already has the core verification logic implemented (`AuthService.verifyTurnstile()` and controller checks), so the focus will be on:
+
 1. Frontend widget integration
 2. Frontend services layer updates
 3. Backend DTO updates for forgot password
@@ -27,7 +28,7 @@ The backend already has the core verification logic implemented (`AuthService.ve
     - Expose ref for reset functionality
     - _Requirements: 1.1, 6.1_
 
-  - [ ]* 2.2 Write unit tests for TurnstileWidget
+  - [ ]\* 2.2 Write unit tests for TurnstileWidget
     - Test component renders with correct site key
     - Test onSuccess callback is called with token
     - Test onError callback is called on failure
@@ -65,7 +66,7 @@ The backend already has the core verification logic implemented (`AuthService.ve
     - Clear token after failed attempt
     - _Requirements: 1.4, 5.5_
 
-  - [ ]* 3.5 Write unit tests for LoginPage integration
+  - [ ]\* 3.5 Write unit tests for LoginPage integration
     - Test captcha token is stored in state on success
     - Test login includes captcha token in request
     - Test registration includes captcha token in request
@@ -94,7 +95,7 @@ The backend already has the core verification logic implemented (`AuthService.ve
     - Export from types/index.ts
     - _Requirements: 4.7_
 
-  - [ ]* 5.4 Write unit tests for type definitions
+  - [ ]\* 5.4 Write unit tests for type definitions
     - Verify LoginDto includes captchaToken field
     - Verify RegisterStartDto includes captchaToken field
     - Verify ForgotPasswordDto includes captchaToken field
@@ -116,11 +117,11 @@ The backend already has the core verification logic implemented (`AuthService.ve
     - Include captchaToken in API request payload
     - _Requirements: 4.3, 4.4_
 
-  - [ ]* 6.4 Write property test for AuthService token inclusion
+  - [ ]\* 6.4 Write property test for AuthService token inclusion
     - **Property 1: Authentication Requests Include CAPTCHA Token**
     - **Validates: Requirements 1.2, 1.3, 1.4, 4.4**
 
-  - [ ]* 6.5 Write unit tests for AuthService methods
+  - [ ]\* 6.5 Write unit tests for AuthService methods
     - Test login includes captchaToken when provided
     - Test registerStart includes captchaToken when provided
     - Test forgotPassword includes captchaToken when provided
@@ -134,7 +135,7 @@ The backend already has the core verification logic implemented (`AuthService.ve
     - Add ApiProperty documentation
     - _Requirements: 4.7_
 
-  - [ ]* 7.2 Write unit tests for DTO validation
+  - [ ]\* 7.2 Write unit tests for DTO validation
     - Test ForgotPasswordDto accepts optional captchaToken
     - Test validation passes with and without captchaToken
     - _Requirements: 4.7_
@@ -147,7 +148,7 @@ The backend already has the core verification logic implemented (`AuthService.ve
     - Throw BadRequestException if token required but missing
     - _Requirements: 2.3_
 
-  - [ ]* 8.2 Write unit tests for controller verification logic
+  - [ ]\* 8.2 Write unit tests for controller verification logic
     - Test forgotPassword calls verifyTurnstile when token provided
     - Test forgotPassword throws error when token required but missing
     - Test forgotPassword proceeds without token when secret key not set
@@ -160,69 +161,69 @@ The backend already has the core verification logic implemented (`AuthService.ve
   - Ask the user if questions arise
 
 - [ ] 10. Write property-based tests for backend verification
-  - [ ]* 10.1 Write property test for verification before authentication
+  - [ ]\* 10.1 Write property test for verification before authentication
     - **Property 3: Verification Before Authentication**
     - **Validates: Requirements 2.1, 2.2, 2.3**
 
-  - [ ]* 10.2 Write property test for failed verification response
+  - [ ]\* 10.2 Write property test for failed verification response
     - **Property 4: Failed Verification Returns 403**
     - **Validates: Requirements 2.4, 2.5**
 
-  - [ ]* 10.3 Write property test for server-side verification
+  - [ ]\* 10.3 Write property test for server-side verification
     - **Property 10: Server-Side Verification Required**
     - **Validates: Requirements 9.3**
 
-  - [ ]* 10.4 Write property test for secret key exposure
+  - [ ]\* 10.4 Write property test for secret key exposure
     - **Property 8: Secret Key Never Exposed**
     - **Validates: Requirements 9.1**
 
-  - [ ]* 10.5 Write property test for single-use tokens
+  - [ ]\* 10.5 Write property test for single-use tokens
     - **Property 9: Single-Use Token Validation**
     - **Validates: Requirements 9.2**
 
-  - [ ]* 10.6 Write property test for verification logging
+  - [ ]\* 10.6 Write property test for verification logging
     - **Property 11: Failed Verification Logging**
     - **Validates: Requirements 9.5**
 
-  - [ ]* 10.7 Write property test for network error handling
+  - [ ]\* 10.7 Write property test for network error handling
     - **Property 12: Network Error Handling**
     - **Validates: Requirements 10.1**
 
 - [ ] 11. Write property-based tests for frontend behavior
-  - [ ]* 11.1 Write property test for token storage
+  - [ ]\* 11.1 Write property test for token storage
     - **Property 2: Token Storage After Generation**
     - **Validates: Requirements 1.5**
 
-  - [ ]* 11.2 Write property test for form submission validation
+  - [ ]\* 11.2 Write property test for form submission validation
     - **Property 5: Form Submission Requires Token**
     - **Validates: Requirements 5.4, 6.4**
 
-  - [ ]* 11.3 Write property test for widget reset
+  - [ ]\* 11.3 Write property test for widget reset
     - **Property 6: Widget Reset After Authentication Failure**
     - **Validates: Requirements 5.5**
 
-  - [ ]* 11.4 Write property test for retry after network failure
+  - [ ]\* 11.4 Write property test for retry after network failure
     - **Property 13: Retry After Network Failure**
     - **Validates: Requirements 10.3**
 
 - [ ] 12. Write integration tests
-  - [ ]* 12.1 Write end-to-end login flow test
+  - [ ]\* 12.1 Write end-to-end login flow test
     - Test complete login with valid CAPTCHA token
     - Test login rejection with invalid token
     - Test login without token when secret key not configured
     - _Requirements: 1.2, 2.1, 5.1_
 
-  - [ ]* 12.2 Write end-to-end registration flow test
+  - [ ]\* 12.2 Write end-to-end registration flow test
     - Test complete registration with valid CAPTCHA token
     - Test registration rejection with invalid token
     - _Requirements: 1.3, 2.2, 5.1_
 
-  - [ ]* 12.3 Write end-to-end forgot password flow test
+  - [ ]\* 12.3 Write end-to-end forgot password flow test
     - Test forgot password with valid CAPTCHA token
     - Test forgot password rejection with invalid token
     - _Requirements: 1.4, 2.3, 5.1_
 
-  - [ ]* 12.4 Write widget lifecycle test
+  - [ ]\* 12.4 Write widget lifecycle test
     - Test widget render → token generation → submission → reset
     - Test token expiration and regeneration
     - _Requirements: 1.1, 1.5, 5.5_

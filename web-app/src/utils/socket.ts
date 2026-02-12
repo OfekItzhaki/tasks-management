@@ -38,7 +38,6 @@ export async function getSocket(): Promise<Socket> {
   });
 
   // Connection event handlers
-  /*
   socketInstance.on('connect', () => {
     console.log('[Socket] Connected to server');
   });
@@ -54,7 +53,6 @@ export async function getSocket(): Promise<Socket> {
   socketInstance.on('reconnect', (attemptNumber) => {
     console.log('[Socket] Reconnected after', attemptNumber, 'attempts');
   });
-  */
 
   return socketInstance;
 }

@@ -25,7 +25,11 @@ import { Task, CreateTaskDto, ListType } from '../types';
 import type { ReminderConfig } from '@tasks-management/frontend-services';
 import ReminderConfigComponent from '../components/ReminderConfig';
 import DatePicker from '../components/DatePicker';
-import { scheduleTaskReminders, cancelAllTaskNotifications, rescheduleAllReminders } from '../services/notifications.service';
+import {
+  scheduleTaskReminders,
+  cancelAllTaskNotifications,
+  rescheduleAllReminders,
+} from '../services/notifications.service';
 import { ReminderTimesStorage, ReminderAlarmsStorage } from '../utils/storage';
 import { convertRemindersToBackend } from '@tasks-management/frontend-services';
 import { formatDate } from '../utils/helpers';
@@ -58,7 +62,9 @@ export default function TasksScreen() {
   const [newTaskDescription, setNewTaskDescription] = useState('');
   const [newTaskDueDate, setNewTaskDueDate] = useState('');
   const [taskReminders, setTaskReminders] = useState<ReminderConfig[]>([]);
-  const [sortBy, setSortBy] = useState<'default' | 'dueDate' | 'completed' | 'alphabetical'>('default');
+  const [sortBy, setSortBy] = useState<'default' | 'dueDate' | 'completed' | 'alphabetical'>(
+    'default',
+  );
   const [showSortMenu, setShowSortMenu] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -71,7 +77,8 @@ export default function TasksScreen() {
   } = useQuery({
     queryKey: ['tasks', listId],
     queryFn: () => tasksService.getAll(listId),
-    select: (data: Task[]) => data.map((task: Task) => ({ ...task, completed: Boolean(task.completed) })),
+    select: (data: Task[]) =>
+      data.map((task: Task) => ({ ...task, completed: Boolean(task.completed) })),
   });
 
   const toggleTaskMutation = useMutation({
@@ -130,8 +137,8 @@ export default function TasksScreen() {
   useFocusEffect(
     React.useCallback(() => {
       loadTasks();
-      rescheduleAllReminders().catch(() => { });
-    }, [loadTasks])
+      rescheduleAllReminders().catch(() => {});
+    }, [loadTasks]),
   );
 
   const applyFilter = (tasksToFilter: Task[]): Task[] => {
@@ -139,11 +146,8 @@ export default function TasksScreen() {
       return tasksToFilter;
     }
     const query = searchQuery.toLowerCase().trim();
-    return tasksToFilter.filter((task) =>
-      task.description.toLowerCase().includes(query)
-    );
+    return tasksToFilter.filter((task) => task.description.toLowerCase().includes(query));
   };
-
 
   const filteredAndSortedTasks = React.useMemo(() => {
     let result = applyFilter(allTasks);
@@ -212,75 +216,67 @@ export default function TasksScreen() {
   };
 
   const handleDeleteTask = (task: Task) => {
-    Alert.alert(
-      'Delete Task',
-      `Are you sure you want to delete "${task.description}"?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: () => {
-            cancelAllTaskNotifications(task.id);
-            ReminderTimesStorage.removeTimesForTask(task.id);
-            ReminderAlarmsStorage.removeAlarmsForTask(task.id);
-            deleteTaskMutation.mutate(task.id);
-          },
+    Alert.alert('Delete Task', `Are you sure you want to delete "${task.description}"?`, [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: () => {
+          cancelAllTaskNotifications(task.id);
+          ReminderTimesStorage.removeTimesForTask(task.id);
+          ReminderAlarmsStorage.removeAlarmsForTask(task.id);
+          deleteTaskMutation.mutate(task.id);
         },
-      ],
-    );
+      },
+    ]);
   };
 
   const handleArchivedTaskOptions = (task: Task) => {
-    Alert.alert(
-      'Archived Task',
-      `What would you like to do with "${task.description}"?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Restore',
-          onPress: async () => {
-            try {
-              await tasksService.restore(task.id);
-              showErrorAlert('Success', null, 'Task restored to original list');
-              loadTasks();
-            } catch (error: unknown) {
-              handleApiError(error, 'Unable to restore task. Please try again.');
-            }
-          },
+    Alert.alert('Archived Task', `What would you like to do with "${task.description}"?`, [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Restore',
+        onPress: async () => {
+          try {
+            await tasksService.restore(task.id);
+            showErrorAlert('Success', null, 'Task restored to original list');
+            loadTasks();
+          } catch (error: unknown) {
+            handleApiError(error, 'Unable to restore task. Please try again.');
+          }
         },
-        {
-          text: 'Delete Forever',
-          style: 'destructive',
-          onPress: async () => {
-            Alert.alert(
-              'Permanently Delete?',
-              'This action cannot be undone. The task will be deleted forever.',
-              [
-                { text: 'Cancel', style: 'cancel' },
-                {
-                  text: 'Delete Forever',
-                  style: 'destructive',
-                  onPress: async () => {
-                    try {
-                      // Cancel all notifications for this task
-                      await cancelAllTaskNotifications(task.id);
-                      // Clean up client-side storage
-                      await ReminderTimesStorage.removeTimesForTask(task.id);
-                      await ReminderAlarmsStorage.removeAlarmsForTask(task.id);
-                      await tasksService.permanentDelete(task.id);
-                      loadTasks();
-                    } catch (error: unknown) {
-                      handleApiError(error, 'Unable to delete task. Please try again.');
-                    }
-                  },
+      },
+      {
+        text: 'Delete Forever',
+        style: 'destructive',
+        onPress: async () => {
+          Alert.alert(
+            'Permanently Delete?',
+            'This action cannot be undone. The task will be deleted forever.',
+            [
+              { text: 'Cancel', style: 'cancel' },
+              {
+                text: 'Delete Forever',
+                style: 'destructive',
+                onPress: async () => {
+                  try {
+                    // Cancel all notifications for this task
+                    await cancelAllTaskNotifications(task.id);
+                    // Clean up client-side storage
+                    await ReminderTimesStorage.removeTimesForTask(task.id);
+                    await ReminderAlarmsStorage.removeAlarmsForTask(task.id);
+                    await tasksService.permanentDelete(task.id);
+                    loadTasks();
+                  } catch (error: unknown) {
+                    handleApiError(error, 'Unable to delete task. Please try again.');
+                  }
                 },
-              ],
-            );
-          },
+              },
+            ],
+          );
         },
-      ],
-    );
+      },
+    ]);
   };
 
   if (loading) {
@@ -301,15 +297,14 @@ export default function TasksScreen() {
           style={styles.headerGradient}
         />
         <View style={styles.headerTop}>
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => navigation.goBack()}
-          >
+          <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
             <Ionicons name="arrow-back" size={20} color={colors.primary} />
           </TouchableOpacity>
           <View style={{ flex: 1, alignItems: 'center' }}>
             <Text style={styles.title}>{listName}</Text>
-            <Text style={styles.taskCount}>{filteredAndSortedTasks.length} task{filteredAndSortedTasks.length !== 1 ? 's' : ''}</Text>
+            <Text style={styles.taskCount}>
+              {filteredAndSortedTasks.length} task{filteredAndSortedTasks.length !== 1 ? 's' : ''}
+            </Text>
           </View>
           <View style={{ width: 40 }} />
         </View>
@@ -321,12 +316,16 @@ export default function TasksScreen() {
             value={searchQuery}
             onChangeText={setSearchQuery}
           />
-          <TouchableOpacity
-            style={styles.sortButton}
-            onPress={() => setShowSortMenu(true)}
-          >
+          <TouchableOpacity style={styles.sortButton} onPress={() => setShowSortMenu(true)}>
             <Text style={styles.sortButtonText}>
-              Sort: {sortBy === 'default' ? 'Default' : sortBy === 'dueDate' ? 'Due Date' : sortBy === 'completed' ? 'Status' : 'A-Z'}
+              Sort:{' '}
+              {sortBy === 'default'
+                ? 'Default'
+                : sortBy === 'dueDate'
+                  ? 'Due Date'
+                  : sortBy === 'completed'
+                    ? 'Status'
+                    : 'A-Z'}
             </Text>
           </TouchableOpacity>
         </View>
@@ -336,14 +335,14 @@ export default function TasksScreen() {
         data={filteredAndSortedTasks}
         keyExtractor={(item) => item.id.toString()}
         showsVerticalScrollIndicator={true}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         renderItem={({ item }) => (
           <TaskListItem
             task={item}
             onPress={() => navigation.navigate('TaskDetails', { taskId: item.id })}
-            onLongPress={() => isArchivedList ? handleArchivedTaskOptions(item) : handleDeleteTask(item)}
+            onLongPress={() =>
+              isArchivedList ? handleArchivedTaskOptions(item) : handleDeleteTask(item)
+            }
             onToggle={() => toggleTask(item)}
           />
         )}
@@ -351,12 +350,12 @@ export default function TasksScreen() {
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyIcon}>📝</Text>
             <Text style={styles.emptyText}>No tasks yet</Text>
-            <Text style={styles.emptySubtext}>
-              Tap the + button below to add your first task
-            </Text>
+            <Text style={styles.emptySubtext}>Tap the + button below to add your first task</Text>
           </View>
         }
-        contentContainerStyle={filteredAndSortedTasks.length === 0 ? styles.emptyContainer : styles.listContentContainer}
+        contentContainerStyle={
+          filteredAndSortedTasks.length === 0 ? styles.emptyContainer : styles.listContentContainer
+        }
       />
 
       {/* Floating Action Button */}
@@ -369,7 +368,13 @@ export default function TasksScreen() {
           colors={['#6366f1', '#a855f7']}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
-          style={{ width: '100%', height: '100%', borderRadius: 24, justifyContent: 'center', alignItems: 'center' }}
+          style={{
+            width: '100%',
+            height: '100%',
+            borderRadius: 24,
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
         >
           <Text style={styles.fabText}>+</Text>
         </LinearGradient>
@@ -383,11 +388,7 @@ export default function TasksScreen() {
         onRequestClose={() => setShowAddModal(false)}
       >
         <View style={styles.modalOverlay}>
-          <BlurView
-            intensity={100}
-            tint="dark"
-            style={StyleSheet.absoluteFill}
-          />
+          <BlurView intensity={100} tint="dark" style={StyleSheet.absoluteFill} />
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Add New Task</Text>
 
@@ -469,10 +470,7 @@ export default function TasksScreen() {
             ].map((option) => (
               <TouchableOpacity
                 key={option.value}
-                style={[
-                  styles.sortOption,
-                  sortBy === option.value && styles.sortOptionSelected,
-                ]}
+                style={[styles.sortOption, sortBy === option.value && styles.sortOptionSelected]}
                 onPress={() => {
                   setSortBy(option.value as any);
                   setShowSortMenu(false);
@@ -486,9 +484,7 @@ export default function TasksScreen() {
                 >
                   {option.label}
                 </Text>
-                {sortBy === option.value && (
-                  <Text style={styles.checkmark}>✓</Text>
-                )}
+                {sortBy === option.value && <Text style={styles.checkmark}>✓</Text>}
               </TouchableOpacity>
             ))}
           </View>

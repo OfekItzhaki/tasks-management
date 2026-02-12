@@ -65,27 +65,27 @@ export function TaskInfoSection({
           <View style={styles.remindersList}>
             {displayReminders.map((reminder) => (
               <View key={reminder.id} style={styles.reminderDisplayItem}>
-                <Text style={styles.reminderDisplayText}>
-                  {formatReminderDisplay(reminder)}
-                </Text>
+                <Text style={styles.reminderDisplayText}>{formatReminderDisplay(reminder)}</Text>
                 <TouchableOpacity
                   style={[
                     styles.alarmToggleButton,
-                    reminderAlarmStates[reminder.id] && styles.alarmToggleButtonActive
+                    reminderAlarmStates[reminder.id] && styles.alarmToggleButtonActive,
                   ]}
                   onPress={() => onToggleReminderAlarm(reminder.id)}
                   activeOpacity={0.7}
                 >
                   <Ionicons
-                    name={reminderAlarmStates[reminder.id] ? "notifications" : "notifications-off"}
+                    name={reminderAlarmStates[reminder.id] ? 'notifications' : 'notifications-off'}
                     size={18}
-                    color={reminderAlarmStates[reminder.id] ? "#6366f1" : "#64748b"}
+                    color={reminderAlarmStates[reminder.id] ? '#6366f1' : '#64748b'}
                     style={{ marginRight: 6 }}
                   />
-                  <Text style={[
-                    styles.alarmToggleText,
-                    reminderAlarmStates[reminder.id] && styles.alarmToggleTextActive
-                  ]}>
+                  <Text
+                    style={[
+                      styles.alarmToggleText,
+                      reminderAlarmStates[reminder.id] && styles.alarmToggleTextActive,
+                    ]}
+                  >
                     {reminderAlarmStates[reminder.id] ? 'ON' : 'OFF'}
                   </Text>
                 </TouchableOpacity>

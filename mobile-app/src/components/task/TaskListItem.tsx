@@ -15,12 +15,7 @@ interface TaskListItemProps {
   onToggle: () => void;
 }
 
-export function TaskListItem({
-  task,
-  onPress,
-  onLongPress,
-  onToggle,
-}: TaskListItemProps) {
+export function TaskListItem({ task, onPress, onLongPress, onToggle }: TaskListItemProps) {
   const { colors } = useTheme();
   const styles = useThemedStyles(createTasksStyles);
   const isCompleted = Boolean(task.completed);
@@ -50,12 +45,7 @@ export function TaskListItem({
         </TouchableOpacity>
 
         <View style={styles.taskTextContainer}>
-          <Text
-            style={[
-              styles.taskText,
-              isCompleted && styles.taskTextCompleted,
-            ]}
-          >
+          <Text style={[styles.taskText, isCompleted && styles.taskTextCompleted]}>
             {task.description}
           </Text>
 
@@ -69,12 +59,7 @@ export function TaskListItem({
                     color={isOverdueTask ? colors.error : colors.textSecondary}
                     style={{ marginRight: 4 }}
                   />
-                  <Text
-                    style={[
-                      styles.dueDate,
-                      isOverdueTask && styles.dueDateOverdue,
-                    ]}
-                  >
+                  <Text style={[styles.dueDate, isOverdueTask && styles.dueDateOverdue]}>
                     {formatDate(task.dueDate)}
                   </Text>
                 </View>
@@ -88,16 +73,19 @@ export function TaskListItem({
                     color={colors.success}
                     style={{ marginRight: 4 }}
                   />
-                  <Text style={styles.completionCount}>
-                    {completionCount}x
-                  </Text>
+                  <Text style={styles.completionCount}>{completionCount}x</Text>
                 </View>
               )}
             </View>
           )}
         </View>
 
-        <Ionicons name="chevron-forward" size={18} color={colors.border} style={{ alignSelf: 'center' }} />
+        <Ionicons
+          name="chevron-forward"
+          size={18}
+          color={colors.border}
+          style={{ alignSelf: 'center' }}
+        />
       </View>
     </TouchableOpacity>
   );

@@ -5,24 +5,24 @@ import { TokenStorage } from './storage';
 let socket: Socket | null = null;
 
 export const getSocket = async (): Promise<Socket> => {
-    if (socket) return socket;
+  if (socket) return socket;
 
-    const url = getApiUrl('').replace('/api', ''); // Socket usually at root
-    const token = await TokenStorage.getToken();
+  const url = getApiUrl('').replace('/api', ''); // Socket usually at root
+  const token = await TokenStorage.getToken();
 
-    socket = io(url, {
-        auth: {
-            token: `Bearer ${token}`,
-        },
-        transports: ['websocket'],
-    });
+  socket = io(url, {
+    auth: {
+      token: `Bearer ${token}`,
+    },
+    transports: ['websocket'],
+  });
 
-    return socket;
+  return socket;
 };
 
 export const disconnectSocket = () => {
-    if (socket) {
-        socket.disconnect();
-        socket = null;
-    }
+  if (socket) {
+    socket.disconnect();
+    socket = null;
+  }
 };

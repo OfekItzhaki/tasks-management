@@ -59,22 +59,18 @@ describe('To-Do Lists (e2e)', () => {
     }
 
     // Create test user and login
-    const userResponse = await request(app.getHttpServer())
-      .post('/users')
-      .send({
-        email: 'listtest@example.com',
-        password: 'password123',
-        name: 'List Test User',
-      });
+    const userResponse = await request(app.getHttpServer()).post('/users').send({
+      email: 'listtest@example.com',
+      password: 'password123',
+      name: 'List Test User',
+    });
 
     userId = userResponse.body.id;
 
-    const loginResponse = await request(app.getHttpServer())
-      .post('/auth/login')
-      .send({
-        email: 'listtest@example.com',
-        password: 'password123',
-      });
+    const loginResponse = await request(app.getHttpServer()).post('/auth/login').send({
+      email: 'listtest@example.com',
+      password: 'password123',
+    });
 
     authToken = loginResponse.body.accessToken;
   });
@@ -97,10 +93,7 @@ describe('To-Do Lists (e2e)', () => {
         });
         await (prisma.listShare as any).deleteMany({
           where: {
-            OR: [
-              { sharedWithId: { in: userIds } },
-              { toDoList: { ownerId: { in: userIds } } },
-            ],
+            OR: [{ sharedWithId: { in: userIds } }, { toDoList: { ownerId: { in: userIds } } }],
           },
         });
         await (prisma.toDoList as any).deleteMany({
@@ -158,9 +151,7 @@ describe('To-Do Lists (e2e)', () => {
           expect(res.body.length).toBeGreaterThanOrEqual(4);
           const defaultListNames = res.body
             .map((list: any) => list.name)
-            .filter((name: string) =>
-              ['Daily', 'Weekly', 'Monthly', 'Yearly'].includes(name),
-            );
+            .filter((name: string) => ['Daily', 'Weekly', 'Monthly', 'Yearly'].includes(name));
           expect(defaultListNames.length).toBe(4);
         });
     });

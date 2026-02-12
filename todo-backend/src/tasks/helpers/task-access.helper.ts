@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-  ForbiddenException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { ShareRole } from '@prisma/client';
 
@@ -45,19 +41,13 @@ export class TaskAccessHelper {
     // If required is VIEWER, both VIEWER and EDITOR are fine.
     // If required is EDITOR, only EDITOR is fine.
     if (requiredRole === ShareRole.EDITOR && share.role !== ShareRole.EDITOR) {
-      throw new ForbiddenException(
-        'You need Editor permissions for this action',
-      );
+      throw new ForbiddenException('You need Editor permissions for this action');
     }
 
     return list;
   }
 
-  async findTaskForUser(
-    id: string,
-    userId: string,
-    requiredRole: ShareRole = ShareRole.VIEWER,
-  ) {
+  async findTaskForUser(id: string, userId: string, requiredRole: ShareRole = ShareRole.VIEWER) {
     const task = await this.prisma.task.findFirst({
       where: {
         id,
@@ -101,9 +91,7 @@ export class TaskAccessHelper {
     }
 
     if (requiredRole === ShareRole.EDITOR && share.role !== ShareRole.EDITOR) {
-      throw new ForbiddenException(
-        'You need Editor permissions for this action',
-      );
+      throw new ForbiddenException('You need Editor permissions for this action');
     }
 
     return task;

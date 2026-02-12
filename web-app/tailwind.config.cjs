@@ -35,10 +35,10 @@ module.exports = {
         inter: ['Inter', 'sans-serif'],
       },
       boxShadow: {
-        'sm': 'var(--shadow-sm)',
-        'md': 'var(--shadow-md)',
-        'lg': 'var(--shadow-lg)',
-        'xl': 'var(--shadow-xl)',
+        sm: 'var(--shadow-sm)',
+        md: 'var(--shadow-md)',
+        lg: 'var(--shadow-lg)',
+        xl: 'var(--shadow-xl)',
       },
       animation: {
         'fade-in': 'fadeIn 0.3s ease-out',

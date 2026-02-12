@@ -22,10 +22,7 @@ export class StepsService {
    */
   async create(taskId: string, data: CreateStepDto): Promise<Step> {
     try {
-      const response = await apiClient.post<Step>(
-        `/tasks/${taskId}/steps`,
-        data,
-      );
+      const response = await apiClient.post<Step>(`/tasks/${taskId}/steps`, data);
       return response.data;
     } catch (error) {
       if (error instanceof ApiError) {
@@ -69,10 +66,9 @@ export class StepsService {
    */
   async reorder(taskId: string, stepIds: string[]): Promise<Step[]> {
     try {
-      const response = await apiClient.patch<Step[]>(
-        `/tasks/${taskId}/steps/reorder`,
-        { stepIds } as ReorderStepsDto,
-      );
+      const response = await apiClient.patch<Step[]>(`/tasks/${taskId}/steps/reorder`, {
+        stepIds,
+      } as ReorderStepsDto);
       return response.data;
     } catch (error) {
       if (error instanceof ApiError) {
@@ -84,11 +80,3 @@ export class StepsService {
 }
 
 export const stepsService = new StepsService();
-
-
-
-
-
-
-
-

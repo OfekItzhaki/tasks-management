@@ -69,10 +69,7 @@ class UsersService {
       return user;
     } catch (error: unknown) {
       const err = error instanceof Error ? error : new Error(String(error));
-      this.logger.error(
-        `Error finding user by email=${email}: ${err.message}`,
-        err.stack,
-      );
+      this.logger.error(`Error finding user by email=${email}: ${err.message}`, err.stack);
       throw error;
     }
   }
@@ -146,9 +143,7 @@ class UsersService {
           ...share,
           toDoList: {
             ...share.toDoList,
-            tasks: share.toDoList.tasks.filter(
-              (task) => task.deletedAt === null,
-            ),
+            tasks: share.toDoList.tasks.filter((task) => task.deletedAt === null),
           },
         })),
     };
@@ -192,10 +187,9 @@ class UsersService {
 
     if (existingUser) {
       if (existingUser.emailVerified) {
-        throw new BadRequestException(
-          'Email is already registered and verified',
-        );
+        throw new BadRequestException('Email is already registered and verified');
       }
+
       // Update existing unverified user with new OTP
       return this.prisma.user.update({
         where: { id: existingUser.id },
@@ -259,11 +253,7 @@ class UsersService {
       this.logger.debug(`Password Reset OTP for ${email}: ${otp}`);
     }
     // Reuse verification email template for now or add a new one if needed
-    await this.emailService.sendVerificationEmail(
-      email,
-      otp,
-      user.name || undefined,
-    );
+    await this.emailService.sendVerificationEmail(email, otp, user.name || undefined);
 
     return { message: 'Password reset OTP sent' };
   }
@@ -331,10 +321,7 @@ class UsersService {
       throw new BadRequestException('Invalid or expired verification code');
     }
 
-    if (
-      user.emailVerificationExpiresAt &&
-      user.emailVerificationExpiresAt < new Date()
-    ) {
+    if (user.emailVerificationExpiresAt && user.emailVerificationExpiresAt < new Date()) {
       throw new BadRequestException('Verification code has expired');
     }
 
@@ -373,8 +360,7 @@ class UsersService {
 
     // Rate Limit: 5 seconds
     if (user.emailVerificationSentAt) {
-      const diff =
-        new Date().getTime() - new Date(user.emailVerificationSentAt).getTime();
+      const diff = new Date().getTime() - new Date(user.emailVerificationSentAt).getTime();
       if (diff < 5000) {
         throw new BadRequestException('Please wait 5 seconds before resending');
       }
@@ -382,14 +368,10 @@ class UsersService {
 
     // Max Attempts: 5
     if (user.emailVerificationAttempts >= 5) {
-      throw new BadRequestException(
-        'Too many attempts. Please try again later.',
-      );
+      throw new BadRequestException('Too many attempts. Please try again later.');
     }
 
-    const emailVerificationOtp = Math.floor(
-      100000 + Math.random() * 900000,
-    ).toString();
+    const emailVerificationOtp = Math.floor(100000 + Math.random() * 900000).toString();
     const expiresAt = new Date();
     expiresAt.setMinutes(expiresAt.getMinutes() + 5);
 
@@ -410,11 +392,7 @@ class UsersService {
 
     // Send verification email (don't await to avoid blocking response)
     this.emailService
-      .sendVerificationEmail(
-        updatedUser.email,
-        emailVerificationOtp,
-        updatedUser.name || undefined,
-      )
+      .sendVerificationEmail(updatedUser.email, emailVerificationOtp, updatedUser.name || undefined)
       .catch((error) => {
         console.error('Failed to send verification email:', error);
       });
@@ -436,13 +414,15 @@ class UsersService {
     const updateData: Prisma.UserUpdateInput = {};
     if (data.email !== undefined) updateData.email = data.email;
     if (data.name !== undefined) updateData.name = data.name;
-    if (data.profilePicture !== undefined)
-      updateData.profilePicture = data.profilePicture;
+    if (data.profilePicture !== undefined) updateData.profilePicture = data.profilePicture;
     if (data.password !== undefined) {
       updateData.passwordHash = await bcrypt.hash(data.password, 10);
     }
     if (data.notificationFrequency !== undefined) {
       updateData.notificationFrequency = data.notificationFrequency;
+    }
+    if (data.trashRetentionDays !== undefined) {
+      updateData.trashRetentionDays = data.trashRetentionDays;
     }
 
     const user = await this.prisma.user.update({
@@ -457,10 +437,7 @@ class UsersService {
     return sanitized;
   }
 
-  async deleteUser(
-    id: string,
-    requestingUserId: string,
-  ): Promise<SanitizedUser> {
+  async deleteUser(id: string, requestingUserId: string): Promise<SanitizedUser> {
     await this.getUser(id, requestingUserId); // This will throw if user doesn't exist
 
     const user = await this.prisma.user.update({

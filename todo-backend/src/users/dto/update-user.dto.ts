@@ -56,7 +56,6 @@ export class UpdateUserDto {
   @IsOptional()
   @IsEnum(NotificationFrequency)
   notificationFrequency?: NotificationFrequency;
-
   @ApiPropertyOptional({
     description: 'Number of days to keep items in trash before purging',
     example: 30,

@@ -25,15 +25,7 @@ if (dsn) {
           const data = event.request.data as Record<string, unknown>;
           const scrubbed: Record<string, unknown> = {};
           for (const [k, v] of Object.entries(data)) {
-            if (
-              [
-                'password',
-                'passwordHash',
-                'token',
-                'accessToken',
-                'refreshToken',
-              ].includes(k)
-            ) {
+            if (['password', 'passwordHash', 'token', 'accessToken', 'refreshToken'].includes(k)) {
               scrubbed[k] = '[Redacted]';
             } else if (k === 'email' && typeof v === 'string') {
               scrubbed[k] = v.replace(/(.{2}).*@(.*)/, '$1***@$2');

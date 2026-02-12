@@ -15,16 +15,8 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const {
-    user,
-    isAuthenticated,
-    isLoading,
-    loadUser,
-    login,
-    register,
-    logout,
-    refreshUser
-  } = useAuthStore();
+  const { user, isAuthenticated, isLoading, loadUser, login, register, logout, refreshUser } =
+    useAuthStore();
 
   useEffect(() => {
     loadUser();

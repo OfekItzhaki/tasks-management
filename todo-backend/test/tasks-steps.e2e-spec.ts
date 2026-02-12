@@ -58,22 +58,18 @@ describe('Tasks and Steps (e2e)', () => {
     }
 
     // Create test user and login
-    const userResponse = await request(app.getHttpServer())
-      .post('/users')
-      .send({
-        email: 'tasktest@example.com',
-        password: 'password123',
-        name: 'Task Test User',
-      });
+    const userResponse = await request(app.getHttpServer()).post('/users').send({
+      email: 'tasktest@example.com',
+      password: 'password123',
+      name: 'Task Test User',
+    });
 
     userId = userResponse.body.id;
 
-    const loginResponse = await request(app.getHttpServer())
-      .post('/auth/login')
-      .send({
-        email: 'tasktest@example.com',
-        password: 'password123',
-      });
+    const loginResponse = await request(app.getHttpServer()).post('/auth/login').send({
+      email: 'tasktest@example.com',
+      password: 'password123',
+    });
 
     authToken = loginResponse.body.accessToken;
 
@@ -103,10 +99,7 @@ describe('Tasks and Steps (e2e)', () => {
         });
         await (prisma.listShare as any).deleteMany({
           where: {
-            OR: [
-              { sharedWithId: { in: userIds } },
-              { toDoList: { ownerId: { in: userIds } } },
-            ],
+            OR: [{ sharedWithId: { in: userIds } }, { toDoList: { ownerId: { in: userIds } } }],
           },
         });
         await (prisma.toDoList as any).deleteMany({

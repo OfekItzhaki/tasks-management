@@ -7,9 +7,13 @@ import { EmailProcessor } from './email.processor';
 
 @Module({
   imports: [
-    BullModule.registerQueue({
-      name: 'email',
-    }),
+    ...(process.env.REDIS_HOST
+      ? [
+          BullModule.registerQueue({
+            name: 'email',
+          }),
+        ]
+      : []),
   ],
   providers: [
     EmailService,

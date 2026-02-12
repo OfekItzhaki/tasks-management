@@ -75,16 +75,12 @@ describe('StepsService', () => {
       mockPrismaService.step.update.mockImplementation((args) =>
         Promise.resolve({ id: args.where.id, order: args.data.order }),
       );
-      mockPrismaService.$transaction.mockImplementation((promises) =>
-        Promise.all(promises),
-      );
-      mockPrismaService.step.findMany
-        .mockResolvedValueOnce(existingSteps)
-        .mockResolvedValueOnce([
-          { id: '3', order: 1 },
-          { id: '1', order: 2 },
-          { id: '2', order: 3 },
-        ]);
+      mockPrismaService.$transaction.mockImplementation((promises) => Promise.all(promises));
+      mockPrismaService.step.findMany.mockResolvedValueOnce(existingSteps).mockResolvedValueOnce([
+        { id: '3', order: 1 },
+        { id: '1', order: 2 },
+        { id: '2', order: 3 },
+      ]);
 
       const result = await service.reorder(taskId, ownerId, stepIds);
 
@@ -99,9 +95,7 @@ describe('StepsService', () => {
 
       mockPrismaService.step.findMany.mockResolvedValue(existingSteps);
 
-      await expect(service.reorder(taskId, ownerId, stepIds)).rejects.toThrow(
-        BadRequestException,
-      );
+      await expect(service.reorder(taskId, ownerId, stepIds)).rejects.toThrow(BadRequestException);
     });
 
     it('should throw BadRequestException if stepIds contain duplicates', async () => {
@@ -110,9 +104,7 @@ describe('StepsService', () => {
 
       mockPrismaService.step.findMany.mockResolvedValue(existingSteps);
 
-      await expect(service.reorder(taskId, ownerId, stepIds)).rejects.toThrow(
-        BadRequestException,
-      );
+      await expect(service.reorder(taskId, ownerId, stepIds)).rejects.toThrow(BadRequestException);
     });
 
     it('should throw BadRequestException if stepId does not belong to task', async () => {
@@ -121,17 +113,15 @@ describe('StepsService', () => {
 
       mockPrismaService.step.findMany.mockResolvedValue(existingSteps);
 
-      await expect(service.reorder(taskId, ownerId, stepIds)).rejects.toThrow(
-        BadRequestException,
-      );
+      await expect(service.reorder(taskId, ownerId, stepIds)).rejects.toThrow(BadRequestException);
     });
 
     it('should throw NotFoundException if task does not exist', async () => {
       mockPrismaService.task.findFirst.mockResolvedValue(null);
 
-      await expect(
-        service.reorder('taskId', ownerId, ['1', '2', '3']),
-      ).rejects.toThrow(NotFoundException);
+      await expect(service.reorder('taskId', ownerId, ['1', '2', '3'])).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -174,9 +164,9 @@ describe('StepsService', () => {
     it('should throw NotFoundException if task does not exist', async () => {
       mockPrismaService.task.findFirst.mockResolvedValue(null);
 
-      await expect(
-        service.create(taskId, { description: 'Test' }, ownerId),
-      ).rejects.toThrow(NotFoundException);
+      await expect(service.create(taskId, { description: 'Test' }, ownerId)).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it('should assign correct order when steps exist', async () => {
@@ -244,9 +234,9 @@ describe('StepsService', () => {
     it('should throw NotFoundException if step does not exist', async () => {
       mockPrismaService.step.findFirst.mockResolvedValue(null);
 
-      await expect(
-        service.update(stepId, { description: 'Test' }, ownerId),
-      ).rejects.toThrow(NotFoundException);
+      await expect(service.update(stepId, { description: 'Test' }, ownerId)).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 

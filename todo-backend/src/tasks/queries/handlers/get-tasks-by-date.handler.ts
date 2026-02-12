@@ -3,9 +3,7 @@ import { GetTasksByDateQuery } from '../get-tasks-by-date.query';
 import { TasksService } from '../../tasks.service';
 
 @QueryHandler(GetTasksByDateQuery)
-export class GetTasksByDateHandler
-  implements IQueryHandler<GetTasksByDateQuery>
-{
+export class GetTasksByDateHandler implements IQueryHandler<GetTasksByDateQuery> {
   constructor(private readonly tasksService: TasksService) {}
 
   async execute(query: GetTasksByDateQuery) {

@@ -6,14 +6,8 @@ import { Queue } from 'bullmq';
 export class EmailService {
   constructor(@InjectQueue('email') private readonly emailQueue: Queue) {}
 
-  async sendVerificationEmail(
-    email: string,
-    otp: string,
-    name?: string,
-  ): Promise<void> {
-    console.log(
-      `[EmailService] Queueing OTP email for: ${email} (OTP: ${otp})`,
-    );
+  async sendVerificationEmail(email: string, otp: string, name?: string): Promise<void> {
+    console.log(`[EmailService] Queueing OTP email for: ${email} (OTP: ${otp})`);
     await this.emailQueue.add('sendVerificationEmail', {
       email,
       otp,

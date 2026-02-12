@@ -134,3 +134,5 @@ model RefreshToken {
   revokedAt DateTime?
   createdAt DateTime  @default(now())
 }
+
+

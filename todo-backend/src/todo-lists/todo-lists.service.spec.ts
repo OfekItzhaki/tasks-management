@@ -40,9 +40,7 @@ describe('TodoListsService', () => {
         {
           provide: TaskAccessHelper,
           useValue: {
-            ensureListAccess: jest
-              .fn()
-              .mockResolvedValue({ id: '1', ownerId: '1' }),
+            ensureListAccess: jest.fn().mockResolvedValue({ id: '1', ownerId: '1' }),
             findTaskForUser: jest.fn(),
           },
         },
@@ -181,9 +179,7 @@ describe('TodoListsService', () => {
     it('should throw NotFoundException if list not found', async () => {
       mockPrismaService.toDoList.findFirst.mockResolvedValue(null);
 
-      await expect(service.findOne('999', ownerId)).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(service.findOne('999', ownerId)).rejects.toThrow(NotFoundException);
       await expect(service.findOne('999', ownerId)).rejects.toThrow(
         'ToDoList with ID 999 not found',
       );

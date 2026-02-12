@@ -1,10 +1,7 @@
 import { ListType, Task, ToDoList } from '@prisma/client';
 
 export class TaskOccurrenceHelper {
-  static shouldAppearOnDate(
-    task: Task & { todoList: ToDoList },
-    targetDate: Date,
-  ): boolean {
+  static shouldAppearOnDate(task: Task & { todoList: ToDoList }, targetDate: Date): boolean {
     const normalizedTarget = new Date(targetDate);
     normalizedTarget.setHours(0, 0, 0, 0);
 
@@ -37,19 +34,14 @@ export class TaskOccurrenceHelper {
 
       case ListType.YEARLY:
         // Default Jan 1st
-        return (
-          normalizedTarget.getMonth() === 0 && normalizedTarget.getDate() === 1
-        );
+        return normalizedTarget.getMonth() === 0 && normalizedTarget.getDate() === 1;
 
       default:
         return false;
     }
   }
 
-  static calculateNextDueDate(
-    task: Task & { todoList: ToDoList },
-    fromDate: Date,
-  ): Date | null {
+  static calculateNextDueDate(task: Task & { todoList: ToDoList }, fromDate: Date): Date | null {
     const target = new Date(fromDate);
     target.setHours(0, 0, 0, 0);
 
@@ -91,10 +83,7 @@ export class TaskOccurrenceHelper {
     }
   }
 
-  static shouldRemindOnDate(
-    task: Task & { todoList: ToDoList },
-    targetDate: Date,
-  ): boolean {
+  static shouldRemindOnDate(task: Task & { todoList: ToDoList }, targetDate: Date): boolean {
     const dueDate = this.calculateNextDueDate(task, targetDate);
     if (!dueDate) return false;
 

@@ -1,16 +1,8 @@
-import {
-  Injectable,
-  Logger,
-  OnModuleInit,
-  OnModuleDestroy,
-} from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 
 @Injectable()
-export class PrismaService
-  extends PrismaClient
-  implements OnModuleInit, OnModuleDestroy
-{
+export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(PrismaService.name);
 
   constructor() {
@@ -25,14 +17,10 @@ export class PrismaService
     if (process.env.DATABASE_URL) {
       try {
         const dbUrl = process.env.DATABASE_URL;
-        const match = dbUrl.match(
-          /postgresql:\/\/([^:]+):([^@]+)@([^:]+):(\d+)\/(.+)/,
-        );
+        const match = dbUrl.match(/postgresql:\/\/([^:]+):([^@]+)@([^:]+):(\d+)\/(.+)/);
         if (match) {
           const [, , , host, port, database] = match;
-          this.logger.debug(
-            `Connecting to postgresql://${host}:${port}/${database}`,
-          );
+          this.logger.debug(`Connecting to postgresql://${host}:${port}/${database}`);
         } else {
           this.logger.debug('DATABASE_URL format detected');
         }

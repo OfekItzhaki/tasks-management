@@ -55,9 +55,7 @@ describe('CloudinaryService', () => {
       const mockReadStream = {
         pipe: jest.fn().mockReturnThis(),
       };
-      (streamifier.createReadStream as jest.Mock).mockReturnValue(
-        mockReadStream,
-      );
+      (streamifier.createReadStream as jest.Mock).mockReturnValue(mockReadStream);
 
       const result = await service.uploadFile(mockFile);
 
@@ -74,9 +72,7 @@ describe('CloudinaryService', () => {
         }),
         expect.any(Function),
       );
-      expect(streamifier.createReadStream).toHaveBeenCalledWith(
-        mockFile.buffer,
-      );
+      expect(streamifier.createReadStream).toHaveBeenCalledWith(mockFile.buffer);
       expect(mockReadStream.pipe).toHaveBeenCalled();
     });
 
@@ -89,8 +85,7 @@ describe('CloudinaryService', () => {
 
       const mockUploadResult = {
         public_id: 'custom_folder/test123',
-        secure_url:
-          'https://res.cloudinary.com/test/image/upload/v1234/custom_folder/test123.jpg',
+        secure_url: 'https://res.cloudinary.com/test/image/upload/v1234/custom_folder/test123.jpg',
       };
 
       const mockUploadStream = jest.fn((options, callback) => {
@@ -106,9 +101,7 @@ describe('CloudinaryService', () => {
       const mockReadStream = {
         pipe: jest.fn().mockReturnThis(),
       };
-      (streamifier.createReadStream as jest.Mock).mockReturnValue(
-        mockReadStream,
-      );
+      (streamifier.createReadStream as jest.Mock).mockReturnValue(mockReadStream);
 
       const result = await service.uploadFile(mockFile, 'custom_folder');
 
@@ -143,13 +136,9 @@ describe('CloudinaryService', () => {
       const mockReadStream = {
         pipe: jest.fn().mockReturnThis(),
       };
-      (streamifier.createReadStream as jest.Mock).mockReturnValue(
-        mockReadStream,
-      );
+      (streamifier.createReadStream as jest.Mock).mockReturnValue(mockReadStream);
 
-      await expect(service.uploadFile(mockFile)).rejects.toThrow(
-        'Cloudinary upload failed',
-      );
+      await expect(service.uploadFile(mockFile)).rejects.toThrow('Cloudinary upload failed');
     });
 
     it('should reject when result is undefined', async () => {
@@ -172,9 +161,7 @@ describe('CloudinaryService', () => {
       const mockReadStream = {
         pipe: jest.fn().mockReturnThis(),
       };
-      (streamifier.createReadStream as jest.Mock).mockReturnValue(
-        mockReadStream,
-      );
+      (streamifier.createReadStream as jest.Mock).mockReturnValue(mockReadStream);
 
       await expect(service.uploadFile(mockFile)).rejects.toThrow(
         'Cloudinary upload result is undefined',
@@ -189,10 +176,7 @@ describe('CloudinaryService', () => {
       } as Express.Multer.File;
 
       const mockUploadStream = jest.fn((options, callback) => {
-        setTimeout(
-          () => callback(null, { secure_url: 'https://test.com/image.jpg' }),
-          0,
-        );
+        setTimeout(() => callback(null, { secure_url: 'https://test.com/image.jpg' }), 0);
         return {
           on: jest.fn(),
           end: jest.fn(),
@@ -204,9 +188,7 @@ describe('CloudinaryService', () => {
       const mockReadStream = {
         pipe: jest.fn().mockReturnThis(),
       };
-      (streamifier.createReadStream as jest.Mock).mockReturnValue(
-        mockReadStream,
-      );
+      (streamifier.createReadStream as jest.Mock).mockReturnValue(mockReadStream);
 
       await service.uploadFile(mockFile);
 

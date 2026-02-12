@@ -3,9 +3,7 @@ import { GetTodoListByIdQuery } from '../get-todo-list-by-id.query';
 import { TodoListsService } from '../../todo-lists.service';
 
 @QueryHandler(GetTodoListByIdQuery)
-export class GetTodoListByIdHandler
-  implements IQueryHandler<GetTodoListByIdQuery>
-{
+export class GetTodoListByIdHandler implements IQueryHandler<GetTodoListByIdQuery> {
   constructor(private readonly todoListsService: TodoListsService) {}
 
   async execute(query: GetTodoListByIdQuery) {

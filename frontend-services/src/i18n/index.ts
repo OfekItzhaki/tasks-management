@@ -14,12 +14,11 @@ export const defaultLanguage: SupportedLanguage = 'en';
 
 export function normalizeLanguage(lng: string | undefined | null): SupportedLanguage {
   const base = (lng ?? defaultLanguage).split('-')[0];
-  return (supportedLanguages.includes(base as SupportedLanguage)
+  return supportedLanguages.includes(base as SupportedLanguage)
     ? (base as SupportedLanguage)
-    : defaultLanguage);
+    : defaultLanguage;
 }
 
 export function isRtlLanguage(lng: string | undefined | null): boolean {
   return normalizeLanguage(lng) === 'he';
 }
-

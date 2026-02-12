@@ -113,7 +113,12 @@ export default function TasksPage({ isTrashView = false }: TasksPageProps) {
   const restoreTaskMutation = useMutation<Task, ApiError, string>({
     mutationFn: (id) => tasksService.restoreTask(id),
     onSuccess: () => {
-      // Shhh... be silent for better UX
+      toast.success(t('tasks.restored'));
+      if (effectiveListId) {
+        void queryClient.invalidateQueries({
+          queryKey: ['tasks', effectiveListId],
+        });
+      }
     },
     onError: (err) => {
       toast.error(formatApiError(err, t('tasks.restoreFailed')));
@@ -722,68 +727,69 @@ export default function TasksPage({ isTrashView = false }: TasksPageProps) {
               </div>
             </form>
           ) : (
-            <h1
-              className="text-4xl font-bold text-primary cursor-pointer hover:text-accent transition-colors flex items-center gap-3 break-words whitespace-normal leading-snug pb-2"
-              onClick={() => {
-                if (!list?.isSystem) {
-                  setListNameDraft(list?.name || '');
-                  setTaskBehaviorDraft(
-                    list?.taskBehavior || TaskBehavior.ONE_OFF
-                  );
-                  setCompletionPolicyDraft(
-                    list?.completionPolicy || CompletionPolicy.MOVE_TO_DONE
-                  );
-                  setIsEditingListName(true);
-                }
-              }}
-            >
-              <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4">
+              <h1
+                className="text-4xl font-bold text-primary cursor-pointer hover:text-accent transition-colors flex items-center gap-3 break-words whitespace-normal leading-snug pb-2"
+                onClick={() => {
+                  if (!list?.isSystem) {
+                    setListNameDraft(list?.name || '');
+                    setTaskBehaviorDraft(
+                      list?.taskBehavior || TaskBehavior.ONE_OFF
+                    );
+                    setCompletionPolicyDraft(
+                      list?.completionPolicy || CompletionPolicy.MOVE_TO_DONE
+                    );
+                    setIsEditingListName(true);
+                  }
+                }}
+              >
                 {list?.name ?? t('tasks.defaultTitle')}
 
-                {!isTrashView && list && !list.isSystem && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setIsSharing(true);
-                    }}
-                    className="p-2 rounded-xl bg-accent/10 border border-accent/20 text-accent hover:bg-accent/20 transition-all flex items-center gap-2 text-sm font-bold uppercase tracking-wide"
-                    title={t('sharing.title')}
+                {!list?.isSystem && (
+                  <svg
+                    className="w-5 h-5 opacity-20"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
                   >
-                    <svg
-                      className="w-4 h-4"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
-                      />
-                    </svg>
-                    <span className="hidden sm:inline">
-                      {t('sharing.shareButton')}
-                    </span>
-                  </button>
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                    />
+                  </svg>
                 )}
-              </div>
-              {!list?.isSystem && (
-                <svg
-                  className="w-5 h-5 opacity-20"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
+              </h1>
+
+              {!isTrashView && list && !list.isSystem && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsSharing(true);
+                  }}
+                  className="p-2 rounded-xl bg-accent/10 border border-accent/20 text-accent hover:bg-accent/20 transition-all flex items-center gap-2 text-sm font-bold uppercase tracking-wide"
+                  title={t('sharing.title')}
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-                  />
-                </svg>
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
+                    />
+                  </svg>
+                  <span className="hidden sm:inline">
+                    {t('sharing.shareButton')}
+                  </span>
+                </button>
               )}
-            </h1>
+            </div>
           )}
         </div>
 

@@ -18,11 +18,7 @@ export class UpdateTaskHandler implements ICommandHandler<UpdateTaskCommand> {
     );
 
     // Broadcast update to all authorized users (owner + shared)
-    await this.eventsService.broadcastTaskEvent(
-      command.id,
-      'task_updated',
-      result,
-    );
+    await this.eventsService.broadcastTaskEvent(command.id, 'task_updated', result);
 
     return result;
   }

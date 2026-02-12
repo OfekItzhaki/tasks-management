@@ -4,9 +4,7 @@ import { TodoListsService } from '../../todo-lists.service';
 import { EventsService } from '../../../events/events.service';
 
 @CommandHandler(UpdateTodoListCommand)
-export class UpdateTodoListHandler
-  implements ICommandHandler<UpdateTodoListCommand>
-{
+export class UpdateTodoListHandler implements ICommandHandler<UpdateTodoListCommand> {
   constructor(
     private readonly todoListsService: TodoListsService,
     private readonly eventsService: EventsService,
@@ -19,11 +17,7 @@ export class UpdateTodoListHandler
       command.userId,
     );
 
-    await this.eventsService.broadcastListEvent(
-      command.id,
-      'list_updated',
-      result,
-    );
+    await this.eventsService.broadcastListEvent(command.id, 'list_updated', result);
 
     return result;
   }

@@ -275,7 +275,11 @@ export default function AnalysisScreen() {
   const dueTodayTasks = tasksWithDueDates.filter((task) => {
     if (!task.dueDate) return false;
     const dueDate = new Date(task.dueDate);
-    return dueDate >= today && dueDate < new Date(today.getTime() + 24 * 60 * 60 * 1000) && !task.completed;
+    return (
+      dueDate >= today &&
+      dueDate < new Date(today.getTime() + 24 * 60 * 60 * 1000) &&
+      !task.completed
+    );
   });
 
   const dueThisWeekTasks = tasksWithDueDates.filter((task) => {
@@ -294,27 +298,28 @@ export default function AnalysisScreen() {
     };
   });
 
-  const tasksByType = lists.reduce((acc, list) => {
-    const type = list.type;
-    if (!acc[type]) {
-      acc[type] = { total: 0, completed: 0, pending: 0 };
-    }
-    const listTasks = allTasks.filter((task) => task.todoListId === list.id);
-    acc[type].total += listTasks.length;
-    acc[type].completed += listTasks.filter((t) => t.completed).length;
-    acc[type].pending += listTasks.filter((t) => !t.completed).length;
-    return acc;
-  }, {} as Record<string, { total: number; completed: number; pending: number }>);
+  const tasksByType = lists.reduce(
+    (acc, list) => {
+      const type = list.type;
+      if (!acc[type]) {
+        acc[type] = { total: 0, completed: 0, pending: 0 };
+      }
+      const listTasks = allTasks.filter((task) => task.todoListId === list.id);
+      acc[type].total += listTasks.length;
+      acc[type].completed += listTasks.filter((t) => t.completed).length;
+      acc[type].pending += listTasks.filter((t) => !t.completed).length;
+      return acc;
+    },
+    {} as Record<string, { total: number; completed: number; pending: number }>,
+  );
 
   return (
     <View style={styles.container}>
-      <ScrollView 
+      <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
         <View style={styles.headerContainer}>
           <LinearGradient
@@ -324,10 +329,7 @@ export default function AnalysisScreen() {
             style={styles.headerGradient}
           />
           <View style={styles.headerTop}>
-            <TouchableOpacity
-              style={styles.backButton}
-              onPress={() => navigation.goBack()}
-            >
+            <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
               <Ionicons name="arrow-back" size={20} color={colors.primary} />
             </TouchableOpacity>
             <Text style={styles.title}>Task Analysis</Text>
@@ -363,7 +365,9 @@ export default function AnalysisScreen() {
             <Text style={styles.cardTitle}>Due Date Overview</Text>
             <View style={styles.statsRow}>
               <View style={styles.statCard}>
-                <Text style={[styles.statValue, { color: colors.error }]}>{overdueTasks.length}</Text>
+                <Text style={[styles.statValue, { color: colors.error }]}>
+                  {overdueTasks.length}
+                </Text>
                 <Text style={styles.statLabel}>Overdue</Text>
               </View>
               <View style={styles.statCard}>
@@ -431,9 +435,7 @@ export default function AnalysisScreen() {
                 </View>
                 <View style={styles.typeRow}>
                   <Text style={styles.typeLabel}>Pending:</Text>
-                  <Text style={[styles.typeValue, { color: colors.error }]}>
-                    {stats.pending}
-                  </Text>
+                  <Text style={[styles.typeValue, { color: colors.error }]}>{stats.pending}</Text>
                 </View>
                 {stats.total > 0 && (
                   <>

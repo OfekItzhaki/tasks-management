@@ -19,20 +19,16 @@ export function showConfirmDialog({
   onCancel,
   destructive = false,
 }: ConfirmDialogOptions): void {
-  Alert.alert(
-    title,
-    message,
-    [
-      { 
-        text: cancelText, 
-        style: 'cancel',
-        onPress: onCancel,
-      },
-      {
-        text: confirmText,
-        style: destructive ? 'destructive' : 'default',
-        onPress: onConfirm,
-      },
-    ],
-  );
+  Alert.alert(title, message, [
+    {
+      text: cancelText,
+      style: 'cancel',
+      onPress: onCancel,
+    },
+    {
+      text: confirmText,
+      style: destructive ? 'destructive' : 'default',
+      onPress: onConfirm,
+    },
+  ]);
 }

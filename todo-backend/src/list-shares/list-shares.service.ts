@@ -32,11 +32,7 @@ export class ListSharesService {
     return list;
   }
 
-  async shareList(
-    todoListId: string,
-    shareListDto: ShareListDto,
-    ownerId: string,
-  ) {
+  async shareList(todoListId: string, shareListDto: ShareListDto, ownerId: string) {
     // Verify list exists and user owns it
     await this.ensureOwnedList(todoListId, ownerId);
 
@@ -49,9 +45,7 @@ export class ListSharesService {
     });
 
     if (!user) {
-      throw new NotFoundException(
-        `User with email ${shareListDto.email} not found`,
-      );
+      throw new NotFoundException(`User with email ${shareListDto.email} not found`);
     }
 
     if (user.id === ownerId) {
@@ -191,12 +185,7 @@ export class ListSharesService {
     return result;
   }
 
-  async updateShareRole(
-    todoListId: string,
-    userId: string,
-    role: ShareRole,
-    ownerId: string,
-  ) {
+  async updateShareRole(todoListId: string, userId: string, role: ShareRole, ownerId: string) {
     await this.ensureOwnedList(todoListId, ownerId);
 
     const share = await this.prisma.listShare.findUnique({

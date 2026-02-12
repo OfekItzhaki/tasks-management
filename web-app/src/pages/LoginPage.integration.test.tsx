@@ -15,7 +15,7 @@ describe('LoginPage (integration)', () => {
     });
 
     const emailInput = screen.getByPlaceholderText(/name@example.com/i);
-    const passwordInput = screen.getByLabelText(/password/i);
+    const passwordInput = screen.getByPlaceholderText(/••••••••/i);
     const form = screen.getByLabelText(/sign in/i).closest('form');
     await user.type(emailInput, 'invalid');
     await user.type(passwordInput, 'x');
@@ -34,7 +34,7 @@ describe('LoginPage (integration)', () => {
     });
 
     const emailInput = screen.getByPlaceholderText(/name@example.com/i);
-    const passwordInput = screen.getByLabelText(/password/i);
+    const passwordInput = screen.getByPlaceholderText(/••••••••/i);
     const submit = screen.getByLabelText(/sign in/i);
     await user.type(emailInput, 'test@example.com');
     await user.type(passwordInput, 'password123');
@@ -56,7 +56,7 @@ describe('LoginPage (integration)', () => {
     });
 
     const emailInput = screen.getByPlaceholderText(/name@example.com/i);
-    const passwordInput = screen.getByLabelText(/password/i);
+    const passwordInput = screen.getByPlaceholderText(/••••••••/i);
     const submit = screen.getByLabelText(/sign in/i);
 
     await user.type(emailInput, 'fail@example.com');

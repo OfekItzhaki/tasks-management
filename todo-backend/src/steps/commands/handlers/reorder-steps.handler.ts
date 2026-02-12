@@ -5,9 +5,7 @@ import { ReorderStepsCommand } from '../reorder-steps.command';
 import { GetStepsQuery } from '../../queries/get-steps.query';
 
 @CommandHandler(ReorderStepsCommand)
-export class ReorderStepsHandler
-  implements ICommandHandler<ReorderStepsCommand>
-{
+export class ReorderStepsHandler implements ICommandHandler<ReorderStepsCommand> {
   constructor(
     private readonly prisma: PrismaService,
     private readonly queryBus: QueryBus,
@@ -23,10 +21,7 @@ export class ReorderStepsHandler
         deletedAt: null,
         todoList: {
           deletedAt: null,
-          OR: [
-            { ownerId: userId },
-            { shares: { some: { sharedWithId: userId } } },
-          ],
+          OR: [{ ownerId: userId }, { shares: { some: { sharedWithId: userId } } }],
         },
       },
     });
@@ -46,25 +41,19 @@ export class ReorderStepsHandler
     });
 
     if (existingSteps.length !== stepIds.length) {
-      throw new BadRequestException(
-        'All steps must be included when reordering',
-      );
+      throw new BadRequestException('All steps must be included when reordering');
     }
 
     // Check for duplicate step IDs
     const uniqueStepIds = new Set(stepIds);
     if (uniqueStepIds.size !== stepIds.length) {
-      throw new BadRequestException(
-        'Duplicate step IDs are not allowed when reordering',
-      );
+      throw new BadRequestException('Duplicate step IDs are not allowed when reordering');
     }
 
     const validStepIds = new Set(existingSteps.map((step) => step.id));
     stepIds.forEach((id) => {
       if (!validStepIds.has(id)) {
-        throw new BadRequestException(
-          `Step ID ${id} does not belong to task ${taskId}`,
-        );
+        throw new BadRequestException(`Step ID ${id} does not belong to task ${taskId}`);
       }
     });
 
@@ -76,8 +65,6 @@ export class ReorderStepsHandler
     );
 
     await this.prisma.$transaction(updates);
-    return (await this.queryBus.execute(
-      new GetStepsQuery(taskId, userId),
-    )) as unknown;
+    return (await this.queryBus.execute(new GetStepsQuery(taskId, userId))) as unknown;
   }
 }

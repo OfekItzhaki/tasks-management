@@ -9,20 +9,12 @@ import {
   UseGuards,
   ForbiddenException,
 } from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiBearerAuth,
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { ListSharesService } from './list-shares.service';
 import { ShareListDto } from './dto/share-list.dto';
 import { ShareRole } from '@prisma/client';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import {
-  CurrentUser,
-  CurrentUserPayload,
-} from '../auth/current-user.decorator';
+import { CurrentUser, CurrentUserPayload } from '../auth/current-user.decorator';
 
 @ApiTags('List Sharing')
 @ApiBearerAuth()
@@ -40,11 +32,7 @@ export class ListSharesController {
     @Body() shareListDto: ShareListDto,
     @CurrentUser() user: CurrentUserPayload,
   ) {
-    return this.listSharesService.shareList(
-      todoListId,
-      shareListDto,
-      user.userId,
-    );
+    return this.listSharesService.shareList(todoListId, shareListDto, user.userId);
   }
 
   @Get('user/:userId')
@@ -54,10 +42,7 @@ export class ListSharesController {
     status: 403,
     description: 'Forbidden - can only view own shares',
   })
-  getSharedLists(
-    @Param('userId') userId: string,
-    @CurrentUser() user: CurrentUserPayload,
-  ) {
+  getSharedLists(@Param('userId') userId: string, @CurrentUser() user: CurrentUserPayload) {
     if (user.userId !== userId) {
       throw new ForbiddenException("Cannot view another user's shares");
     }
@@ -68,10 +53,7 @@ export class ListSharesController {
   @ApiOperation({ summary: 'Get all users a list is shared with' })
   @ApiResponse({ status: 200, description: 'Returns list of users' })
   @ApiResponse({ status: 404, description: 'List not found' })
-  getListShares(
-    @Param('todoListId') todoListId: string,
-    @CurrentUser() user: CurrentUserPayload,
-  ) {
+  getListShares(@Param('todoListId') todoListId: string, @CurrentUser() user: CurrentUserPayload) {
     return this.listSharesService.getListShares(todoListId, user.userId);
   }
 
@@ -97,11 +79,6 @@ export class ListSharesController {
     @Body('role') role: ShareRole,
     @CurrentUser() user: CurrentUserPayload,
   ) {
-    return this.listSharesService.updateShareRole(
-      todoListId,
-      userId,
-      role,
-      user.userId,
-    );
+    return this.listSharesService.updateShareRole(todoListId, userId, role, user.userId);
   }
 }

@@ -65,9 +65,7 @@ async function bootstrap() {
   // Swagger configuration
   const config = new DocumentBuilder()
     .setTitle('Horizon Flux API')
-    .setDescription(
-      'API for managing to-do lists, tasks, and steps with user authentication',
-    )
+    .setDescription('API for managing to-do lists, tasks, and steps with user authentication')
     .setVersion('1.0')
     .addBearerAuth(
       {

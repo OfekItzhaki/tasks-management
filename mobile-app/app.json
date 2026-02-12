@@ -29,11 +29,7 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "permissions": [
-        "RECEIVE_BOOT_COMPLETED",
-        "VIBRATE",
-        "POST_NOTIFICATIONS"
-      ],
+      "permissions": ["RECEIVE_BOOT_COMPLETED", "VIBRATE", "POST_NOTIFICATIONS"],
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "playStoreUrl": "https://play.google.com/store/apps/details?id=com.tasksmanagement.app"

@@ -37,7 +37,8 @@ if (dsn) {
         const extra = event.extra as Record<string, unknown>;
         const scrubbed: Record<string, unknown> = {};
         for (const [k, v] of Object.entries(extra)) {
-          if (['password', 'token', 'accessToken', 'refreshToken'].includes(k)) scrubbed[k] = '[Redacted]';
+          if (['password', 'token', 'accessToken', 'refreshToken'].includes(k))
+            scrubbed[k] = '[Redacted]';
           else scrubbed[k] = v;
         }
         event.extra = scrubbed;

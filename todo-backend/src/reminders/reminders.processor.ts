@@ -51,9 +51,7 @@ export class RemindersProcessor extends WorkerHost {
     const notifications = await this.remindersService.getTodayReminders(userId);
 
     if (notifications.length > 0) {
-      this.logger.log(
-        `Found ${notifications.length} reminders for user ${userId}`,
-      );
+      this.logger.log(`Found ${notifications.length} reminders for user ${userId}`);
       // The logic for sending these (Socket/Email) should live in RemindersService
       // or we can handle it here if we want to keep service pure.
       // Given the "Premium" vision, we'll implement a push method in RemindersService.

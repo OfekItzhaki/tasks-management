@@ -53,19 +53,22 @@ The backend is configured to allow authentication without CAPTCHA when the `TURN
 ## Setup
 
 1. **Install dependencies:**
+
    ```bash
    cd mobile-app
    npm install
    ```
 
 2. **Configure API URL:**
-   
+
    Create a `.env` file in the `mobile-app` directory:
+
    ```env
    EXPO_PUBLIC_API_URL=http://localhost:3000
    ```
-   
+
    Or update `src/config/api.ts` directly:
+
    ```typescript
    export const API_CONFIG = {
      baseURL: 'http://your-backend-url:3000',
@@ -73,11 +76,13 @@ The backend is configured to allow authentication without CAPTCHA when the `TURN
    ```
 
    **Note:** For testing on a physical device, use your computer's local IP address instead of `localhost`:
+
    ```env
    EXPO_PUBLIC_API_URL=http://192.168.1.XXX:3000
    ```
 
 3. **Start the development server:**
+
    ```bash
    npm start
    ```
@@ -150,6 +155,7 @@ npx expo build:ios
 ## Next Steps
 
 ### ✅ Completed
+
 - [x] Add push notifications for reminders (requires dev/prod build on Android)
 - [x] Implement task creation/editing UI
 - [x] Add step management UI (add, toggle, delete)
@@ -160,17 +166,20 @@ npx expo build:ios
 ### 🔧 Remaining Improvements
 
 **High Priority:**
+
 - [ ] Implement list sharing UI (backend API exists, needs UI)
 - [ ] Add step reordering UI (drag-and-drop or buttons)
 - [ ] Add pull-to-refresh on RemindersScreen
 - [ ] Email verification flow improvements (resend verification, better messaging)
 
 **Medium Priority:**
+
 - [ ] Step edit functionality (edit descriptions)
 - [ ] User profile editing
 - [ ] Better error handling and user feedback
 
 **Low Priority:**
+
 - [ ] Offline support
 - [ ] Advanced filters and views
 - [ ] Accessibility improvements
@@ -178,11 +187,13 @@ npx expo build:ios
 ## Troubleshooting
 
 **Connection errors:**
+
 - Make sure your backend is running
 - Check that the API URL is correct
 - For physical devices, ensure phone and computer are on the same network
 
 **Module not found errors:**
+
 - Delete `node_modules` and run `npm install` again
 - Clear Expo cache: `npx expo start -c`
 
@@ -201,6 +212,7 @@ See [STORE_LISTING.md](../instructions/MOBILE_APP_STORE_LISTING.md) for app desc
 A privacy policy template is available in `privacy-policy.html`. You must host this file online and provide the URL when submitting to app stores.
 
 **To host the privacy policy:**
+
 1. Upload `privacy-policy.html` to a hosting service (GitHub Pages, your website, etc.)
 2. Get the public URL
 3. Update the email address in the privacy policy
@@ -209,11 +221,3 @@ A privacy policy template is available in `privacy-policy.html`. You must host t
 ## License
 
 UNLICENSED
-
-
-
-
-
-
-
-

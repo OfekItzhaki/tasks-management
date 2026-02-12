@@ -21,9 +21,7 @@ export class SharingService {
    */
   async getSharedLists(userId: number): Promise<ToDoList[]> {
     try {
-      const response = await apiClient.get<ToDoList[]>(
-        `/list-shares/user/${userId}`,
-      );
+      const response = await apiClient.get<ToDoList[]>(`/list-shares/user/${userId}`);
       return response.data;
     } catch (error) {
       if (error instanceof ApiError) {
@@ -38,9 +36,7 @@ export class SharingService {
    */
   async getListShares(todoListId: number): Promise<any[]> {
     try {
-      const response = await apiClient.get<any[]>(
-        `/list-shares/todo-list/${todoListId}`,
-      );
+      const response = await apiClient.get<any[]>(`/list-shares/todo-list/${todoListId}`);
       return response.data;
     } catch (error) {
       if (error instanceof ApiError) {
@@ -55,9 +51,7 @@ export class SharingService {
    */
   async unshareList(todoListId: number, userId: number): Promise<void> {
     try {
-      await apiClient.delete(
-        `/list-shares/todo-list/${todoListId}/user/${userId}`,
-      );
+      await apiClient.delete(`/list-shares/todo-list/${todoListId}/user/${userId}`);
     } catch (error) {
       if (error instanceof ApiError) {
         throw error;
@@ -68,11 +62,3 @@ export class SharingService {
 }
 
 export const sharingService = new SharingService();
-
-
-
-
-
-
-
-

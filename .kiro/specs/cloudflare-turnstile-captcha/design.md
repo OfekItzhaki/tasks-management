@@ -7,6 +7,7 @@ This design document outlines the implementation of Cloudflare Turnstile CAPTCHA
 Cloudflare Turnstile is a privacy-focused CAPTCHA alternative that provides bot protection with minimal user friction. The implementation will use "managed" mode, which automatically adapts between invisible verification and interactive challenges based on risk assessment.
 
 The design follows a defense-in-depth approach where:
+
 1. Frontend renders the Turnstile widget and collects tokens
 2. Frontend includes tokens in authentication requests
 3. Backend verifies tokens with Cloudflare before processing authentication
@@ -72,6 +73,7 @@ The design follows a defense-in-depth approach where:
 ### Component Interaction Flow
 
 **Login Flow:**
+
 1. User navigates to LoginPage
 2. Turnstile widget initializes and runs background challenge
 3. Widget generates token and stores in component state
@@ -83,6 +85,7 @@ The design follows a defense-in-depth approach where:
 9. Frontend displays appropriate error message
 
 **Registration Flow:**
+
 1. User navigates to LoginPage and switches to registration mode
 2. Turnstile widget initializes and runs background challenge
 3. Widget generates token and stores in component state
@@ -94,6 +97,7 @@ The design follows a defense-in-depth approach where:
 9. Frontend displays appropriate error message
 
 **Forgot Password Flow:**
+
 1. User navigates to LoginPage and clicks "Forgot Password"
 2. Turnstile widget initializes and runs background challenge
 3. Widget generates token and stores in component state
@@ -143,6 +147,7 @@ function TurnstileWidget({ onSuccess, onError, onExpire }: TurnstileWidgetProps)
 #### LoginPage Integration
 
 The existing LoginPage component will be modified to:
+
 - Import and render TurnstileWidget
 - Store captcha token in state
 - Pass token to authentication methods
@@ -167,7 +172,7 @@ function LoginPage() {
       setError('Please complete the security verification.');
       return;
     }
-    
+
     try {
       await login({ email, password, captchaToken });
       navigate('/lists');
@@ -206,16 +211,16 @@ class AuthService {
   }
 
   async registerStart(email: string, captchaToken?: string): Promise<{ message: string }> {
-    return apiClient.post<{ message: string }>('/auth/register/start', { 
-      email, 
-      captchaToken 
+    return apiClient.post<{ message: string }>('/auth/register/start', {
+      email,
+      captchaToken,
     });
   }
 
   async forgotPassword(email: string, captchaToken?: string): Promise<{ message: string }> {
-    return apiClient.post<{ message: string }>('/auth/forgot-password', { 
-      email, 
-      captchaToken 
+    return apiClient.post<{ message: string }>('/auth/forgot-password', {
+      email,
+      captchaToken,
     });
   }
 }
@@ -251,7 +256,7 @@ The backend already has a `verifyTurnstile()` method implemented. The design con
 ```typescript
 async verifyTurnstile(token: string): Promise<void> {
   const secretKey = process.env.TURNSTILE_SECRET_KEY;
-  
+
   // Skip verification if secret key not configured (dev mode)
   if (!secretKey) {
     this.logger.warn('TURNSTILE_SECRET_KEY not set. Skipping verification.');
@@ -273,12 +278,12 @@ async verifyTurnstile(token: string): Promise<void> {
     );
 
     const data = response.data;
-    
+
     if (!data.success) {
       this.logger.warn(`Turnstile verification failed: ${JSON.stringify(data)}`);
       throw new ForbiddenException('CAPTCHA verification failed');
     }
-    
+
     // Verification successful
     this.logger.debug('Turnstile verification successful');
   } catch (error) {
@@ -305,7 +310,7 @@ async login(@Body() loginDto: LoginDto, @Res({ passthrough: true }) response: Re
 
   const result = await this.authService.login(loginDto.email, loginDto.password);
   this.setRefreshTokenCookie(response, result.refreshToken);
-  
+
   const { refreshToken, ...rest } = result;
   return rest;
 }
@@ -341,9 +346,9 @@ async forgotPassword(@Body() dto: ForgotPasswordDto) {
 
 ```typescript
 interface TurnstileVerificationRequest {
-  secret: string;        // Secret key from environment
-  response: string;      // Token from frontend
-  remoteip?: string;     // Optional: client IP address
+  secret: string; // Secret key from environment
+  response: string; // Token from frontend
+  remoteip?: string; // Optional: client IP address
 }
 ```
 
@@ -351,12 +356,12 @@ interface TurnstileVerificationRequest {
 
 ```typescript
 interface TurnstileVerificationResponse {
-  success: boolean;              // Whether verification succeeded
-  challenge_ts?: string;         // ISO timestamp of challenge
-  hostname?: string;             // Hostname where challenge was served
-  'error-codes'?: string[];      // Array of error codes if failed
-  action?: string;               // Custom action identifier
-  cdata?: string;                // Custom data payload
+  success: boolean; // Whether verification succeeded
+  challenge_ts?: string; // ISO timestamp of challenge
+  hostname?: string; // Hostname where challenge was served
+  'error-codes'?: string[]; // Array of error codes if failed
+  action?: string; // Custom action identifier
+  cdata?: string; // Custom data payload
 }
 ```
 
@@ -375,16 +380,19 @@ Cloudflare Turnstile returns specific error codes:
 ### Environment Variables
 
 **Backend (.env):**
+
 ```bash
 TURNSTILE_SECRET_KEY=<secret-key-from-cloudflare>
 ```
 
 **Frontend (.env):**
+
 ```bash
 VITE_TURNSTILE_SITE_KEY=<site-key-from-cloudflare>
 ```
 
 **Test Keys (for development):**
+
 - Site Key: `1x00000000000000000000AA` (always passes)
 - Secret Key: `1x0000000000000000000000000000000AA` (always passes)
 
@@ -393,21 +401,25 @@ VITE_TURNSTILE_SITE_KEY=<site-key-from-cloudflare>
 ### Frontend Error Handling
 
 **Widget Load Failure:**
+
 - Display error message: "Unable to load security verification. Please refresh the page."
 - Disable form submission
 - Log error to console
 
 **Token Generation Failure:**
+
 - Display error message: "CAPTCHA verification failed. Please try again."
 - Reset widget for retry
 - Allow user to retry
 
 **Token Expiration:**
+
 - Automatically reset widget when token expires (5 minutes)
 - Generate new token before form submission
 - Display message if user attempts to submit with expired token
 
 **Backend Verification Failure:**
+
 - Display error message from backend: "CAPTCHA verification failed"
 - Reset widget for new attempt
 - Clear stored token
@@ -415,25 +427,30 @@ VITE_TURNSTILE_SITE_KEY=<site-key-from-cloudflare>
 ### Backend Error Handling
 
 **Missing Secret Key:**
+
 - Log warning: "TURNSTILE_SECRET_KEY not set. Skipping verification."
 - Allow request to proceed (development mode)
 - Do not throw error
 
 **Missing Token (when secret key is set):**
+
 - Return 400 Bad Request
 - Error message: "CAPTCHA token required"
 
 **Invalid Token:**
+
 - Return 403 Forbidden
 - Error message: "CAPTCHA verification failed"
 - Log warning with error details
 
 **Cloudflare API Error:**
+
 - Return 403 Forbidden
 - Error message: "CAPTCHA verification failed"
 - Log error with full details for debugging
 
 **Network Timeout:**
+
 - Implement 5-second timeout for verification requests
 - Return 403 Forbidden on timeout
 - Log timeout error
@@ -457,6 +474,7 @@ VITE_TURNSTILE_SITE_KEY=<site-key-from-cloudflare>
 ### Unit Testing
 
 **Frontend Unit Tests:**
+
 1. TurnstileWidget component renders correctly
 2. TurnstileWidget calls onSuccess with token
 3. TurnstileWidget calls onError on failure
@@ -466,6 +484,7 @@ VITE_TURNSTILE_SITE_KEY=<site-key-from-cloudflare>
 7. LoginPage prevents submission without token (when required)
 
 **Backend Unit Tests:**
+
 1. AuthService.verifyTurnstile() calls Cloudflare API correctly
 2. AuthService.verifyTurnstile() throws ForbiddenException on failure
 3. AuthService.verifyTurnstile() skips verification when secret key not set
@@ -480,6 +499,7 @@ Property-based tests will be defined after prework analysis of acceptance criter
 ### Integration Testing
 
 **End-to-End Tests:**
+
 1. Complete login flow with valid CAPTCHA token
 2. Complete registration flow with valid CAPTCHA token
 3. Login rejection with invalid CAPTCHA token
@@ -488,6 +508,7 @@ Property-based tests will be defined after prework analysis of acceptance criter
 6. Widget reset and retry after failure
 
 **Manual Testing Checklist:**
+
 1. Test with Cloudflare test keys (always pass)
 2. Test with production keys in staging environment
 3. Verify invisible mode works for legitimate users
@@ -499,15 +520,18 @@ Property-based tests will be defined after prework analysis of acceptance criter
 ### Test Configuration
 
 **Development Environment:**
+
 - Use Cloudflare test keys that always pass
 - Set `TURNSTILE_SECRET_KEY=1x0000000000000000000000000000000AA`
 - Set `VITE_TURNSTILE_SITE_KEY=1x00000000000000000000AA`
 
 **Staging Environment:**
+
 - Use production keys with staging domain registered
 - Test with real Cloudflare verification
 
 **Production Environment:**
+
 - Use production keys with production domain registered
 - Monitor verification success/failure rates
 - Set up alerts for high failure rates
@@ -521,16 +545,19 @@ The @marsidev/react-turnstile library is designed for web browsers and has limit
 ### Recommended Approach
 
 **Option 1: WebView Integration (Recommended)**
+
 - Render Turnstile widget in a WebView component
 - Use WebView message passing to communicate token to React Native
 - Requires additional complexity but provides full Turnstile functionality
 
 **Option 2: Deferred Implementation**
+
 - Allow mobile app to authenticate without CAPTCHA initially
 - Backend already supports optional CAPTCHA (when secret key not set)
 - Implement mobile CAPTCHA in future iteration
 
 **Option 3: Alternative CAPTCHA for Mobile**
+
 - Use a different CAPTCHA provider with better React Native support
 - Maintain Turnstile for web, use alternative for mobile
 - Backend would need to support multiple verification methods
@@ -538,6 +565,7 @@ The @marsidev/react-turnstile library is designed for web browsers and has limit
 ### Implementation Plan
 
 For the initial implementation:
+
 1. Focus on web frontend integration
 2. Document mobile limitations in README
 3. Configure backend to allow mobile requests without CAPTCHA
@@ -562,18 +590,21 @@ The backend's flexible design (optional CAPTCHA when secret key not set) allows 
 ### Environment Configuration
 
 **Backend (.env):**
+
 ```bash
 # Cloudflare Turnstile
 TURNSTILE_SECRET_KEY=<your-secret-key>
 ```
 
 **Frontend (.env):**
+
 ```bash
 # Cloudflare Turnstile
 VITE_TURNSTILE_SITE_KEY=<your-site-key>
 ```
 
 **Backend (.env.example):**
+
 ```bash
 # Cloudflare Turnstile (CAPTCHA)
 # Get these keys from the Cloudflare Dashboard: https://dash.cloudflare.com/?to=/:account/turnstile
@@ -605,87 +636,85 @@ TURNSTILE_SECRET_KEY=
 7. **Logging**: Log verification failures for security monitoring
 8. **Graceful degradation**: Handle Cloudflare service outages appropriately
 
-
-
 ## Correctness Properties
 
 A property is a characteristic or behavior that should hold true across all valid executions of a system—essentially, a formal statement about what the system should do. Properties serve as the bridge between human-readable specifications and machine-verifiable correctness guarantees.
 
 ### Property 1: Authentication Requests Include CAPTCHA Token
 
-*For any* authentication request (login, registration, or forgot password) where a CAPTCHA token has been generated, the request payload SHALL include the captchaToken field.
+_For any_ authentication request (login, registration, or forgot password) where a CAPTCHA token has been generated, the request payload SHALL include the captchaToken field.
 
 **Validates: Requirements 1.2, 1.3, 1.4, 4.4**
 
 ### Property 2: Token Storage After Generation
 
-*For any* successful Turnstile widget token generation, the Web_Frontend SHALL store the token in component state for subsequent form submission.
+_For any_ successful Turnstile widget token generation, the Web_Frontend SHALL store the token in component state for subsequent form submission.
 
 **Validates: Requirements 1.5**
 
 ### Property 3: Verification Before Authentication
 
-*For any* authentication request containing a CAPTCHA token (login, registration, or forgot password), the Backend_API SHALL call the Cloudflare verification API before executing authentication logic (credential validation, user creation, or OTP sending).
+_For any_ authentication request containing a CAPTCHA token (login, registration, or forgot password), the Backend_API SHALL call the Cloudflare verification API before executing authentication logic (credential validation, user creation, or OTP sending).
 
 **Validates: Requirements 2.1, 2.2, 2.3**
 
 ### Property 4: Failed Verification Returns 403
 
-*For any* CAPTCHA token that fails Cloudflare verification, the Backend_API SHALL return a 403 Forbidden error with the message "CAPTCHA verification failed".
+_For any_ CAPTCHA token that fails Cloudflare verification, the Backend_API SHALL return a 403 Forbidden error with the message "CAPTCHA verification failed".
 
 **Validates: Requirements 2.4, 2.5**
 
 ### Property 5: Form Submission Requires Token
 
-*For any* form submission attempt when CAPTCHA is enabled, the Web_Frontend SHALL prevent submission if no CAPTCHA token exists and display a validation message.
+_For any_ form submission attempt when CAPTCHA is enabled, the Web_Frontend SHALL prevent submission if no CAPTCHA token exists and display a validation message.
 
 **Validates: Requirements 5.4, 6.4**
 
 ### Property 6: Widget Reset After Authentication Failure
 
-*For any* authentication failure (after successful CAPTCHA verification), the Web_Frontend SHALL reset the Turnstile widget to generate a new token for the next attempt.
+_For any_ authentication failure (after successful CAPTCHA verification), the Web_Frontend SHALL reset the Turnstile widget to generate a new token for the next attempt.
 
 **Validates: Requirements 5.5**
 
 ### Property 7: Token Verification Endpoint Agnostic
 
-*For any* valid CAPTCHA token (regardless of client type - web or mobile), the Backend_API SHALL verify it using the same verification endpoint and logic.
+_For any_ valid CAPTCHA token (regardless of client type - web or mobile), the Backend_API SHALL verify it using the same verification endpoint and logic.
 
 **Validates: Requirements 7.3**
 
 ### Property 8: Secret Key Never Exposed
 
-*For any* API response from the Backend_API, the response payload SHALL NOT contain the TURNSTILE_SECRET_KEY value.
+_For any_ API response from the Backend_API, the response payload SHALL NOT contain the TURNSTILE_SECRET_KEY value.
 
 **Validates: Requirements 9.1**
 
 ### Property 9: Single-Use Token Validation
 
-*For any* CAPTCHA token, attempting to verify it more than once SHALL result in verification failure on subsequent attempts.
+_For any_ CAPTCHA token, attempting to verify it more than once SHALL result in verification failure on subsequent attempts.
 
 **Validates: Requirements 9.2**
 
 ### Property 10: Server-Side Verification Required
 
-*For any* authentication request when TURNSTILE_SECRET_KEY is configured, the Backend_API SHALL perform server-side token verification and SHALL NOT trust any client-side validation claims.
+_For any_ authentication request when TURNSTILE_SECRET_KEY is configured, the Backend_API SHALL perform server-side token verification and SHALL NOT trust any client-side validation claims.
 
 **Validates: Requirements 9.3**
 
 ### Property 11: Failed Verification Logging
 
-*For any* failed CAPTCHA verification attempt, the Backend_API SHALL create a log entry containing the failure details for security monitoring.
+_For any_ failed CAPTCHA verification attempt, the Backend_API SHALL create a log entry containing the failure details for security monitoring.
 
 **Validates: Requirements 9.5**
 
 ### Property 12: Network Error Handling
 
-*For any* network error or timeout when calling Cloudflare's verification API, the Backend_API SHALL log the error and return a 403 Forbidden error to the client.
+_For any_ network error or timeout when calling Cloudflare's verification API, the Backend_API SHALL log the error and return a 403 Forbidden error to the client.
 
 **Validates: Requirements 10.1**
 
 ### Property 13: Retry After Network Failure
 
-*For any* CAPTCHA verification failure due to network issues, the Web_Frontend SHALL allow the user to retry by resetting the widget and generating a new token.
+_For any_ CAPTCHA verification failure due to network issues, the Web_Frontend SHALL allow the user to retry by resetting the widget and generating a new token.
 
 **Validates: Requirements 10.3**
 
@@ -694,105 +723,126 @@ A property is a characteristic or behavior that should hold true across all vali
 The following acceptance criteria are best validated through specific example tests rather than property-based tests:
 
 **Example 1: Widget Initialization**
+
 - Verify LoginPage renders TurnstileWidget with correct siteKey from environment
 - **Validates: Requirements 1.1**
 
 **Example 2: Widget Load Failure Error Message**
+
 - Simulate widget load failure and verify error message: "Unable to load security verification. Please refresh the page."
 - **Validates: Requirements 1.5**
 
 **Example 3: Missing Secret Key Behavior**
+
 - Configure backend without TURNSTILE_SECRET_KEY and verify requests proceed without verification
 - Verify warning is logged
 - **Validates: Requirements 2.5, 3.3**
 
 **Example 4: Environment Variable Configuration**
+
 - Verify backend reads secret key from TURNSTILE_SECRET_KEY environment variable
 - Verify frontend reads site key from VITE_TURNSTILE_SITE_KEY environment variable
 - **Validates: Requirements 3.1, 3.2**
 
 **Example 5: Missing Site Key Error**
+
 - Configure frontend without VITE_TURNSTILE_SITE_KEY and verify error message is displayed
 - **Validates: Requirements 3.4**
 
 **Example 6: Environment Documentation**
+
 - Verify .env.example files contain TURNSTILE_SECRET_KEY and VITE_TURNSTILE_SITE_KEY with instructions
 - **Validates: Requirements 3.5**
 
 **Example 7: Frontend Services Method Signatures**
+
 - Verify AuthService.login() accepts optional captchaToken parameter
 - Verify AuthService.registerStart() accepts optional captchaToken parameter
 - Verify AuthService.forgotPassword() accepts optional captchaToken parameter
 - **Validates: Requirements 4.1, 4.2, 4.3**
 
 **Example 8: DTO Type Definitions**
+
 - Verify LoginDto includes optional captchaToken field
 - Verify RegisterStartDto includes optional captchaToken field
 - Verify ForgotPasswordDto includes optional captchaToken field
 - **Validates: Requirements 4.5, 4.6, 4.7**
 
 **Example 9: Verification Failure Error Message**
+
 - Simulate verification failure and verify error message: "CAPTCHA verification failed. Please try again."
 - **Validates: Requirements 5.1**
 
 **Example 10: Widget Load Timeout**
+
 - Simulate widget load timeout and verify error message is displayed
 - **Validates: Requirements 5.2**
 
 **Example 11: Missing Token Error**
+
 - Send authentication request without token when TURNSTILE_SECRET_KEY is set
 - Verify 400 Bad Request with message "CAPTCHA token required"
 - **Validates: Requirements 5.3**
 
 **Example 12: Widget Mode Configuration**
+
 - Verify TurnstileWidget is configured with "managed" mode
 - **Validates: Requirements 6.1**
 
 **Example 13: Mobile Documentation**
+
 - Verify design document notes React Native limitations
 - Verify design document recommends WebView approach
 - Verify mobile implementation strategy is documented
 - **Validates: Requirements 7.1, 7.2, 7.5**
 
 **Example 14: Test Key Support**
+
 - Verify widget works with Cloudflare test site key (1x00000000000000000000AA)
 - Verify backend successfully verifies tokens from test key
 - Verify documentation includes test key instructions
 - **Validates: Requirements 8.1, 8.2, 8.3, 8.4**
 
 **Example 15: HTTPS Protocol**
+
 - Verify Cloudflare API URL uses HTTPS protocol
 - **Validates: Requirements 9.4**
 
 **Example 16: Widget Timeout Configuration**
+
 - Verify widget displays timeout error after 10 seconds of load failure
 - **Validates: Requirements 10.2**
 
 **Example 17: Verification Request Timeout**
+
 - Verify backend implements 5-second timeout for Cloudflare API requests
 - **Validates: Requirements 10.4**
 
 ### Testing Implementation Notes
 
 **Property-Based Tests:**
+
 - Each property test should run minimum 100 iterations
 - Use random test data generation for tokens, requests, and responses
 - Mock Cloudflare API responses for property tests
 - Tag each test with: `Feature: cloudflare-turnstile-captcha, Property N: [property title]`
 
 **Example Tests:**
+
 - Use specific test cases with known inputs and expected outputs
 - Mock external dependencies (Cloudflare API, environment variables)
 - Test both success and failure paths
 - Verify exact error messages and status codes
 
 **Integration Tests:**
+
 - Test complete authentication flows with CAPTCHA
 - Use Cloudflare test keys for predictable behavior
 - Test widget lifecycle (render → generate token → submit → reset)
 - Verify end-to-end error handling
 
 **Manual Testing:**
+
 - Test with production keys in staging environment
 - Verify invisible mode behavior with legitimate traffic
 - Test interactive challenge appears for suspicious activity

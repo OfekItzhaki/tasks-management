@@ -35,10 +35,8 @@ export function useStepManagement(taskId: string, onStepChange: () => void) {
     const newCompleted = !currentCompleted;
 
     // Optimistic update - update UI immediately
-    setSteps(prevSteps =>
-      prevSteps.map(s =>
-        s.id === step.id ? { ...s, completed: newCompleted } : s
-      )
+    setSteps((prevSteps) =>
+      prevSteps.map((s) => (s.id === step.id ? { ...s, completed: newCompleted } : s)),
     );
 
     try {
@@ -47,10 +45,8 @@ export function useStepManagement(taskId: string, onStepChange: () => void) {
       return { success: true };
     } catch (error: unknown) {
       // Revert on error
-      setSteps(prevSteps =>
-        prevSteps.map(s =>
-          s.id === step.id ? { ...s, completed: currentCompleted } : s
-        )
+      setSteps((prevSteps) =>
+        prevSteps.map((s) => (s.id === step.id ? { ...s, completed: currentCompleted } : s)),
       );
       handleApiError(error, 'Unable to update step. Please try again.');
       return { success: false };

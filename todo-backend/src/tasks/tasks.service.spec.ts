@@ -260,9 +260,7 @@ describe('TasksService', () => {
     it('should throw error if list does not exist', async () => {
       mockPrismaService.toDoList.findFirst.mockResolvedValue(null);
 
-      await expect(
-        service.create(todoListId, { description: 'Test' }, ownerId),
-      ).rejects.toThrow();
+      await expect(service.create(todoListId, { description: 'Test' }, ownerId)).rejects.toThrow();
     });
   });
 
@@ -292,9 +290,7 @@ describe('TasksService', () => {
     it('should throw NotFoundException if task not found', async () => {
       mockPrismaService.task.findFirst.mockResolvedValue(null);
 
-      await expect(service.findOne(taskId, ownerId)).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(service.findOne(taskId, ownerId)).rejects.toThrow(NotFoundException);
     });
   });
 

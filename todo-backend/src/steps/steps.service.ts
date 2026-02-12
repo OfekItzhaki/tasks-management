@@ -1,8 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { TaskAccessHelper } from '../tasks/helpers/task-access.helper';
 import { ShareRole } from '@prisma/client';
@@ -24,10 +20,7 @@ export class StepsService {
         deletedAt: null,
         todoList: {
           deletedAt: null,
-          OR: [
-            { ownerId: userId },
-            { shares: { some: { sharedWithId: userId } } },
-          ],
+          OR: [{ ownerId: userId }, { shares: { some: { sharedWithId: userId } } }],
         },
       },
     });
@@ -49,10 +42,7 @@ export class StepsService {
           deletedAt: null,
           todoList: {
             deletedAt: null,
-            OR: [
-              { ownerId: userId },
-              { shares: { some: { sharedWithId: userId } } },
-            ],
+            OR: [{ ownerId: userId }, { shares: { some: { sharedWithId: userId } } }],
           },
         },
       },
@@ -108,11 +98,7 @@ export class StepsService {
   async update(stepId: string, dto: UpdateStepDto, ownerId: string) {
     const step = await this.ensureStepAccess(stepId, ownerId);
     // Find task to check EDITOR role
-    await this.taskAccess.findTaskForUser(
-      step.taskId,
-      ownerId,
-      ShareRole.EDITOR,
-    );
+    await this.taskAccess.findTaskForUser(step.taskId, ownerId, ShareRole.EDITOR);
 
     return this.prisma.step.update({
       where: { id: stepId },
@@ -125,11 +111,7 @@ export class StepsService {
 
   async remove(stepId: string, ownerId: string) {
     const step = await this.ensureStepAccess(stepId, ownerId);
-    await this.taskAccess.findTaskForUser(
-      step.taskId,
-      ownerId,
-      ShareRole.EDITOR,
-    );
+    await this.taskAccess.findTaskForUser(step.taskId, ownerId, ShareRole.EDITOR);
 
     return this.prisma.step.update({
       where: { id: stepId },
@@ -153,25 +135,19 @@ export class StepsService {
     });
 
     if (existingSteps.length !== stepIds.length) {
-      throw new BadRequestException(
-        'All steps must be included when reordering',
-      );
+      throw new BadRequestException('All steps must be included when reordering');
     }
 
     // Check for duplicate step IDs
     const uniqueStepIds = new Set(stepIds);
     if (uniqueStepIds.size !== stepIds.length) {
-      throw new BadRequestException(
-        'Duplicate step IDs are not allowed when reordering',
-      );
+      throw new BadRequestException('Duplicate step IDs are not allowed when reordering');
     }
 
     const validStepIds = new Set(existingSteps.map((step) => step.id));
     stepIds.forEach((id) => {
       if (!validStepIds.has(id)) {
-        throw new BadRequestException(
-          `Step ID ${id} does not belong to task ${taskId}`,
-        );
+        throw new BadRequestException(`Step ID ${id} does not belong to task ${taskId}`);
       }
     });
 

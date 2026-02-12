@@ -98,9 +98,9 @@ describe('ListSharesService', () => {
     it('should throw NotFoundException if list does not exist', async () => {
       mockPrismaService.toDoList.findFirst.mockResolvedValue(null);
 
-      await expect(
-        service.shareList(todoListId, shareListDto, ownerId),
-      ).rejects.toThrow(NotFoundException);
+      await expect(service.shareList(todoListId, shareListDto, ownerId)).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it('should throw NotFoundException if user does not exist', async () => {
@@ -113,9 +113,9 @@ describe('ListSharesService', () => {
       mockPrismaService.toDoList.findFirst.mockResolvedValue(mockList);
       mockPrismaService.user.findFirst.mockResolvedValue(null);
 
-      await expect(
-        service.shareList(todoListId, shareListDto, ownerId),
-      ).rejects.toThrow(`User with email ${shareListDto.email} not found`);
+      await expect(service.shareList(todoListId, shareListDto, ownerId)).rejects.toThrow(
+        `User with email ${shareListDto.email} not found`,
+      );
     });
 
     it('should throw ConflictException if list is already shared', async () => {
@@ -138,12 +138,12 @@ describe('ListSharesService', () => {
       mockPrismaService.user.findFirst.mockResolvedValue(mockUser);
       mockPrismaService.listShare.findUnique.mockResolvedValue(existingShare);
 
-      await expect(
-        service.shareList(todoListId, shareListDto, ownerId),
-      ).rejects.toThrow(ConflictException);
-      await expect(
-        service.shareList(todoListId, shareListDto, ownerId),
-      ).rejects.toThrow('List is already shared with this user');
+      await expect(service.shareList(todoListId, shareListDto, ownerId)).rejects.toThrow(
+        ConflictException,
+      );
+      await expect(service.shareList(todoListId, shareListDto, ownerId)).rejects.toThrow(
+        'List is already shared with this user',
+      );
     });
   });
 

@@ -7,18 +7,9 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiBearerAuth,
-  ApiQuery,
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import {
-  CurrentUser,
-  CurrentUserPayload,
-} from '../auth/current-user.decorator';
+import { CurrentUser, CurrentUserPayload } from '../auth/current-user.decorator';
 import { GetTodoListsQuery } from '../todo-lists/queries/get-todo-lists.query';
 import { GetTasksQuery } from '../tasks/queries/get-tasks.query';
 import { GetTrashQuery } from './queries/get-trash.query';
@@ -52,10 +43,7 @@ export class MeController {
     description: 'Filter tasks by list ID',
   })
   @ApiResponse({ status: 200, description: 'Returns user tasks' })
-  getMyTasks(
-    @CurrentUser() user: CurrentUserPayload,
-    @Query('todoListId') todoListId?: string,
-  ) {
+  getMyTasks(@CurrentUser() user: CurrentUserPayload, @Query('todoListId') todoListId?: string) {
     return this.queryBus.execute(new GetTasksQuery(user.userId, todoListId));
   }
 
@@ -77,8 +65,6 @@ export class MeController {
     @CurrentUser() user: CurrentUserPayload,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    return this.commandBus.execute(
-      new UpdateProfilePictureCommand(user.userId, file),
-    );
+    return this.commandBus.execute(new UpdateProfilePictureCommand(user.userId, file));
   }
 }

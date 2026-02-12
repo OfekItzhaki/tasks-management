@@ -10,17 +10,13 @@ export class EmailProcessor extends WorkerHost {
   constructor(@Inject('RESEND_CLIENT') private readonly resend: Resend | null) {
     super();
     if (!this.resend) {
-      this.logger.warn(
-        'RESEND_API_KEY not configured - email sending will be disabled',
-      );
+      this.logger.warn('RESEND_API_KEY not configured - email sending will be disabled');
     }
   }
 
   async process(job: Job<unknown, unknown, string>): Promise<unknown> {
     if (!this.resend) {
-      this.logger.warn(
-        `Skipping email job "${job.name}" - Resend not configured`,
-      );
+      this.logger.warn(`Skipping email job "${job.name}" - Resend not configured`);
       return;
     }
 
@@ -59,8 +55,8 @@ export class EmailProcessor extends WorkerHost {
 
     try {
       const { data: result, error } = await this.resend.emails.send({
-        from: 'onboarding@resend.dev',
-        replyTo: 'ofeklabs@outlook.com',
+        from: 'Horizon Flux <noreply@ofeklabs.dev>',
+        replyTo: 'horizon-flux@ofeklabs.dev',
         to: email,
         subject: title,
         html: `
@@ -78,7 +74,7 @@ export class EmailProcessor extends WorkerHost {
             <p><strong>Task:</strong> ${taskDescription}</p>
             <p>${message}</p>
             <hr style="border: none; border-top: 1px solid #ddd; margin: 20px 0;">
-            <p style="font-size: 12px; color: #666;">This is an automated reminder. For support, contact <a href="mailto:ofeklabs@outlook.com" style="color: #4f46e5;">ofeklabs@outlook.com</a></p>
+            <p style="font-size: 12px; color: #666;">This is an automated reminder. For support, contact <a href="mailto:horizon-flux@ofeklabs.dev" style="color: #4f46e5;">horizon-flux@ofeklabs.dev</a></p>
           </div>
         </body>
         </html>
@@ -94,9 +90,7 @@ export class EmailProcessor extends WorkerHost {
         throw new Error(error.message);
       }
 
-      this.logger.log(
-        `Successfully sent reminder email to: ${email}, ID: ${result?.id}`,
-      );
+      this.logger.log(`Successfully sent reminder email to: ${email}, ID: ${result?.id}`);
     } catch (error: unknown) {
       const stack = error instanceof Error ? error.stack : undefined;
       this.logger.error(`Failed to send reminder email to ${email}:`, stack);
@@ -104,11 +98,7 @@ export class EmailProcessor extends WorkerHost {
     }
   }
 
-  private async handleSendVerificationEmail(data: {
-    email: string;
-    otp: string;
-    name?: string;
-  }) {
+  private async handleSendVerificationEmail(data: { email: string; otp: string; name?: string }) {
     const { email, otp, name } = data;
     this.logger.log(`Processing verification email for: ${email}`);
 
@@ -119,8 +109,8 @@ export class EmailProcessor extends WorkerHost {
 
     try {
       const { data: result, error } = await this.resend.emails.send({
-        from: 'onboarding@resend.dev',
-        replyTo: 'ofeklabs@outlook.com',
+        from: 'Horizon Flux <noreply@ofeklabs.dev>',
+        replyTo: 'horizon-flux@ofeklabs.dev',
         to: email,
         subject: 'Welcome to Horizon Flux',
         html: `
@@ -143,7 +133,7 @@ export class EmailProcessor extends WorkerHost {
             <p>This code will expire in 5 minutes.</p>
             <p>If you didn't create an account, you can safely ignore this email.</p>
             <hr style="border: none; border-top: 1px solid #ddd; margin: 20px 0;">
-            <p style="font-size: 12px; color: #666;">This is an automated message. For support, contact <a href="mailto:ofeklabs@outlook.com" style="color: #4f46e5;">ofeklabs@outlook.com</a></p>
+            <p style="font-size: 12px; color: #666;">This is an automated message. For support, contact <a href="mailto:horizon-flux@ofeklabs.dev" style="color: #4f46e5;">horizon-flux@ofeklabs.dev</a></p>
           </div>
         </body>
         </html>
@@ -166,9 +156,7 @@ export class EmailProcessor extends WorkerHost {
         throw new Error(error.message);
       }
 
-      this.logger.log(
-        `Successfully sent verification email to: ${email}, ID: ${result?.id}`,
-      );
+      this.logger.log(`Successfully sent verification email to: ${email}, ID: ${result?.id}`);
     } catch (error: unknown) {
       const stack = error instanceof Error ? error.stack : undefined;
       this.logger.error(`Failed to send email to ${email}:`, stack);
