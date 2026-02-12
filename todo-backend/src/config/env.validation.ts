@@ -17,24 +17,17 @@ export const envSchema = z.object({
   SMTP_SECURE: z.string().optional().default('false'),
   SMTP_USER: z.string().optional(),
   SMTP_PASSWORD: z.string().optional(),
-<<<<<<< HEAD
-  SMTP_FROM: z.string().email().optional(),
-=======
   SMTP_FROM: z.string().optional(),
->>>>>>> 4145321f585625a9ce6a1ccd658b6879607bb25b
 
   // Redis config
   REDIS_HOST: z.string().default('localhost'),
   REDIS_PORT: z.string().transform(Number).default(6379),
   REDIS_PASSWORD: z.string().optional(),
-<<<<<<< HEAD
-=======
 
   // Cloudinary config
   CLOUDINARY_CLOUD_NAME: z.string().optional(),
   CLOUDINARY_API_KEY: z.string().optional(),
   CLOUDINARY_API_SECRET: z.string().optional(),
->>>>>>> 4145321f585625a9ce6a1ccd658b6879607bb25b
 });
 
 export type Env = z.infer<typeof envSchema>;

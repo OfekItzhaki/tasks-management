@@ -71,11 +71,7 @@ export default function TasksScreen() {
   } = useQuery({
     queryKey: ['tasks', listId],
     queryFn: () => tasksService.getAll(listId),
-<<<<<<< HEAD
-    select: (data) => data.map(task => ({ ...task, completed: Boolean(task.completed) })),
-=======
     select: (data: Task[]) => data.map((task: Task) => ({ ...task, completed: Boolean(task.completed) })),
->>>>>>> 4145321f585625a9ce6a1ccd658b6879607bb25b
   });
 
   const toggleTaskMutation = useMutation({
@@ -84,11 +80,7 @@ export default function TasksScreen() {
       queryClient.invalidateQueries({ queryKey: ['tasks', listId] });
       rescheduleAllReminders();
     },
-<<<<<<< HEAD
-    onError: (error) => handleApiError(error, 'Failed to update task'),
-=======
     onError: (error: any) => handleApiError(error, 'Failed to update task'),
->>>>>>> 4145321f585625a9ce6a1ccd658b6879607bb25b
   });
 
   const addTaskMutation = useMutation({
@@ -100,17 +92,6 @@ export default function TasksScreen() {
       setTaskReminders([]);
       setShowAddModal(false);
     },
-<<<<<<< HEAD
-    onError: (error) => handleApiError(error, 'Failed to add task'),
-  });
-
-  const deleteTaskMutation = useMutation({
-    mutationFn: (id: number) => tasksService.delete(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tasks', listId] });
-    },
-    onError: (error) => handleApiError(error, 'Failed to delete task'),
-=======
     onError: (error: any) => handleApiError(error, 'Failed to add task'),
   });
 
@@ -120,7 +101,6 @@ export default function TasksScreen() {
       queryClient.invalidateQueries({ queryKey: ['tasks', listId] });
     },
     onError: (error: any) => handleApiError(error, 'Failed to delete task'),
->>>>>>> 4145321f585625a9ce6a1ccd658b6879607bb25b
   });
 
   // Real-time Presence: Join/Leave room

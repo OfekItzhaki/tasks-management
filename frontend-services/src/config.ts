@@ -13,11 +13,7 @@ export const configure = (config: { baseURL?: string; turnstileSiteKey?: string 
 
 // Get API base URL - works in both Node.js and browser environments
 const getApiBaseUrl = (): string => {
-<<<<<<< HEAD
-  let url = 'http://localhost:3000';
-=======
   let url = internalBaseUrl || 'http://localhost:3000';
->>>>>>> 4145321f585625a9ce6a1ccd658b6879607bb25b
 
   // In Vite/Browser, we check both process.env (if polyfilled) and import.meta.env
   if (typeof process !== 'undefined' && (process as any).env) {
@@ -39,11 +35,7 @@ const getApiBaseUrl = (): string => {
       hostname.includes('onrender.com');
 
     if (isProdDomain && url.includes('localhost')) {
-<<<<<<< HEAD
-      url = 'https://tasks-api.ofeklabs.dev';
-=======
       url = 'https://api.horizon-flux.ofeklabs.dev';
->>>>>>> 4145321f585625a9ce6a1ccd658b6879607bb25b
     }
   }
 

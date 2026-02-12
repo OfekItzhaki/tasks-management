@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-# SMTP Setup Guide for Horizon Tasks
-=======
 # SMTP Setup Guide for Horizon Flux
->>>>>>> 4145321f585625a9ce6a1ccd658b6879607bb25b
 
 This guide explains how to set up the SMTP configuration for the `todo-backend`. Currently, the Email Service is in a NO-OP state or using placeholders, which prevents OTP emails from being sent to users.
 
@@ -26,11 +22,7 @@ SMTP_HOST=smtp.example.com
 SMTP_PORT=587
 SMTP_USER=your-username
 SMTP_PASS=your-password
-<<<<<<< HEAD
-SMTP_FROM='"Horizon Tasks" <no-reply@yourdomain.com>'
-=======
 SMTP_FROM='"Horizon Flux" <no-reply@yourdomain.com>'
->>>>>>> 4145321f585625a9ce6a1ccd658b6879607bb25b
 ```
 
 ## 3. Configuration in NestJS

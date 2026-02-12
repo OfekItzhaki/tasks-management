@@ -1,10 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { TaskSchedulerService } from './task-scheduler.service';
 import { PrismaService } from '../prisma/prisma.service';
-<<<<<<< HEAD
-import { ListType } from '@prisma/client';
-=======
->>>>>>> 4145321f585625a9ce6a1ccd658b6879607bb25b
 
 describe('TaskSchedulerService', () => {
   let service: TaskSchedulerService;

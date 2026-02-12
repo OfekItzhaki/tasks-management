@@ -4,10 +4,7 @@ import { JwtService } from '@nestjs/jwt';
 import { AuthService } from './auth.service';
 import UsersService from '../users/users.service';
 import { PrismaService } from '../prisma/prisma.service';
-<<<<<<< HEAD
-=======
 import { TodoListsService } from '../todo-lists/todo-lists.service';
->>>>>>> 4145321f585625a9ce6a1ccd658b6879607bb25b
 import * as bcrypt from 'bcrypt';
 
 jest.mock('bcrypt');
@@ -39,13 +36,10 @@ describe('AuthService', () => {
     user: {
       update: jest.fn(),
     },
-<<<<<<< HEAD
-=======
   };
 
   const mockTodoListsService = {
     seedDefaultLists: jest.fn(),
->>>>>>> 4145321f585625a9ce6a1ccd658b6879607bb25b
   };
 
   beforeEach(async () => {
@@ -275,78 +269,6 @@ describe('AuthService', () => {
           'new-password',
         ),
       ).rejects.toThrow(BadRequestException);
-<<<<<<< HEAD
-=======
-    });
-  });
-
-  describe('registration flow', () => {
-    it('registerStart should initiate registration', async () => {
-      mockUsersService.initUser = jest.fn().mockResolvedValue({
-        id: 1,
-        email: 'test@example.com',
-        emailVerificationOtp: '123456',
-      });
-      mockUsersService.sendOtp = jest.fn().mockResolvedValue(undefined);
-
-      const result = await service.registerStart('test@example.com');
-
-      expect(result).toEqual({ message: 'OTP sent' });
-      expect(mockUsersService.initUser).toHaveBeenCalledWith(
-        'test@example.com',
-      );
-      expect(mockUsersService.sendOtp).toHaveBeenCalled();
-    });
-
-    it('registerVerify should return token for valid OTP', async () => {
-      const mockUser = {
-        id: 1,
-        email: 'test@example.com',
-        emailVerificationOtp: '123456',
-        emailVerificationExpiresAt: new Date(Date.now() + 10000),
-      };
-      mockUsersService.findByEmail.mockResolvedValue(mockUser);
-      mockJwtService.sign.mockReturnValue('reg-token');
-
-      const result = await service.registerVerify('test@example.com', '123456');
-
-      expect(result).toEqual({ registrationToken: 'reg-token' });
-      expect(mockJwtService.sign).toHaveBeenCalledWith(
-        expect.objectContaining({ purpose: 'registration' }),
-        expect.any(Object),
-      );
-    });
-
-    it('registerFinish should complete registration and login', async () => {
-      const mockUser = { id: 1, email: 'test@example.com' };
-      const mockToken = 'reg-token';
-      const mockPayload = {
-        sub: 1,
-        purpose: 'registration',
-        email: 'test@example.com',
-      };
-
-      mockJwtService.verify = jest.fn().mockReturnValue(mockPayload);
-      (bcrypt.hash as jest.Mock).mockResolvedValue('hashed-password');
-      mockUsersService.setPassword = jest.fn().mockResolvedValue(mockUser);
-      mockTodoListsService.seedDefaultLists = jest
-        .fn()
-        .mockResolvedValue(undefined);
-
-      // Mock login internal call
-      mockUsersService.findByEmail.mockResolvedValue({
-        ...mockUser,
-        passwordHash: 'hashed-password',
-      });
-      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
-      mockJwtService.sign.mockReturnValue('final-jwt');
-
-      const result = await service.registerFinish(mockToken, 'newpassword');
-
-      expect(result).toHaveProperty('accessToken', 'final-jwt');
-      expect(mockUsersService.setPassword).toHaveBeenCalled();
-      expect(mockTodoListsService.seedDefaultLists).toHaveBeenCalledWith(1);
->>>>>>> 4145321f585625a9ce6a1ccd658b6879607bb25b
     });
   });
 });

@@ -4,7 +4,6 @@ import request from 'supertest';
 import { App } from 'supertest/types';
 import { AppModule } from './../src/app.module';
 import { EmailService } from '../src/email/email.service';
-import { MailerService } from '@nestjs-modules/mailer';
 
 describe('AppController (e2e)', () => {
   let app: INestApplication<App>;
@@ -17,8 +16,14 @@ describe('AppController (e2e)', () => {
       .useValue({
         sendVerificationEmail: jest.fn().mockResolvedValue(undefined),
       })
-      .overrideProvider(MailerService)
-      .useValue({ sendMail: jest.fn().mockResolvedValue(true) })
+      .overrideProvider('RESEND_CLIENT')
+      .useValue({
+        emails: {
+          send: jest
+            .fn()
+            .mockResolvedValue({ data: { id: 'test' }, error: null }),
+        },
+      })
       .compile();
 
     app = moduleFixture.createNestApplication();
@@ -36,11 +41,7 @@ describe('AppController (e2e)', () => {
       .get('/')
       .expect(200)
       .expect((res) => {
-<<<<<<< HEAD
-        expect(res.text).toContain('Horizon Tasks API');
-=======
         expect(res.text).toContain('Horizon Flux API');
->>>>>>> 4145321f585625a9ce6a1ccd658b6879607bb25b
       });
   });
 });

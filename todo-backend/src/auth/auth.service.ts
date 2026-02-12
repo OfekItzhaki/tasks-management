@@ -29,7 +29,7 @@ export class AuthService {
     private readonly todoListsService: TodoListsService,
     private readonly jwtService: JwtService,
     private readonly prisma: PrismaService,
-  ) { }
+  ) {}
 
   async validateUser(email: string, password: string) {
     this.logger.debug(`Validating user: ${email}`);
@@ -111,9 +111,12 @@ export class AuthService {
 
   async refreshAccessToken(token: string) {
     try {
-      const payload = this.jwtService.verify(token, {
-        secret: process.env.JWT_REFRESH_SECRET || 'refresh-secret',
-      });
+      const payload = this.jwtService.verify<{ sub: string; jti: string }>(
+        token,
+        {
+          secret: process.env.JWT_REFRESH_SECRET || 'refresh-secret',
+        },
+      );
 
       if (!payload.sub || !payload.jti) {
         throw new UnauthorizedException('Invalid payload structure');

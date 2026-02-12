@@ -46,14 +46,10 @@ export default function Layout() {
   return (
     <div className="min-h-screen flex flex-col bg-app font-inter">
       {/* Navigation Bar - Solid, Clean */}
-<<<<<<< HEAD
-      <nav dir="ltr" className="sticky top-0 z-50 bg-surface border-b border-border-subtle shadow-sm">
-=======
       <nav
         dir="ltr"
         className="sticky top-0 z-50 bg-surface border-b border-border-subtle shadow-sm"
       >
->>>>>>> 4145321f585625a9ce6a1ccd658b6879607bb25b
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex justify-between items-center h-16">
             {/* Logo & Links */}
@@ -64,29 +60,16 @@ export default function Layout() {
                 </span>
               </Link>
 
-<<<<<<< HEAD
-              <div className="hidden sm:flex items-center gap-1">
-                {navLinks.map((link) => (
-                  <Link
-                    key={link.to}
-                    to={link.to}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${location.pathname.startsWith(link.to)
-                      ? 'bg-accent text-white shadow-sm'
-                      : 'text-secondary hover:text-primary hover:bg-hover'
-                      }`}
-=======
               <div className="hidden sm:flex items-center gap-4">
                 {/* Lists Dropdown */}
                 <div className="relative" ref={dropdownRef}>
                   <button
                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                    className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                      location.pathname.startsWith('/lists') ||
+                    className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all ${location.pathname.startsWith('/lists') ||
                       location.pathname.startsWith('/trash')
-                        ? 'bg-accent/10 text-accent'
-                        : 'text-secondary hover:text-primary hover:bg-hover'
-                    }`}
->>>>>>> 4145321f585625a9ce6a1ccd658b6879607bb25b
+                      ? 'bg-accent/10 text-accent'
+                      : 'text-secondary hover:text-primary hover:bg-hover'
+                      }`}
                   >
                     {t('nav.lists')}
                     <svg
@@ -184,11 +167,10 @@ export default function Layout() {
 
                 <Link
                   to="/analytics"
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                    location.pathname.startsWith('/analytics')
-                      ? 'bg-accent text-white shadow-sm'
-                      : 'text-secondary hover:text-primary hover:bg-hover'
-                  }`}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${location.pathname.startsWith('/analytics')
+                    ? 'bg-accent text-white shadow-sm'
+                    : 'text-secondary hover:text-primary hover:bg-hover'
+                    }`}
                 >
                   {t('nav.analytics', { defaultValue: 'Analytics' })}
                 </Link>

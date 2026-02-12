@@ -22,33 +22,18 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   private userSockets = new Map<string, string[]>(); // userId -> socketIds
   private userPresence = new Map<string, string>(); // socketId -> listId
 
-<<<<<<< HEAD
-  constructor(private readonly jwtService: JwtService) { }
-=======
   constructor(private readonly jwtService: JwtService) {}
->>>>>>> 4145321f585625a9ce6a1ccd658b6879607bb25b
 
   handleConnection(client: Socket) {
     try {
       const auth = client.handshake.auth as { token?: string };
       const headers = client.handshake.headers as { authorization?: string };
-<<<<<<< HEAD
-      const token =
-        auth.token || headers.authorization?.split(' ')[1];
-=======
       const token = auth.token || headers.authorization?.split(' ')[1];
->>>>>>> 4145321f585625a9ce6a1ccd658b6879607bb25b
       if (!token) {
         client.disconnect();
         return;
       }
 
-<<<<<<< HEAD
-      const payload = this.jwtService.verify(token);
-      const userId = payload.sub as string;
-
-      client.data = { ...client.data, userId };
-=======
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const payload: any = this.jwtService.verify(token);
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
@@ -58,7 +43,6 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
         data: { userId?: string };
       };
       dataContainer.data = { ...dataContainer.data, userId };
->>>>>>> 4145321f585625a9ce6a1ccd658b6879607bb25b
 
       const sockets = this.userSockets.get(userId) || [];
       sockets.push(client.id);
@@ -119,11 +103,7 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('ping')
-<<<<<<< HEAD
-  handlePing(_client: Socket) {
-=======
   handlePing() {
->>>>>>> 4145321f585625a9ce6a1ccd658b6879607bb25b
     return { event: 'pong', data: new Date().toISOString() };
   }
 

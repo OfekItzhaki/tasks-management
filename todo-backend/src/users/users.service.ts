@@ -86,18 +86,6 @@ class UsersService {
     });
   }
 
-<<<<<<< HEAD
-  async findById(id: string) {
-    return this.prisma.user.findUnique({
-      where: {
-        id,
-        deletedAt: null,
-      },
-    });
-  }
-
-=======
->>>>>>> 4145321f585625a9ce6a1ccd658b6879607bb25b
   async getAllUsers(requestingUserId: string): Promise<SanitizedUser[]> {
     const user = await this.getUser(requestingUserId, requestingUserId);
     return user ? [user] : [];
@@ -197,31 +185,18 @@ class UsersService {
   }
 
   async initUser(email: string): Promise<User> {
-<<<<<<< HEAD
-    console.log(`initUser: starting for ${email}`);
     const existingUser = await this.findByEmail(email);
-    console.log(`initUser: existingUser check done, found: ${!!existingUser}`);
-=======
-    const existingUser = await this.findByEmail(email);
->>>>>>> 4145321f585625a9ce6a1ccd658b6879607bb25b
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const expiresAt = new Date();
     expiresAt.setMinutes(expiresAt.getMinutes() + 10); // 10 minutes for registration
 
     if (existingUser) {
       if (existingUser.emailVerified) {
-<<<<<<< HEAD
-        console.log(`initUser: email already verified`);
-=======
->>>>>>> 4145321f585625a9ce6a1ccd658b6879607bb25b
         throw new BadRequestException(
           'Email is already registered and verified',
         );
       }
-<<<<<<< HEAD
-      console.log(`initUser: updating existing unverified user`);
-=======
->>>>>>> 4145321f585625a9ce6a1ccd658b6879607bb25b
+
       // Update existing unverified user with new OTP
       return this.prisma.user.update({
         where: { id: existingUser.id },
@@ -234,10 +209,6 @@ class UsersService {
       });
     }
 
-<<<<<<< HEAD
-    console.log(`initUser: creating new unverified user`);
-=======
->>>>>>> 4145321f585625a9ce6a1ccd658b6879607bb25b
     const user = await this.prisma.user.create({
       data: {
         email,
@@ -249,30 +220,17 @@ class UsersService {
       },
     });
 
-<<<<<<< HEAD
-    console.log(
-      `initUser: user created, id=${user.id}. creating default lists...`,
-    );
     // Create default lists for the new user
     await this.createDefaultLists(user.id);
-    console.log(`initUser: default lists created`);
-=======
-    // Create default lists for the new user
-    await this.createDefaultLists(user.id);
->>>>>>> 4145321f585625a9ce6a1ccd658b6879607bb25b
 
     return user;
   }
 
   async sendOtp(email: string, otp: string, name?: string) {
-<<<<<<< HEAD
-    console.log(`[DEV] OTP for ${email}: ${otp}`);
-=======
     // Only log in development
     if (process.env.NODE_ENV === 'development') {
       this.logger.debug(`OTP for ${email}: ${otp}`);
     }
->>>>>>> 4145321f585625a9ce6a1ccd658b6879607bb25b
     await this.emailService.sendVerificationEmail(email, otp, name);
   }
 
@@ -297,14 +255,10 @@ class UsersService {
       },
     });
 
-<<<<<<< HEAD
-    console.log(`[DEV] Password Reset OTP for ${email}: ${otp}`);
-=======
     // Only log in development
     if (process.env.NODE_ENV === 'development') {
       this.logger.debug(`Password Reset OTP for ${email}: ${otp}`);
     }
->>>>>>> 4145321f585625a9ce6a1ccd658b6879607bb25b
     // Reuse verification email template for now or add a new one if needed
     await this.emailService.sendVerificationEmail(
       email,
@@ -450,15 +404,10 @@ class UsersService {
       } as Prisma.UserUpdateInput,
     });
 
-<<<<<<< HEAD
-    // Log for Dev
-    console.log(`[DEV] Resent OTP for ${email}: ${emailVerificationOtp}`);
-=======
     // Only log in development
     if (process.env.NODE_ENV === 'development') {
       this.logger.debug(`Resent OTP for ${email}: ${emailVerificationOtp}`);
     }
->>>>>>> 4145321f585625a9ce6a1ccd658b6879607bb25b
 
     // Send verification email (don't await to avoid blocking response)
     this.emailService

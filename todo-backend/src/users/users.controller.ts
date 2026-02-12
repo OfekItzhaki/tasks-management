@@ -28,8 +28,6 @@ import {
   CurrentUser,
   CurrentUserPayload,
 } from '../auth/current-user.decorator';
-<<<<<<< HEAD
-=======
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface CloudinaryResponse {
@@ -43,7 +41,6 @@ interface CloudinaryError {
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { UploadApiResponse, UploadApiErrorResponse } from 'cloudinary';
->>>>>>> 4145321f585625a9ce6a1ccd658b6879607bb25b
 import { CloudinaryService } from '../common/cloudinary/cloudinary.service';
 import { FileUploadInterceptor } from './interceptors/file-upload.interceptor';
 
@@ -149,14 +146,6 @@ class UsersController {
     }
 
     // Upload to Cloudinary
-<<<<<<< HEAD
-    const result = await this.cloudinaryService.uploadFile(file);
-
-    // Update user profile with the Cloudinary secure URL
-    return this.userService.updateUser(
-      id,
-      { profilePicture: result.secure_url },
-=======
     const result = (await this.cloudinaryService.uploadFile(file)) as unknown;
 
     if (!result || typeof result !== 'object' || !('secure_url' in result)) {
@@ -173,7 +162,6 @@ class UsersController {
     return this.userService.updateUser(
       id,
       { profilePicture: secureUrl },
->>>>>>> 4145321f585625a9ce6a1ccd658b6879607bb25b
       user.userId,
     );
   }

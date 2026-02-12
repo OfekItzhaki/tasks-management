@@ -39,20 +39,6 @@ enum NotificationFrequency {
 }
 
 model ToDoList {
-<<<<<<< HEAD
-  id        String      @id @default(uuid())
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
-  name      String      @db.VarChar(255)
-  ownerId   String
-  order     Int         @default(autoincrement())
-  deletedAt DateTime?
-  type      ListType    @default(CUSTOM)
-  isSystem  Boolean     @default(false) // System lists (like "Finished Tasks") cannot be deleted
-  shares    ListShare[]
-  tasks     Task[]
-  owner     User        @relation(fields: [ownerId], references: [id])
-=======
   id               String           @id @default(uuid())
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @updatedAt
@@ -78,7 +64,6 @@ enum CompletionPolicy {
   AUTO_DELETE
   KEEP
   MOVE_TO_DONE
->>>>>>> 4145321f585625a9ce6a1ccd658b6879607bb25b
 }
 
 model ListShare {
@@ -149,12 +134,4 @@ model RefreshToken {
   createdAt DateTime  @default(now())
 }
 
-model RefreshToken {
-  id        String    @id @default(uuid())
-  token     String    @unique
-  userId    String
-  user      User      @relation(fields: [userId], references: [id])
-  expiresAt DateTime
-  revokedAt DateTime?
-  createdAt DateTime  @default(now())
-}
+

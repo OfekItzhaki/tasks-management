@@ -311,36 +311,17 @@ export default function ListsScreen() {
       setNewListName('');
       setShowAddModal(false);
     },
-<<<<<<< HEAD
-    onError: (error) => handleApiError(error, 'Failed to create list'),
-  });
-
-  const updateListMutation = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: { name: string } }) =>
-=======
     onError: (error: any) => handleApiError(error, 'Failed to create list'),
   });
 
   const updateListMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: { name: string } }) =>
->>>>>>> 4145321f585625a9ce6a1ccd658b6879607bb25b
       listsService.update(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['lists'] });
       setEditingList(null);
       setEditListName('');
     },
-<<<<<<< HEAD
-    onError: (error) => handleApiError(error, 'Failed to update list'),
-  });
-
-  const deleteListMutation = useMutation({
-    mutationFn: (id: number) => listsService.delete(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['lists'] });
-    },
-    onError: (error) => handleApiError(error, 'Failed to delete list'),
-=======
     onError: (error: any) => handleApiError(error, 'Failed to update list'),
   });
 
@@ -350,7 +331,6 @@ export default function ListsScreen() {
       queryClient.invalidateQueries({ queryKey: ['lists'] });
     },
     onError: (error: any) => handleApiError(error, 'Failed to delete list'),
->>>>>>> 4145321f585625a9ce6a1ccd658b6879607bb25b
   });
 
   useFocusEffect(

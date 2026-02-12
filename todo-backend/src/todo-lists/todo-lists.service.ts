@@ -13,11 +13,7 @@ export class TodoListsService {
   constructor(
     private prisma: PrismaService,
     private taskAccess: TaskAccessHelper,
-<<<<<<< HEAD
-  ) { }
-=======
   ) {}
->>>>>>> 4145321f585625a9ce6a1ccd658b6879607bb25b
 
   async create(createToDoListDto: CreateToDoListDto, ownerId: string) {
     const list = await this.prisma.toDoList.create({
@@ -33,9 +29,6 @@ export class TodoListsService {
     return list;
   }
 
-<<<<<<< HEAD
-  async findAll(ownerId: string) {
-=======
   async seedDefaultLists(userId: string) {
     const defaultLists: {
       name: string;
@@ -67,6 +60,12 @@ export class TodoListsService {
         type: ListType.YEARLY,
         taskBehavior: 'RECURRING',
         completionPolicy: 'KEEP',
+      },
+      {
+        name: 'Hot Tasks',
+        type: ListType.CUSTOM,
+        taskBehavior: 'ONE_OFF',
+        completionPolicy: 'MOVE_TO_DONE',
       },
       {
         name: 'Hot Tasks',
@@ -159,8 +158,6 @@ export class TodoListsService {
         this.logger.log(`Lazy seeded Done list for userId=${ownerId}`);
       }
     }
-
->>>>>>> 4145321f585625a9ce6a1ccd658b6879607bb25b
     return this.prisma.toDoList.findMany({
       where: {
         deletedAt: null,
@@ -224,12 +221,9 @@ export class TodoListsService {
       where: { id },
       data: {
         name: updateToDoListDto.name ?? list.name,
-<<<<<<< HEAD
-=======
         taskBehavior: updateToDoListDto.taskBehavior ?? list.taskBehavior,
         completionPolicy:
           updateToDoListDto.completionPolicy ?? list.completionPolicy,
->>>>>>> 4145321f585625a9ce6a1ccd658b6879607bb25b
       },
     });
     this.logger.log(`List updated: listId=${id} userId=${userId}`);
