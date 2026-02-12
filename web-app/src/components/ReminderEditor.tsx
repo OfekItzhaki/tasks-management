@@ -144,7 +144,7 @@ export default function ReminderEditor({
         : undefined,
       dayOfWeek:
         config.timeframe === ReminderTimeframe.EVERY_WEEK &&
-          config.dayOfWeek === undefined
+        config.dayOfWeek === undefined
           ? 1
           : config.dayOfWeek,
     };
@@ -458,7 +458,9 @@ export default function ReminderEditor({
                       className="w-full text-left px-4 py-3 text-sm hover:bg-hover transition-colors border-b border-border-subtle last:border-0 flex items-center gap-3"
                     >
                       <span className="text-accent opacity-60">📍</span>
-                      <span className="truncate text-primary">{s.display_name}</span>
+                      <span className="truncate text-primary">
+                        {s.display_name}
+                      </span>
                     </button>
                   ))}
                 </div>

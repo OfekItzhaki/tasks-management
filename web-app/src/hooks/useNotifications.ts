@@ -52,7 +52,6 @@ export function useNotifications() {
               __tasksTestNotification?: () => Promise<boolean>;
             }
           ).__tasksTestNotification = triggerTestNotification;
-
         }
       } catch {
         // if (import.meta.env.DEV) {

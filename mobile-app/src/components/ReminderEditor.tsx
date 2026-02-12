@@ -72,7 +72,6 @@ export default function ReminderEditor({
     });
   };
 
-
   const handleSave = () => {
     // Ensure time is valid (default to 09:00 if not set)
     let timeToUse = config.time || '';
@@ -136,11 +135,7 @@ export default function ReminderEditor({
         <View style={styles.dragHandle} />
         <View style={styles.modalHeader}>
           <Text style={styles.modalTitle}>Configure Reminder</Text>
-          <TouchableOpacity
-            style={styles.closeButton}
-            onPress={onCancel}
-            activeOpacity={0.7}
-          >
+          <TouchableOpacity style={styles.closeButton} onPress={onCancel} activeOpacity={0.7}>
             <Ionicons name="close" size={24} color="#64748b" />
           </TouchableOpacity>
         </View>
@@ -190,9 +185,7 @@ export default function ReminderEditor({
                       styles.optionButton,
                       config.specificDate === sd.value && styles.optionButtonSelected,
                     ]}
-                    onPress={() =>
-                      setConfig({ ...config, specificDate: sd.value })
-                    }
+                    onPress={() => setConfig({ ...config, specificDate: sd.value })}
                     activeOpacity={0.7}
                   >
                     <Text
@@ -262,29 +255,27 @@ export default function ReminderEditor({
           {/* Days Before (only show for reminders that can use due dates) */}
           {(config.timeframe === ReminderTimeframe.SPECIFIC_DATE ||
             config.timeframe === ReminderTimeframe.EVERY_DAY) && (
-              <>
-                <Text style={styles.label}>Days Before Due Date (optional):</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="e.g., 7 for 7 days before due date"
-                  value={config.daysBefore?.toString() || ''}
-                  onChangeText={(text) => {
-                    const days = parseInt(text, 10);
-                    if (!isNaN(days) && days > 0) {
-                      setConfig({ ...config, daysBefore: days });
-                    } else if (text === '') {
-                      setConfig({ ...config, daysBefore: undefined });
-                    }
-                  }}
-                  keyboardType="numeric"
-                />
-                <Text style={styles.helperText}>
-                  Leave empty if this reminder is not relative to due date
-                </Text>
-              </>
-            )}
-
-
+            <>
+              <Text style={styles.label}>Days Before Due Date (optional):</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="e.g., 7 for 7 days before due date"
+                value={config.daysBefore?.toString() || ''}
+                onChangeText={(text) => {
+                  const days = parseInt(text, 10);
+                  if (!isNaN(days) && days > 0) {
+                    setConfig({ ...config, daysBefore: days });
+                  } else if (text === '') {
+                    setConfig({ ...config, daysBefore: undefined });
+                  }
+                }}
+                keyboardType="numeric"
+              />
+              <Text style={styles.helperText}>
+                Leave empty if this reminder is not relative to due date
+              </Text>
+            </>
+          )}
 
           {/* Time Picker */}
           <Text style={styles.label}>Time (24h, HH:mm):</Text>
@@ -304,7 +295,7 @@ export default function ReminderEditor({
                 style={[
                   styles.toggleSwitch,
                   config.hasAlarm && styles.toggleSwitchActive,
-                  { flexDirection: config.hasAlarm ? 'row-reverse' : 'row' }
+                  { flexDirection: config.hasAlarm ? 'row-reverse' : 'row' },
                 ]}
                 onPress={() => setConfig({ ...config, hasAlarm: !config.hasAlarm })}
                 activeOpacity={0.8}
@@ -316,16 +307,10 @@ export default function ReminderEditor({
         </ScrollView>
 
         <View style={styles.modalButtons}>
-          <TouchableOpacity
-            style={[styles.modalButton, styles.cancelButton]}
-            onPress={onCancel}
-          >
+          <TouchableOpacity style={[styles.modalButton, styles.cancelButton]} onPress={onCancel}>
             <Text style={styles.cancelButtonText}>Cancel</Text>
           </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.modalButton, styles.saveButton]}
-            onPress={handleSave}
-          >
+          <TouchableOpacity style={[styles.modalButton, styles.saveButton]} onPress={handleSave}>
             <Text style={styles.saveButtonText}>Save</Text>
           </TouchableOpacity>
         </View>
@@ -334,5 +319,4 @@ export default function ReminderEditor({
   );
 }
 
-export { };
-
+export {};

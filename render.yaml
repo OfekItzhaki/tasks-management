@@ -16,9 +16,9 @@ services:
       - key: NODE_ENV
         value: production
       - key: DATABASE_URL
-        sync: false  # Set manually in Render dashboard
+        sync: false # Set manually in Render dashboard
       - key: DIRECT_URL
-        sync: false  # Set manually in Render dashboard
+        sync: false # Set manually in Render dashboard
       - key: JWT_SECRET
         generateValue: true
       - key: PORT

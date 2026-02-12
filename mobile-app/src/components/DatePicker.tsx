@@ -1,12 +1,5 @@
 import React, { useState } from 'react';
-import {
-  Modal,
-  View,
-  Text,
-  TouchableOpacity,
-  ScrollView,
-  Platform,
-} from 'react-native';
+import { Modal, View, Text, TouchableOpacity, ScrollView, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { createTaskDetailsStyles } from '../screens/styles/TaskDetailsScreen.styles';
 import { useThemedStyles } from '../utils/useThemedStyles';
@@ -28,9 +21,7 @@ export default function DatePicker({
 }: DatePickerProps) {
   const styles = useThemedStyles(createTaskDetailsStyles);
   const [showPicker, setShowPicker] = useState(false);
-  const [selectedDate, setSelectedDate] = useState<Date | null>(
-    value ? new Date(value) : null,
-  );
+  const [selectedDate, setSelectedDate] = useState<Date | null>(value ? new Date(value) : null);
 
   const formatDate = (date: Date): string => {
     const year = date.getFullYear();
@@ -84,8 +75,18 @@ export default function DatePicker({
     }
 
     const monthNames = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
     ];
 
     const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -129,7 +130,14 @@ export default function DatePicker({
 
     return (
       <View style={{ padding: 20 }}>
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: 20,
+          }}
+        >
           <TouchableOpacity
             style={styles.closeButton}
             onPress={() => changeMonth(-1)}
@@ -162,7 +170,14 @@ export default function DatePicker({
             <TouchableOpacity
               key={index}
               style={[
-                { width: '14.28%', aspectRatio: 1, justifyContent: 'center', alignItems: 'center', borderRadius: 12, marginVertical: 2 },
+                {
+                  width: '14.28%',
+                  aspectRatio: 1,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  borderRadius: 12,
+                  marginVertical: 2,
+                },
                 isSelected(day) && { backgroundColor: '#6366f1' },
                 isToday(day) && !isSelected(day) && { backgroundColor: '#f1f5f9' },
                 isDisabled(day) && { opacity: 0.3 },
@@ -247,10 +262,7 @@ export default function DatePicker({
             <View style={styles.dragHandle} />
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Select Date</Text>
-              <TouchableOpacity
-                style={styles.closeButton}
-                onPress={() => setShowPicker(false)}
-              >
+              <TouchableOpacity style={styles.closeButton} onPress={() => setShowPicker(false)}>
                 <Ionicons name="close" size={24} color="#64748b" />
               </TouchableOpacity>
             </View>

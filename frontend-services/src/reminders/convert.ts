@@ -27,7 +27,9 @@ export function convertBackendToReminders(
     const push = (c: Record<string, unknown>) => {
       if (!c || !c.timeframe) return;
       const tf =
-        typeof c.timeframe === 'string' ? (c.timeframe as ReminderTimeframe) : (c.timeframe as ReminderTimeframe);
+        typeof c.timeframe === 'string'
+          ? (c.timeframe as ReminderTimeframe)
+          : (c.timeframe as ReminderTimeframe);
       reminders.push({
         id: (c.id as string) || `reminder-${Date.now()}-${Math.random()}`,
         timeframe: tf,
@@ -52,7 +54,7 @@ export function convertBackendToReminders(
   if (reminderDaysBefore?.length && dueDate) {
     reminderDaysBefore.forEach((days) => {
       const exists = reminders.some(
-        (r) => r.timeframe === ReminderTimeframe.SPECIFIC_DATE && r.daysBefore === days
+        (r) => r.timeframe === ReminderTimeframe.SPECIFIC_DATE && r.daysBefore === days,
       );
       if (!exists) {
         reminders.push({
@@ -67,7 +69,7 @@ export function convertBackendToReminders(
 
   if (specificDayOfWeek != null && specificDayOfWeek >= 0 && specificDayOfWeek <= 6) {
     const exists = reminders.some(
-      (r) => r.timeframe === ReminderTimeframe.EVERY_WEEK && r.dayOfWeek === specificDayOfWeek
+      (r) => r.timeframe === ReminderTimeframe.EVERY_WEEK && r.dayOfWeek === specificDayOfWeek,
     );
     if (!exists) {
       reminders.push({
@@ -85,7 +87,11 @@ export function convertBackendToReminders(
 export function convertRemindersToBackend(
   reminders: ReminderConfig[],
   dueDate?: string,
-): { reminderDaysBefore?: number[]; specificDayOfWeek?: number | null; reminderConfig?: ReminderConfig[] | null } {
+): {
+  reminderDaysBefore?: number[];
+  specificDayOfWeek?: number | null;
+  reminderConfig?: ReminderConfig[] | null;
+} {
   const daysBefore: number[] = [];
   let dayOfWeek: number | undefined;
 
@@ -108,8 +114,7 @@ export function convertRemindersToBackend(
     reminderConfig?: ReminderConfig[] | null;
   } = {
     reminderDaysBefore: daysBefore.length ? [...new Set(daysBefore)].sort((a, b) => b - a) : [],
-    specificDayOfWeek:
-      dayOfWeek != null && dayOfWeek >= 0 && dayOfWeek <= 6 ? dayOfWeek : null,
+    specificDayOfWeek: dayOfWeek != null && dayOfWeek >= 0 && dayOfWeek <= 6 ? dayOfWeek : null,
     reminderConfig: configs.length ? configs : null,
   };
 

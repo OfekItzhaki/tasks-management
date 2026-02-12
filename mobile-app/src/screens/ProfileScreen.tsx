@@ -273,16 +273,20 @@ export default function ProfileScreen() {
   }));
 
   const handleLogout = async () => {
-    Alert.alert(t('nav.logout'), t('profile.logoutConfirm', { defaultValue: 'Are you sure you want to logout?' }), [
-      { text: t('common.cancel'), style: 'cancel' },
-      {
-        text: t('nav.logout'),
-        style: 'destructive',
-        onPress: async () => {
-          await logout();
+    Alert.alert(
+      t('nav.logout'),
+      t('profile.logoutConfirm', { defaultValue: 'Are you sure you want to logout?' }),
+      [
+        { text: t('common.cancel'), style: 'cancel' },
+        {
+          text: t('nav.logout'),
+          style: 'destructive',
+          onPress: async () => {
+            await logout();
+          },
         },
-      },
-    ]);
+      ],
+    );
   };
 
   const handleProfilePicturePress = async () => {
@@ -292,7 +296,9 @@ export default function ProfileScreen() {
       if (status !== 'granted') {
         Alert.alert(
           t('profile.permissionDenied', { defaultValue: 'Permission Denied' }),
-          t('profile.cameraPermissionRequired', { defaultValue: 'Camera permission is required to upload a profile picture.' }),
+          t('profile.cameraPermissionRequired', {
+            defaultValue: 'Camera permission is required to upload a profile picture.',
+          }),
         );
         return;
       }
@@ -317,7 +323,11 @@ export default function ProfileScreen() {
               });
 
               if (!result.canceled && result.assets[0]) {
-                await uploadImage(result.assets[0].uri, result.assets[0].fileName || 'photo.jpg', result.assets[0].type || 'image/jpeg');
+                await uploadImage(
+                  result.assets[0].uri,
+                  result.assets[0].fileName || 'photo.jpg',
+                  result.assets[0].type || 'image/jpeg',
+                );
               }
             },
           },
@@ -332,7 +342,11 @@ export default function ProfileScreen() {
               });
 
               if (!result.canceled && result.assets[0]) {
-                await uploadImage(result.assets[0].uri, result.assets[0].fileName || 'photo.jpg', result.assets[0].type || 'image/jpeg');
+                await uploadImage(
+                  result.assets[0].uri,
+                  result.assets[0].fileName || 'photo.jpg',
+                  result.assets[0].type || 'image/jpeg',
+                );
               }
             },
           },
@@ -340,7 +354,10 @@ export default function ProfileScreen() {
       );
     } catch (error) {
       console.error('Error picking image:', error);
-      Alert.alert(t('profile.error', { defaultValue: 'Error' }), t('profile.failedToPickImage', { defaultValue: 'Failed to pick image' }));
+      Alert.alert(
+        t('profile.error', { defaultValue: 'Error' }),
+        t('profile.failedToPickImage', { defaultValue: 'Failed to pick image' }),
+      );
     }
   };
 
@@ -352,17 +369,32 @@ export default function ProfileScreen() {
       // Validate file type
       const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
       if (!allowedTypes.includes(fileType)) {
-        Alert.alert(t('profile.error'), t('profile.invalidFileType', { defaultValue: 'Invalid file type. Please select an image file.' }));
+        Alert.alert(
+          t('profile.error'),
+          t('profile.invalidFileType', {
+            defaultValue: 'Invalid file type. Please select an image file.',
+          }),
+        );
         return;
       }
 
       const updatedUser = await usersService.uploadAvatar(user.id, uri, fileName, fileType);
       setImageError(false); // Reset error state when new image is uploaded
       await refreshUser();
-      Alert.alert(t('profile.pictureUpdated'), t('profile.pictureUpdatedMessage', { defaultValue: 'Profile picture updated successfully' }));
+      Alert.alert(
+        t('profile.pictureUpdated'),
+        t('profile.pictureUpdatedMessage', {
+          defaultValue: 'Profile picture updated successfully',
+        }),
+      );
     } catch (error: unknown) {
       console.error('Error uploading image:', error);
-      handleApiError(error, t('profile.pictureUpdateFailed', { defaultValue: 'Failed to update profile picture. Please try again.' }));
+      handleApiError(
+        error,
+        t('profile.pictureUpdateFailed', {
+          defaultValue: 'Failed to update profile picture. Please try again.',
+        }),
+      );
     } finally {
       setUploading(false);
     }
@@ -373,12 +405,14 @@ export default function ProfileScreen() {
 
     try {
       await authService.resendVerification(user.email);
-      Alert.alert(
-        'Success',
-        'Verification code sent. Please check your inbox.',
-      );
+      Alert.alert('Success', 'Verification code sent. Please check your inbox.');
     } catch (error: unknown) {
-      handleApiError(error, t('profile.failedToResendVerification', { defaultValue: 'Failed to resend verification email. Please try again.' }));
+      handleApiError(
+        error,
+        t('profile.failedToResendVerification', {
+          defaultValue: 'Failed to resend verification email. Please try again.',
+        }),
+      );
     }
   };
 
@@ -398,7 +432,10 @@ export default function ProfileScreen() {
   const appVersion = Constants.expoConfig?.version ?? '1.0.0';
   const handleOpenRepo = () => {
     Linking.openURL('https://github.com/OfekItzhaki/TasksManagement').catch(() => {
-      Alert.alert(t('profile.error'), t('profile.failedToOpenRepo', { defaultValue: 'Could not open repository' }));
+      Alert.alert(
+        t('profile.error'),
+        t('profile.failedToOpenRepo', { defaultValue: 'Could not open repository' }),
+      );
     });
   };
 
@@ -451,9 +488,7 @@ export default function ProfileScreen() {
       <ScrollView
         style={styles.content}
         contentContainerStyle={styles.scrollContent}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
         <View style={styles.header}>
           <LinearGradient
@@ -463,10 +498,7 @@ export default function ProfileScreen() {
             style={styles.headerGradient}
           />
           <View style={styles.headerTop}>
-            <TouchableOpacity
-              style={styles.backButton}
-              onPress={() => navigation.goBack()}
-            >
+            <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
               <Ionicons name="arrow-back" size={20} color={colors.primary} />
             </TouchableOpacity>
             <Text style={styles.title}>{t('profile.title')}</Text>
@@ -503,7 +535,7 @@ export default function ProfileScreen() {
                         }
 
                         return `${url}${url.includes('?') ? '&' : '?'}v=${user.updatedAt ? new Date(user.updatedAt).getTime() : Date.now()}`;
-                      })()
+                      })(),
                     }}
                     style={styles.profilePicture}
                     onError={(e) => {
@@ -548,7 +580,11 @@ export default function ProfileScreen() {
           <View style={styles.profileSection}>
             <Text style={styles.profileLabel}>Task Updates Frequency</Text>
             <View style={{ flexDirection: 'row', gap: 8, marginTop: 8 }}>
-              {([NotificationFrequency.NONE, NotificationFrequency.DAILY, NotificationFrequency.WEEKLY]).map((freq) => (
+              {[
+                NotificationFrequency.NONE,
+                NotificationFrequency.DAILY,
+                NotificationFrequency.WEEKLY,
+              ].map((freq) => (
                 <TouchableOpacity
                   key={freq}
                   onPress={() => handleFrequencyChange(freq)}
@@ -556,22 +592,31 @@ export default function ProfileScreen() {
                     paddingHorizontal: 12,
                     paddingVertical: 8,
                     borderRadius: 8,
-                    backgroundColor: user.notificationFrequency === freq ? colors.primary : colors.surface,
+                    backgroundColor:
+                      user.notificationFrequency === freq ? colors.primary : colors.surface,
                     borderWidth: 1,
-                    borderColor: user.notificationFrequency === freq ? colors.primary : colors.border,
+                    borderColor:
+                      user.notificationFrequency === freq ? colors.primary : colors.border,
                   }}
                 >
-                  <Text style={{
-                    color: user.notificationFrequency === freq ? '#fff' : colors.text,
-                    fontWeight: 'bold',
-                    fontSize: 12,
-                  }}>
+                  <Text
+                    style={{
+                      color: user.notificationFrequency === freq ? '#fff' : colors.text,
+                      fontWeight: 'bold',
+                      fontSize: 12,
+                    }}
+                  >
                     {freq.charAt(0) + freq.slice(1).toLowerCase()}
                   </Text>
                 </TouchableOpacity>
               ))}
             </View>
-            <Text style={[styles.profileValue, { fontSize: 12, marginTop: 8, color: colors.textSecondary }]}>
+            <Text
+              style={[
+                styles.profileValue,
+                { fontSize: 12, marginTop: 8, color: colors.textSecondary },
+              ]}
+            >
               Choose how often you want to receive email updates about your tasks.
             </Text>
           </View>
@@ -605,10 +650,7 @@ export default function ProfileScreen() {
             <Text style={styles.themeLabel}>{t('profile.theme')}</Text>
             <View style={styles.themeToggle}>
               <TouchableOpacity
-                style={[
-                  styles.themeOption,
-                  themeMode === 'light' && styles.themeOptionActive,
-                ]}
+                style={[styles.themeOption, themeMode === 'light' && styles.themeOptionActive]}
                 onPress={() => setThemeMode('light')}
               >
                 <Text
@@ -621,10 +663,7 @@ export default function ProfileScreen() {
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[
-                  styles.themeOption,
-                  themeMode === 'dark' && styles.themeOptionActive,
-                ]}
+                style={[styles.themeOption, themeMode === 'dark' && styles.themeOptionActive]}
                 onPress={() => setThemeMode('dark')}
               >
                 <Text
@@ -637,10 +676,7 @@ export default function ProfileScreen() {
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[
-                  styles.themeOption,
-                  themeMode === 'auto' && styles.themeOptionActive,
-                ]}
+                style={[styles.themeOption, themeMode === 'auto' && styles.themeOptionActive]}
                 onPress={() => setThemeMode('auto')}
               >
                 <Text

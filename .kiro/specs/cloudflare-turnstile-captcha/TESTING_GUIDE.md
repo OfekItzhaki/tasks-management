@@ -15,11 +15,13 @@ This guide provides instructions for testing the Cloudflare Turnstile CAPTCHA im
 Cloudflare provides test keys that always pass verification. These are useful for development and testing without requiring a real Cloudflare account.
 
 ### Test Site Key (Frontend)
+
 ```
 1x00000000000000000000AA
 ```
 
 ### Test Secret Key (Backend)
+
 ```
 1x0000000000000000000000000000000AA
 ```
@@ -27,11 +29,13 @@ Cloudflare provides test keys that always pass verification. These are useful fo
 ### Configuration
 
 **Backend (.env):**
+
 ```bash
 TURNSTILE_SECRET_KEY=1x0000000000000000000000000000000AA
 ```
 
 **Frontend (.env):**
+
 ```bash
 VITE_TURNSTILE_SITE_KEY=1x00000000000000000000AA
 ```
@@ -67,13 +71,15 @@ To use Cloudflare Turnstile in production, you need to create a Turnstile site i
    - Copy both keys to your environment variables
 
 5. **Configure Environment Variables**
-   
+
    **Backend (.env):**
+
    ```bash
    TURNSTILE_SECRET_KEY=your-production-secret-key-here
    ```
-   
+
    **Frontend (.env):**
+
    ```bash
    VITE_TURNSTILE_SITE_KEY=your-production-site-key-here
    ```
@@ -231,10 +237,12 @@ To test the application without CAPTCHA (development mode):
 ### Widget Not Rendering
 
 **Symptoms:**
+
 - Widget doesn't appear on login page
 - Console shows "CAPTCHA not configured" error
 
 **Solutions:**
+
 1. Check that `VITE_TURNSTILE_SITE_KEY` is set in frontend `.env`
 2. Restart frontend development server
 3. Clear browser cache and reload page
@@ -243,10 +251,12 @@ To test the application without CAPTCHA (development mode):
 ### Verification Always Fails
 
 **Symptoms:**
+
 - All authentication attempts return 403 Forbidden
 - Backend logs show "Turnstile verification failed"
 
 **Solutions:**
+
 1. Check that `TURNSTILE_SECRET_KEY` is set in backend `.env`
 2. Verify secret key is correct (no typos)
 3. Ensure backend can reach Cloudflare API (check firewall)
@@ -256,10 +266,12 @@ To test the application without CAPTCHA (development mode):
 ### Token Not Included in Request
 
 **Symptoms:**
+
 - Backend logs show "CAPTCHA token required"
 - Frontend doesn't send token in request payload
 
 **Solutions:**
+
 1. Check that widget `onSuccess` callback is setting token state
 2. Verify token is passed to authentication methods
 3. Check browser console for JavaScript errors
@@ -268,10 +280,12 @@ To test the application without CAPTCHA (development mode):
 ### Widget Loads But Token Not Generated
 
 **Symptoms:**
+
 - Widget renders but no token is generated
 - Form submission is blocked with "Please complete the security verification"
 
 **Solutions:**
+
 1. Check browser console for Turnstile errors
 2. Verify site key is valid and not expired
 3. Check that domain matches Turnstile site configuration
@@ -281,10 +295,12 @@ To test the application without CAPTCHA (development mode):
 ### Backend Can't Reach Cloudflare API
 
 **Symptoms:**
+
 - Backend logs show network errors
 - Verification times out after 5 seconds
 
 **Solutions:**
+
 1. Check backend server has internet access
 2. Verify firewall allows outbound HTTPS to Cloudflare
 3. Check DNS resolution for `challenges.cloudflare.com`
@@ -294,10 +310,12 @@ To test the application without CAPTCHA (development mode):
 ### Production Keys Don't Work
 
 **Symptoms:**
+
 - Test keys work but production keys fail
 - Widget shows "Invalid site key" error
 
 **Solutions:**
+
 1. Verify production domain is added to Turnstile site configuration
 2. Check that you're testing on the correct domain
 3. Ensure site key and secret key are from the same Turnstile site
@@ -307,10 +325,12 @@ To test the application without CAPTCHA (development mode):
 ### Mobile App Can't Authenticate
 
 **Symptoms:**
+
 - Mobile app authentication fails with CAPTCHA errors
 - Web app works fine
 
 **Solutions:**
+
 1. Remove `TURNSTILE_SECRET_KEY` from backend `.env` to disable CAPTCHA requirement
 2. Or implement WebView-based CAPTCHA for mobile (see mobile implementation strategy)
 3. Verify backend logs show "Skipping verification" for mobile requests

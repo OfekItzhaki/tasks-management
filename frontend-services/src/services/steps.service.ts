@@ -34,13 +34,10 @@ export class StepsService {
    * Reorder steps for a task
    */
   async reorder(taskId: string, stepIds: string[]): Promise<Step[]> {
-    return apiClient.patch<Step[]>(
-      `/tasks/${taskId}/steps/reorder`,
-      { stepIds } as ReorderStepsDto,
-    );
+    return apiClient.patch<Step[]>(`/tasks/${taskId}/steps/reorder`, {
+      stepIds,
+    } as ReorderStepsDto);
   }
 }
 
 export const stepsService = new StepsService();
-
-

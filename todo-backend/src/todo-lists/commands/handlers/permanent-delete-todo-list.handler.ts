@@ -4,9 +4,7 @@ import { TodoListsService } from '../../todo-lists.service';
 import { EventsService } from '../../../events/events.service';
 
 @CommandHandler(PermanentDeleteTodoListCommand)
-export class PermanentDeleteTodoListHandler
-  implements ICommandHandler<PermanentDeleteTodoListCommand>
-{
+export class PermanentDeleteTodoListHandler implements ICommandHandler<PermanentDeleteTodoListCommand> {
   constructor(
     private readonly todoListsService: TodoListsService,
     private readonly eventsService: EventsService,

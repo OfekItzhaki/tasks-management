@@ -70,9 +70,9 @@ function MainTabs() {
           backgroundColor: colors.surface,
           borderTopColor: colors.border,
           borderTopWidth: 1,
-          paddingBottom: insets.bottom > 0 ? insets.bottom : (Platform.OS === 'android' ? 8 : 0),
+          paddingBottom: insets.bottom > 0 ? insets.bottom : Platform.OS === 'android' ? 8 : 0,
           paddingTop: 12,
-          height: 70 + (insets.bottom > 0 ? insets.bottom : (Platform.OS === 'android' ? 8 : 0)),
+          height: 70 + (insets.bottom > 0 ? insets.bottom : Platform.OS === 'android' ? 8 : 0),
           shadowColor: colors.shadow,
           shadowOffset: { width: 0, height: -4 },
           shadowOpacity: 0.1,
@@ -95,9 +95,7 @@ function MainTabs() {
         component={ListsScreen}
         options={{
           title: 'My Lists',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="list" size={24} color={color} />
-          ),
+          tabBarIcon: ({ color, size }) => <Ionicons name="list" size={24} color={color} />,
         }}
       />
       <Tab.Screen
@@ -105,9 +103,7 @@ function MainTabs() {
         component={AnalysisScreen}
         options={{
           title: 'Analysis',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="analytics" size={24} color={color} />
-          ),
+          tabBarIcon: ({ color, size }) => <Ionicons name="analytics" size={24} color={color} />,
         }}
       />
       <Tab.Screen
@@ -115,9 +111,7 @@ function MainTabs() {
         component={ProfileScreen}
         options={{
           title: 'Profile',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="person" size={24} color={color} />
-          ),
+          tabBarIcon: ({ color, size }) => <Ionicons name="person" size={24} color={color} />,
         }}
       />
     </Tab.Navigator>
@@ -142,11 +136,7 @@ export default function AppNavigator() {
         {isAuthenticated ? (
           <>
             <Stack.Screen name="Main" component={MainTabs} />
-            <Stack.Screen
-              name="Tasks"
-              component={TasksScreen}
-              options={{ headerShown: false }}
-            />
+            <Stack.Screen name="Tasks" component={TasksScreen} options={{ headerShown: false }} />
             <Stack.Screen
               name="TaskDetails"
               component={TaskDetailsScreen}

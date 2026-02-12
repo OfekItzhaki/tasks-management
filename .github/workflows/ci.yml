@@ -19,7 +19,7 @@ jobs:
     defaults:
       run:
         working-directory: todo-backend
-    
+
     steps:
       - uses: actions/checkout@v4
 
@@ -94,7 +94,7 @@ jobs:
     defaults:
       run:
         working-directory: mobile-app
-    
+
     steps:
       - uses: actions/checkout@v4
 
@@ -142,4 +142,3 @@ jobs:
           else
             echo "✅ All tests passed!"
           fi
-

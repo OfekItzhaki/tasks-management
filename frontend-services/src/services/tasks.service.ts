@@ -6,9 +6,7 @@ export class TasksService {
    * Get all tasks (optionally filtered by list)
    */
   async getAll(todoListId?: string): Promise<Task[]> {
-    const path = todoListId
-      ? `/tasks?todoListId=${todoListId}`
-      : '/tasks';
+    const path = todoListId ? `/tasks?todoListId=${todoListId}` : '/tasks';
     return apiClient.get<Task[]>(path);
   }
 
@@ -79,13 +77,9 @@ export class TasksService {
    * Get user's tasks (optionally filtered by list)
    */
   async getMyTasks(todoListId?: string): Promise<Task[]> {
-    const path = todoListId
-      ? `/me/tasks?todoListId=${todoListId}`
-      : '/me/tasks';
+    const path = todoListId ? `/me/tasks?todoListId=${todoListId}` : '/me/tasks';
     return apiClient.get<Task[]>(path);
   }
 }
 
 export const tasksService = new TasksService();
-
-

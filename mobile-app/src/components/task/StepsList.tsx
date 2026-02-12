@@ -59,9 +59,7 @@ export function StepsList({
 
       {totalSteps > 0 && (
         <View style={styles.progressBar}>
-          <View
-            style={[styles.progressFill, { width: `${stepsProgress}%` }]}
-          />
+          <View style={[styles.progressFill, { width: `${stepsProgress}%` }]} />
         </View>
       )}
 
@@ -69,9 +67,7 @@ export function StepsList({
         <View style={styles.emptyStepsContainer}>
           <Ionicons name="list-outline" size={64} color="#64748b" style={{ opacity: 0.3 }} />
           <Text style={styles.emptyStepsText}>No steps yet</Text>
-          <Text style={styles.emptyStepsSubtext}>
-            Break down your task into smaller steps
-          </Text>
+          <Text style={styles.emptyStepsSubtext}>Break down your task into smaller steps</Text>
         </View>
       ) : (
         steps.map((step) => {
@@ -81,15 +77,9 @@ export function StepsList({
           return (
             <View
               key={step.id}
-              style={[
-                styles.stepItem,
-                stepCompleted && styles.stepItemCompleted,
-              ]}
+              style={[styles.stepItem, stepCompleted && styles.stepItemCompleted]}
             >
-              <TouchableOpacity
-                style={styles.stepCheckbox}
-                onPress={() => onToggleStep(step)}
-              >
+              <TouchableOpacity style={styles.stepCheckbox} onPress={() => onToggleStep(step)}>
                 {stepCompleted && <Ionicons name="checkmark" size={16} color="#6366f1" />}
               </TouchableOpacity>
 
@@ -103,31 +93,17 @@ export function StepsList({
                     onSubmitEditing={onSaveStepEdit}
                     blurOnSubmit={false}
                   />
-                  <TouchableOpacity
-                    style={styles.stepEditSaveButton}
-                    onPress={onSaveStepEdit}
-                  >
+                  <TouchableOpacity style={styles.stepEditSaveButton} onPress={onSaveStepEdit}>
                     <Ionicons name="checkmark" size={20} color="#fff" />
                   </TouchableOpacity>
-                  <TouchableOpacity
-                    style={styles.stepEditCancelButton}
-                    onPress={onCancelStepEdit}
-                  >
+                  <TouchableOpacity style={styles.stepEditCancelButton} onPress={onCancelStepEdit}>
                     <Ionicons name="close" size={20} color="#fff" />
                   </TouchableOpacity>
                 </View>
               ) : (
                 <>
-                  <TouchableOpacity
-                    style={styles.stepContent}
-                    onPress={() => onToggleStep(step)}
-                  >
-                    <Text
-                      style={[
-                        styles.stepText,
-                        stepCompleted && styles.stepTextCompleted,
-                      ]}
-                    >
+                  <TouchableOpacity style={styles.stepContent} onPress={() => onToggleStep(step)}>
+                    <Text style={[styles.stepText, stepCompleted && styles.stepTextCompleted]}>
                       {step.description}
                     </Text>
                   </TouchableOpacity>
@@ -152,10 +128,7 @@ export function StepsList({
         })
       )}
 
-      <TouchableOpacity
-        style={styles.addStepButton}
-        onPress={onAddStepPress}
-      >
+      <TouchableOpacity style={styles.addStepButton} onPress={onAddStepPress}>
         <Text style={styles.addStepButtonText}>+ Add Step</Text>
       </TouchableOpacity>
     </View>

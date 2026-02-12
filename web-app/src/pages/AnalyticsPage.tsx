@@ -60,7 +60,11 @@ export default function AnalyticsPage() {
           <h1 className="text-4xl font-bold text-primary tracking-tight">
             {t('analysis.title')}
           </h1>
-          <p className="mt-2 text-secondary">{t('analysis.insightsDescription', { defaultValue: 'Insights and statistics' })}</p>
+          <p className="mt-2 text-secondary">
+            {t('analysis.insightsDescription', {
+              defaultValue: 'Insights and statistics',
+            })}
+          </p>
         </div>
         <div className="rounded-2xl bg-accent-danger/10 border border-accent-danger/20 p-6 text-center">
           <div className="text-sm text-accent-danger mb-3">
@@ -124,7 +128,11 @@ export default function AnalyticsPage() {
         <h1 className="text-4xl font-bold text-primary tracking-tight">
           {t('analysis.title')}
         </h1>
-        <p className="mt-2 text-secondary">{t('analysis.insightsDescription', { defaultValue: 'Insights and statistics' })}</p>
+        <p className="mt-2 text-secondary">
+          {t('analysis.insightsDescription', {
+            defaultValue: 'Insights and statistics',
+          })}
+        </p>
       </div>
 
       {/* Overview Cards */}

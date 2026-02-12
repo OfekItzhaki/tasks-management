@@ -3,7 +3,7 @@ import * as Sentry from '@sentry/react-native';
 import {
   extractErrorMessage as sharedExtractErrorMessage,
   isAuthError as sharedIsAuthError,
-  isTimeoutError as sharedIsTimeoutError
+  isTimeoutError as sharedIsTimeoutError,
 } from '@tasks-management/frontend-services';
 
 /**
@@ -31,12 +31,11 @@ export function isTimeoutError(error: unknown): boolean {
 /**
  * Show error alert with consistent formatting
  */
-export function showErrorAlert(
-  title: string,
-  error: unknown,
-  defaultMessage?: string,
-): void {
-  const message = extractErrorMessage(error, defaultMessage || 'An error occurred. Please try again.');
+export function showErrorAlert(title: string, error: unknown, defaultMessage?: string): void {
+  const message = extractErrorMessage(
+    error,
+    defaultMessage || 'An error occurred. Please try again.',
+  );
   Alert.alert(title, message);
 }
 

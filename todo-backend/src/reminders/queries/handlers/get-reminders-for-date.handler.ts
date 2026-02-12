@@ -3,9 +3,7 @@ import { GetRemindersForDateQuery } from '../get-reminders-for-date.query';
 import { RemindersService } from '../../reminders.service';
 
 @QueryHandler(GetRemindersForDateQuery)
-export class GetRemindersForDateHandler
-  implements IQueryHandler<GetRemindersForDateQuery>
-{
+export class GetRemindersForDateHandler implements IQueryHandler<GetRemindersForDateQuery> {
   constructor(private readonly remindersService: RemindersService) {}
 
   async execute(query: GetRemindersForDateQuery) {

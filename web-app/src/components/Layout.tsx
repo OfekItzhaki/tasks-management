@@ -76,11 +76,12 @@ export default function Layout() {
                 <div className="relative" ref={dropdownRef}>
                   <button
                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                    className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all ${location.pathname.startsWith('/lists') ||
+                    className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                      location.pathname.startsWith('/lists') ||
                       location.pathname.startsWith('/trash')
-                      ? 'bg-accent/10 text-accent'
-                      : 'text-secondary hover:text-primary hover:bg-hover'
-                      }`}
+                        ? 'bg-accent/10 text-accent'
+                        : 'text-secondary hover:text-primary hover:bg-hover'
+                    }`}
                   >
                     {t('nav.lists')}
                     <svg
@@ -180,10 +181,11 @@ export default function Layout() {
 
                 <Link
                   to="/analytics"
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${location.pathname.startsWith('/analytics')
-                    ? 'bg-accent text-white shadow-sm'
-                    : 'text-secondary hover:text-primary hover:bg-hover'
-                    }`}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                    location.pathname.startsWith('/analytics')
+                      ? 'bg-accent text-white shadow-sm'
+                      : 'text-secondary hover:text-primary hover:bg-hover'
+                  }`}
                 >
                   {t('nav.analytics', { defaultValue: 'Analytics' })}
                 </Link>
@@ -200,10 +202,11 @@ export default function Layout() {
                   <button
                     key={mode}
                     onClick={() => setThemeMode(mode)}
-                    className={`p-1.5 rounded-md transition-all ${themeMode === mode
-                      ? 'bg-surface text-accent shadow-sm'
-                      : 'text-tertiary hover:text-secondary'
-                      }`}
+                    className={`p-1.5 rounded-md transition-all ${
+                      themeMode === mode
+                        ? 'bg-surface text-accent shadow-sm'
+                        : 'text-tertiary hover:text-secondary'
+                    }`}
                     title={t(`theme.${mode}`, {
                       defaultValue:
                         mode.charAt(0).toUpperCase() + mode.slice(1),
@@ -296,7 +299,8 @@ export default function Layout() {
                     ) : null}
                     {!user?.profilePicture && (
                       <span className="text-xs font-bold text-accent">
-                        {user?.name?.[0]?.toUpperCase() || user?.email[0]?.toUpperCase()}
+                        {user?.name?.[0]?.toUpperCase() ||
+                          user?.email[0]?.toUpperCase()}
                       </span>
                     )}
 
@@ -355,7 +359,8 @@ export default function Layout() {
             {t('footer.allRightsReserved')}
           </span>
           <span className="text-tertiary">
-            Developed by <span className="text-accent font-medium">OfekLabs</span>
+            Developed by{' '}
+            <span className="text-accent font-medium">OfekLabs</span>
           </span>
         </div>
       </footer>

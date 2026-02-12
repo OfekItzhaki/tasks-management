@@ -28,7 +28,7 @@ jobs:
   bump-and-build:
     name: Bump Version and Build
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -52,7 +52,7 @@ jobs:
           # Read current version
           CURRENT_VERSION=$(node -p "require('./package.json').version")
           echo "Current version: $CURRENT_VERSION"
-          
+
           # Bump version based on type
           if [ "${{ github.event.inputs.version_type }}" == "patch" ]; then
             NEW_VERSION=$(npm version patch --no-git-tag)
@@ -61,11 +61,11 @@ jobs:
           elif [ "${{ github.event.inputs.version_type }}" == "major" ]; then
             NEW_VERSION=$(npm version major --no-git-tag)
           fi
-          
+
           # Remove 'v' prefix if present
           NEW_VERSION=${NEW_VERSION#v}
           echo "New version: $NEW_VERSION"
-          
+
           # Update app.json version
           node -e "
             const fs = require('fs');
@@ -76,7 +76,7 @@ jobs:
             }
             fs.writeFileSync('app.json', JSON.stringify(appJson, null, 2) + '\n');
           "
-          
+
           echo "VERSION=$NEW_VERSION" >> $GITHUB_ENV
 
       - name: Commit version bump

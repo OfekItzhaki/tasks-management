@@ -4,9 +4,7 @@ import { TasksService } from '../../tasks.service';
 import { EventsService } from '../../../events/events.service';
 
 @CommandHandler(PermanentDeleteTaskCommand)
-export class PermanentDeleteTaskHandler
-  implements ICommandHandler<PermanentDeleteTaskCommand>
-{
+export class PermanentDeleteTaskHandler implements ICommandHandler<PermanentDeleteTaskCommand> {
   constructor(
     private readonly tasksService: TasksService,
     private readonly eventsService: EventsService,

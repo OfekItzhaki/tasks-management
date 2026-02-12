@@ -5,9 +5,7 @@ import { ReorderStepsCommand } from '../reorder-steps.command';
 import { GetStepsQuery } from '../../queries/get-steps.query';
 
 @CommandHandler(ReorderStepsCommand)
-export class ReorderStepsHandler
-  implements ICommandHandler<ReorderStepsCommand>
-{
+export class ReorderStepsHandler implements ICommandHandler<ReorderStepsCommand> {
   constructor(
     private readonly prisma: PrismaService,
     private readonly queryBus: QueryBus,

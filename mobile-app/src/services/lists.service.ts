@@ -52,10 +52,7 @@ export class ListsService {
    */
   async update(id: string, data: UpdateTodoListDto): Promise<ToDoList> {
     try {
-      const response = await apiClient.patch<ToDoList>(
-        `/todo-lists/${id}`,
-        data,
-      );
+      const response = await apiClient.patch<ToDoList>(`/todo-lists/${id}`, data);
       return response.data;
     } catch (error) {
       if (error instanceof ApiError) {

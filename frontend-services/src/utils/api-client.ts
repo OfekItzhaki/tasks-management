@@ -6,11 +6,7 @@ export class ApiClient {
   private isRefreshing = false;
   private refreshPromise: Promise<any> | null = null;
 
-  private async request<T>(
-    method: string,
-    path: string,
-    options: RequestInit = {},
-  ): Promise<T> {
+  private async request<T>(method: string, path: string, options: RequestInit = {}): Promise<T> {
     const url = getApiUrl(path);
     const token = TokenStorage.getToken();
 
@@ -112,7 +108,7 @@ export class ApiClient {
       this.isRefreshing = false;
       this.refreshPromise = null;
       TokenStorage.removeToken();
-      // We don't redirect here to keep the service pure, 
+      // We don't redirect here to keep the service pure,
       // but we throw so the UI can handle it
       throw refreshError;
     }

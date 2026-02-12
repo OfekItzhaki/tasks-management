@@ -53,7 +53,12 @@ export class UsersService {
   /**
    * Upload profile picture
    */
-  async uploadAvatar(id: string, fileUri: string, fileName: string, fileType: string): Promise<User> {
+  async uploadAvatar(
+    id: string,
+    fileUri: string,
+    fileName: string,
+    fileType: string,
+  ): Promise<User> {
     try {
       // Create FormData for file upload
       const formData = new FormData();

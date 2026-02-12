@@ -20,6 +20,7 @@ A modern React 19+ web application for managing tasks and todo lists.
 ### Installation
 
 1. Install dependencies:
+
 ```bash
 npm install
 # or
@@ -29,12 +30,14 @@ yarn install
 ```
 
 2. Set up environment variables (optional):
-Create a `.env` file in the root:
+   Create a `.env` file in the root:
+
 ```
 VITE_API_BASE_URL=http://localhost:3000
 ```
 
 3. Build the frontend-services package first (if needed):
+
 ```bash
 cd ../frontend-services
 npm run build
@@ -42,6 +45,7 @@ cd ../web-app
 ```
 
 4. Start the development server:
+
 ```bash
 npm run dev
 ```

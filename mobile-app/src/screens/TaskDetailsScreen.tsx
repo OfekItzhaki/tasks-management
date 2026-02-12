@@ -80,20 +80,20 @@ export default function TaskDetailsScreen() {
       task.reminderDaysBefore,
       task.specificDayOfWeek,
       task.dueDate || undefined,
-      task.reminderConfig
+      task.reminderConfig,
     ) as ReminderConfig[];
 
-    return raw.map(r => ({
+    return raw.map((r) => ({
       ...r,
       hasAlarm: reminderAlarmStates[r.id] ?? r.hasAlarm ?? false,
-      time: editReminders.find(er => er.id === r.id)?.time ?? r.time ?? '09:00',
+      time: editReminders.find((er) => er.id === r.id)?.time ?? r.time ?? '09:00',
     }));
   }, [task, isEditing, reminderAlarmStates, editReminders]);
 
   const isRepeating = useMemo(() => {
     if (!task) return false;
     // Check for every-day reminders in displayReminders
-    const hasEveryDay = displayReminders.some(r => r.timeframe === 'EVERY_DAY');
+    const hasEveryDay = displayReminders.some((r) => r.timeframe === 'EVERY_DAY');
     return checkIsRepeatingTask(task as any, hasEveryDay ? [{ timeframe: 'EVERY_DAY' }] : []);
   }, [task, displayReminders]);
 
@@ -118,7 +118,8 @@ export default function TaskDetailsScreen() {
       <View style={styles.screenHeader}>
         <LinearGradient
           colors={[colors.primary, colors.purple]}
-          start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
           style={styles.headerGradient}
         />
         <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
@@ -179,7 +180,11 @@ export default function TaskDetailsScreen() {
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Due Date:</Text>
               <View style={styles.datePickerContainer}>
-                <DatePicker value={editDueDate} onChange={setEditDueDate} placeholder="No due date" />
+                <DatePicker
+                  value={editDueDate}
+                  onChange={setEditDueDate}
+                  placeholder="No due date"
+                />
               </View>
             </View>
           </View>
@@ -187,7 +192,10 @@ export default function TaskDetailsScreen() {
 
         {isEditing && (
           <View style={styles.section}>
-            <ReminderConfigComponent reminders={editReminders} onRemindersChange={setEditReminders} />
+            <ReminderConfigComponent
+              reminders={editReminders}
+              onRemindersChange={setEditReminders}
+            />
           </View>
         )}
 
@@ -197,7 +205,10 @@ export default function TaskDetailsScreen() {
           editingStepDescription={editingStepDescription}
           onEditingStepDescriptionChange={setEditingStepDescription}
           onToggleStep={handleToggleStep}
-          onEditStep={(step) => { setEditingStepId(step.id); setEditingStepDescription(step.description); }}
+          onEditStep={(step) => {
+            setEditingStepId(step.id);
+            setEditingStepDescription(step.description);
+          }}
           onSaveStepEdit={async () => {
             if (editingStepId) {
               await updateStep(editingStepId, editingStepDescription);
@@ -211,7 +222,10 @@ export default function TaskDetailsScreen() {
 
         {isEditing && (
           <View style={styles.editActions}>
-            <TouchableOpacity style={[styles.actionButton, styles.cancelButton]} onPress={handleCancelEdit}>
+            <TouchableOpacity
+              style={[styles.actionButton, styles.cancelButton]}
+              onPress={handleCancelEdit}
+            >
               <Text style={styles.cancelButtonText}>Cancel</Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -219,7 +233,11 @@ export default function TaskDetailsScreen() {
               onPress={handleSaveEdit}
               disabled={isSubmitting}
             >
-              {isSubmitting ? <ActivityIndicator color="#fff" /> : <Text style={styles.saveButtonText}>Save</Text>}
+              {isSubmitting ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={styles.saveButtonText}>Save</Text>
+              )}
             </TouchableOpacity>
           </View>
         )}

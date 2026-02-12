@@ -1,7 +1,7 @@
 name: Bump Version
 
 on:
-  workflow_dispatch:  # Manual trigger
+  workflow_dispatch: # Manual trigger
     inputs:
       version_type:
         description: 'Version bump type'
@@ -27,7 +27,7 @@ jobs:
   bump-version:
     name: Bump Version
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -52,7 +52,7 @@ jobs:
           # Read current version
           CURRENT_VERSION=$(node -p "require('./package.json').version")
           echo "Current version: $CURRENT_VERSION"
-          
+
           # Bump version based on type
           if [ "${{ github.event.inputs.version_type }}" == "patch" ]; then
             NEW_VERSION=$(npm version patch --no-git-tag)
@@ -61,11 +61,11 @@ jobs:
           elif [ "${{ github.event.inputs.version_type }}" == "major" ]; then
             NEW_VERSION=$(npm version major --no-git-tag)
           fi
-          
+
           # Remove 'v' prefix if present
           NEW_VERSION=${NEW_VERSION#v}
           echo "New version: $NEW_VERSION"
-          
+
           # Update app.json version
           if [ -f "app.json" ]; then
             # Use node to update app.json
@@ -76,7 +76,7 @@ jobs:
               fs.writeFileSync('app.json', JSON.stringify(appJson, null, 2) + '\n');
             "
           fi
-          
+
           # Update Android versionCode (increment by 1)
           if [ -f "app.json" ]; then
             node -e "
@@ -88,7 +88,7 @@ jobs:
               fs.writeFileSync('app.json', JSON.stringify(appJson, null, 2) + '\n');
             "
           fi
-          
+
           echo "VERSION=$NEW_VERSION" >> $GITHUB_ENV
           echo "MOBILE_VERSION=$NEW_VERSION" >> $GITHUB_ENV
 
@@ -99,7 +99,7 @@ jobs:
           # Read current version
           CURRENT_VERSION=$(node -p "require('./package.json').version")
           echo "Current version: $CURRENT_VERSION"
-          
+
           # Bump version based on type
           if [ "${{ github.event.inputs.version_type }}" == "patch" ]; then
             NEW_VERSION=$(npm version patch --no-git-tag)
@@ -108,7 +108,7 @@ jobs:
           elif [ "${{ github.event.inputs.version_type }}" == "major" ]; then
             NEW_VERSION=$(npm version major --no-git-tag)
           fi
-          
+
           # Remove 'v' prefix if present
           NEW_VERSION=${NEW_VERSION#v}
           echo "New version: $NEW_VERSION"
@@ -118,18 +118,18 @@ jobs:
         uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: "chore: bump version(s) - ${{ github.event.inputs.version_type }}"
-          title: "chore: Bump version(s) - ${{ github.event.inputs.version_type }}"
+          commit-message: 'chore: bump version(s) - ${{ github.event.inputs.version_type }}'
+          title: 'chore: Bump version(s) - ${{ github.event.inputs.version_type }}'
           body: |
             ## Version Bump
-            
+
             **Type:** ${{ github.event.inputs.version_type }}
             **Apps:** ${{ github.event.inputs.apps }}
-            
+
             ### Changes:
             ${{ env.MOBILE_VERSION && format('- Mobile App: {0}', env.MOBILE_VERSION) || '' }}
             ${{ env.WEB_VERSION && format('- Web App: {0}', env.WEB_VERSION) || '' }}
-            
+
             This PR was automatically created by the version bump workflow.
           branch: chore/bump-version-${{ github.run_number }}
           delete-branch: true
@@ -142,6 +142,6 @@ jobs:
             echo "No changes to commit"
             exit 0
           fi
-          
+
           git commit -m "chore: bump version(s) - ${{ github.event.inputs.version_type }}"
           git push origin develop

@@ -61,7 +61,9 @@ export default function StepsList({
       >
         <div className="flex items-center gap-3">
           <h2 className="premium-header-section text-lg">
-            {isRtl ? 'שלבים' : t('taskDetails.stepsTitle', { defaultValue: 'Steps' })}
+            {isRtl
+              ? 'שלבים'
+              : t('taskDetails.stepsTitle', { defaultValue: 'Steps' })}
           </h2>
           {task.steps && task.steps.length > 0 && (
             <button

@@ -77,8 +77,7 @@ export default {
     defaultTitle: 'Tasks',
     renameTitle: 'Click to rename',
     deleteList: 'Delete list',
-    deleteListConfirm:
-      'Delete list "{{name}}"? This will delete all tasks in this list.',
+    deleteListConfirm: 'Delete list "{{name}}"? This will delete all tasks in this list.',
     createFab: 'Create new task',
     empty: 'No tasks found.',
     loadFailed: 'Failed to load tasks',
@@ -105,8 +104,7 @@ export default {
     restored: 'Task restored',
     restoreFailed: 'Failed to restore task',
     deleteForever: 'Delete forever',
-    deleteForeverConfirm:
-      'Delete task "{{description}}" forever? This cannot be undone.',
+    deleteForeverConfirm: 'Delete task "{{description}}" forever? This cannot be undone.',
     deletedForever: 'Task deleted forever',
     deleteForeverFailed: 'Failed to delete task forever',
   },
@@ -216,4 +214,3 @@ export default {
     alreadyShared: 'This list is already shared with this user',
   },
 } as const;
-

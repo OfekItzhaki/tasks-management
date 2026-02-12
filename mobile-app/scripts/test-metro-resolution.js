@@ -9,7 +9,10 @@ const path = require('path');
 const fs = require('fs');
 
 const mobileAppRoot = path.resolve(__dirname, '..');
-const nodeModulesPath = path.resolve(mobileAppRoot, 'node_modules/@tasks-management/frontend-services');
+const nodeModulesPath = path.resolve(
+  mobileAppRoot,
+  'node_modules/@tasks-management/frontend-services',
+);
 const packageJsonPath = path.join(nodeModulesPath, 'package.json');
 const distIndexPath = path.join(nodeModulesPath, 'dist/index.js');
 

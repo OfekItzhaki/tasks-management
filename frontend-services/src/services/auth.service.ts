@@ -7,10 +7,7 @@ export class AuthService {
    * Login with email and password
    */
   async login(credentials: LoginDto): Promise<LoginResponse> {
-    const response = await apiClient.post<LoginResponse>(
-      '/auth/login',
-      credentials,
-    );
+    const response = await apiClient.post<LoginResponse>('/auth/login', credentials);
     TokenStorage.setToken(response.accessToken);
     return response;
   }
@@ -74,10 +71,7 @@ export class AuthService {
   /**
    * Verify OTP for registration
    */
-  async registerVerify(
-    email: string,
-    otp: string,
-  ): Promise<{ registrationToken: string }> {
+  async registerVerify(email: string, otp: string): Promise<{ registrationToken: string }> {
     return apiClient.post<{ registrationToken: string }>('/auth/register/verify', {
       email,
       otp,
@@ -92,10 +86,7 @@ export class AuthService {
     password: string;
     passwordConfirm: string;
   }): Promise<LoginResponse> {
-    const response = await apiClient.post<LoginResponse>(
-      '/auth/register/finish',
-      data,
-    );
+    const response = await apiClient.post<LoginResponse>('/auth/register/finish', data);
     TokenStorage.setToken(response.accessToken);
     return response;
   }
@@ -113,17 +104,11 @@ export class AuthService {
   /**
    * Verify reset OTP
    */
-  async verifyResetOtp(
-    email: string,
-    otp: string,
-  ): Promise<{ resetToken: string }> {
-    return apiClient.post<{ resetToken: string }>(
-      '/auth/reset-password/verify',
-      {
-        email,
-        otp,
-      },
-    );
+  async verifyResetOtp(email: string, otp: string): Promise<{ resetToken: string }> {
+    return apiClient.post<{ resetToken: string }>('/auth/reset-password/verify', {
+      email,
+      otp,
+    });
   }
 
   /**
@@ -135,10 +120,7 @@ export class AuthService {
     password: string;
     passwordConfirm: string;
   }): Promise<{ message: string }> {
-    return apiClient.post<{ message: string }>(
-      '/auth/reset-password/finish',
-      data,
-    );
+    return apiClient.post<{ message: string }>('/auth/reset-password/finish', data);
   }
 }
 

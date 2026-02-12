@@ -186,10 +186,11 @@ export default function LoginScreen() {
           </TouchableOpacity>
         </View>
 
-        <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
-          <Text style={styles.title}>
-            {isLogin ? 'Horizon Flux' : 'Create Account'}
-          </Text>
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+        >
+          <Text style={styles.title}>{isLogin ? 'Horizon Flux' : 'Create Account'}</Text>
 
           {!isLogin && (
             <TextInput
@@ -238,31 +239,21 @@ export default function LoginScreen() {
           {loading ? (
             <ActivityIndicator size="large" color="#6366f1" />
           ) : (
-            <TouchableOpacity
-              onPress={isLogin ? handleLogin : handleRegister}
-              activeOpacity={0.8}
-            >
+            <TouchableOpacity onPress={isLogin ? handleLogin : handleRegister} activeOpacity={0.8}>
               <LinearGradient
                 colors={['#6366f1', '#a855f7']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
                 style={styles.button}
               >
-                <Text style={styles.buttonText}>
-                  {isLogin ? 'Login' : 'Register'}
-                </Text>
+                <Text style={styles.buttonText}>{isLogin ? 'Login' : 'Register'}</Text>
               </LinearGradient>
             </TouchableOpacity>
           )}
 
-          <TouchableOpacity
-            style={styles.switchButton}
-            onPress={() => setIsLogin(!isLogin)}
-          >
+          <TouchableOpacity style={styles.switchButton} onPress={() => setIsLogin(!isLogin)}>
             <Text style={styles.switchText}>
-              {isLogin
-                ? "Don't have an account? Register"
-                : 'Already have an account? Login'}
+              {isLogin ? "Don't have an account? Register" : 'Already have an account? Login'}
             </Text>
           </TouchableOpacity>
         </ScrollView>

@@ -25,5 +25,3 @@ export class TokenStorage {
     return this.getToken() !== null;
   }
 }
-
-

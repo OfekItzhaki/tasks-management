@@ -1,12 +1,5 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  ScrollView,
-  Modal,
-} from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Modal } from 'react-native';
 import {
   type ReminderConfig,
   ReminderTimeframe,
@@ -39,7 +32,6 @@ const SPECIFIC_DATES = [
   { value: ReminderSpecificDate.START_OF_YEAR, label: 'Start of Year (Jan 1st)' },
   { value: ReminderSpecificDate.CUSTOM_DATE, label: 'Custom Date' },
 ];
-
 
 export default function ReminderConfigComponent({
   reminders,
@@ -107,17 +99,24 @@ export default function ReminderConfigComponent({
 
   return (
     <View style={styles.container}>
-      <View style={[styles.header, { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 16 }]}>
+      <View
+        style={[
+          styles.header,
+          {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            paddingVertical: 16,
+          },
+        ]}
+      >
         <View style={[styles.sectionIconRow, { marginBottom: 0 }]}>
           <View style={[styles.iconContainer, { width: 36, height: 36, marginRight: 12 }]}>
             <Ionicons name="notifications-outline" size={20} color="#a855f7" />
           </View>
           <Text style={styles.sectionTitle}>Reminders</Text>
         </View>
-        <TouchableOpacity
-          style={styles.addButton}
-          onPress={addReminder}
-        >
+        <TouchableOpacity style={styles.addButton} onPress={addReminder}>
           <Text style={styles.addButtonText}>+ Add</Text>
         </TouchableOpacity>
       </View>
@@ -132,21 +131,18 @@ export default function ReminderConfigComponent({
                 <View style={styles.reminderTextRow}>
                   <Text style={styles.reminderText}>{formatReminderDisplay(reminder)}</Text>
                   <TouchableOpacity
-                    style={[
-                      styles.alarmToggle,
-                      reminder.hasAlarm && styles.alarmToggleActive
-                    ]}
+                    style={[styles.alarmToggle, reminder.hasAlarm && styles.alarmToggleActive]}
                     onPress={() => {
-                      const updated = reminders.map(r =>
-                        r.id === reminder.id ? { ...r, hasAlarm: !r.hasAlarm } : r
+                      const updated = reminders.map((r) =>
+                        r.id === reminder.id ? { ...r, hasAlarm: !r.hasAlarm } : r,
                       );
                       onRemindersChange(updated);
                     }}
                   >
                     <Ionicons
-                      name={reminder.hasAlarm ? "notifications" : "notifications-off"}
+                      name={reminder.hasAlarm ? 'notifications' : 'notifications-off'}
                       size={18}
-                      color={reminder.hasAlarm ? "#6366f1" : "#64748b"}
+                      color={reminder.hasAlarm ? '#6366f1' : '#64748b'}
                     />
                   </TouchableOpacity>
                 </View>

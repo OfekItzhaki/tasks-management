@@ -4,9 +4,7 @@ import { TodoListsService } from '../../todo-lists.service';
 import { EventsService } from '../../../events/events.service';
 
 @CommandHandler(UpdateTodoListCommand)
-export class UpdateTodoListHandler
-  implements ICommandHandler<UpdateTodoListCommand>
-{
+export class UpdateTodoListHandler implements ICommandHandler<UpdateTodoListCommand> {
   constructor(
     private readonly todoListsService: TodoListsService,
     private readonly eventsService: EventsService,

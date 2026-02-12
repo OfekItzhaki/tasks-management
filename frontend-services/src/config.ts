@@ -30,9 +30,7 @@ const getApiBaseUrl = (): string => {
   // Final Safety Check for Production Domains
   if (typeof window !== 'undefined' && window.location) {
     const hostname = window.location.hostname;
-    const isProdDomain =
-      hostname.includes('ofeklabs.dev') ||
-      hostname.includes('onrender.com');
+    const isProdDomain = hostname.includes('ofeklabs.dev') || hostname.includes('onrender.com');
 
     if (isProdDomain && url.includes('localhost')) {
       url = 'https://api.horizon-flux.ofeklabs.dev';
@@ -59,7 +57,7 @@ export const getTurnstileSiteKey = (): string | null => {
     return (window as any).__VITE_TURNSTILE_SITE_KEY__ || null;
   }
   return null;
-}
+};
 
 export const API_CONFIG = {
   baseURL: getApiBaseUrl(),
@@ -83,10 +81,7 @@ export const getApiUrl = (path: string): string => {
 /**
  * Helper to get the root URL (without /api/v1) for static assets like uploads
  */
-export const getAssetUrl = (
-  path: string,
-  includeCacheBuster = true,
-): string => {
+export const getAssetUrl = (path: string, includeCacheBuster = true): string => {
   if (!path) return '';
 
   // If already an absolute URL, return as is
@@ -104,7 +99,7 @@ export const getAssetUrl = (
   const url = `${root}/uploads/${cleanPath}`;
 
   if (includeCacheBuster) {
-    // Add a timestamp or hash based on the filename if possible, 
+    // Add a timestamp or hash based on the filename if possible,
     // but a simple ?t= is most reliable for immediate updates
     const buster = Date.now();
     return `${url}?t=${buster}`;

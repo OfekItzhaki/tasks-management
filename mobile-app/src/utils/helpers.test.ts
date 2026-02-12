@@ -312,7 +312,6 @@ describe('helpers', () => {
       expect(result.reminderDaysBefore).toEqual([7]);
       expect(result.specificDayOfWeek).toBe(2);
     });
-
   });
 
   describe('convertBackendToReminders', () => {

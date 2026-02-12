@@ -228,7 +228,9 @@ export async function requestNotificationPermissions(showGuidance = false): Prom
 
     const granted = finalStatus === 'granted';
     if (__DEV__) {
-      console.log(`Notification permissions: ${granted ? 'GRANTED' : 'DENIED'} (status: ${finalStatus})`);
+      console.log(
+        `Notification permissions: ${granted ? 'GRANTED' : 'DENIED'} (status: ${finalStatus})`,
+      );
     }
     return granted;
   } catch (error) {
@@ -274,11 +276,16 @@ export async function scheduleReminderNotification(
         minute: minutes,
       } as Notifications.DailyTriggerInput;
       if (__DEV__) {
-        console.log(`Scheduling daily reminder at ${hours}:${minutes.toString().padStart(2, '0')} (repeats: true)`);
+        console.log(
+          `Scheduling daily reminder at ${hours}:${minutes.toString().padStart(2, '0')} (repeats: true)`,
+        );
       }
     }
     // For recurring weekly reminders, use weekly trigger
-    else if (reminder.timeframe === ReminderTimeframe.EVERY_WEEK && reminder.dayOfWeek !== undefined) {
+    else if (
+      reminder.timeframe === ReminderTimeframe.EVERY_WEEK &&
+      reminder.dayOfWeek !== undefined
+    ) {
       // Ensure notification channel is set up
       await setupNotificationChannel();
 
@@ -289,7 +296,9 @@ export async function scheduleReminderNotification(
         minute: minutes,
       } as Notifications.WeeklyTriggerInput;
       if (__DEV__) {
-        console.log(`Scheduling weekly reminder: weekday ${reminder.dayOfWeek + 1} at ${hours}:${minutes.toString().padStart(2, '0')} (repeats: true)`);
+        console.log(
+          `Scheduling weekly reminder: weekday ${reminder.dayOfWeek + 1} at ${hours}:${minutes.toString().padStart(2, '0')} (repeats: true)`,
+        );
       }
     }
     // For other reminders, calculate the date first
@@ -300,7 +309,11 @@ export async function scheduleReminderNotification(
       }
 
       // Don't schedule if the date is in the past (for one-time notifications)
-      if (triggerDate < new Date() && reminder.timeframe !== ReminderTimeframe.EVERY_MONTH && reminder.timeframe !== ReminderTimeframe.EVERY_YEAR) {
+      if (
+        triggerDate < new Date() &&
+        reminder.timeframe !== ReminderTimeframe.EVERY_MONTH &&
+        reminder.timeframe !== ReminderTimeframe.EVERY_YEAR
+      ) {
         return null;
       }
 
@@ -329,7 +342,9 @@ export async function scheduleReminderNotification(
     });
 
     if (__DEV__) {
-      console.log(`Scheduled notification ${notificationId} for task ${taskId}, reminder ${reminder.id} (${reminder.timeframe})`);
+      console.log(
+        `Scheduled notification ${notificationId} for task ${taskId}, reminder ${reminder.id} (${reminder.timeframe})`,
+      );
     }
 
     return notificationId;
@@ -352,8 +367,10 @@ function calculateNotificationDate(
   const minutes = parseInt(timeParts[1] || '0', 10);
 
   // Don't calculate for recurring daily/weekly - they use recurring triggers
-  if (reminder.timeframe === ReminderTimeframe.EVERY_DAY ||
-    (reminder.timeframe === ReminderTimeframe.EVERY_WEEK && reminder.dayOfWeek !== undefined)) {
+  if (
+    reminder.timeframe === ReminderTimeframe.EVERY_DAY ||
+    (reminder.timeframe === ReminderTimeframe.EVERY_WEEK && reminder.dayOfWeek !== undefined)
+  ) {
     return null;
   }
 
@@ -422,10 +439,7 @@ function calculateNotificationDate(
  * Format notification body text
  * Includes location when set.
  */
-function formatNotificationBody(
-  reminder: ReminderConfig,
-  dueDate: Date | string | null,
-): string {
+function formatNotificationBody(reminder: ReminderConfig, dueDate: Date | string | null): string {
   const parts: string[] = [];
   if (reminder.location?.trim()) {
     parts.push(`📍 ${reminder.location.trim()}`);
@@ -502,12 +516,7 @@ export async function scheduleTaskReminders(
   const notificationIds: string[] = [];
 
   for (const reminder of reminders) {
-    const id = await scheduleReminderNotification(
-      taskId,
-      taskDescription,
-      reminder,
-      dueDate,
-    );
+    const id = await scheduleReminderNotification(taskId, taskDescription, reminder, dueDate);
     if (id) {
       notificationIds.push(id);
     }
@@ -519,9 +528,7 @@ export async function scheduleTaskReminders(
 /**
  * Get all scheduled notifications (for debugging)
  */
-export async function getAllScheduledNotifications(): Promise<
-  Notifications.NotificationRequest[]
-> {
+export async function getAllScheduledNotifications(): Promise<Notifications.NotificationRequest[]> {
   if (isExpoGo()) {
     return [];
   }
@@ -572,7 +579,9 @@ async function getTodayTasks(): Promise<Array<{ description: string; isRepeating
 
       // Check if task has daily reminder from reminderConfig
       if (task.reminderConfig && Array.isArray(task.reminderConfig)) {
-        const hasDailyReminder = task.reminderConfig.some((r: any) => r.timeframe === ReminderTimeframe.EVERY_DAY);
+        const hasDailyReminder = task.reminderConfig.some(
+          (r: any) => r.timeframe === ReminderTimeframe.EVERY_DAY,
+        );
         if (hasDailyReminder) {
           isToday = true;
           isRepeating = true;
@@ -633,8 +642,8 @@ export async function updateDailyTasksNotification(): Promise<void> {
     }
 
     // Separate repeating and non-repeating tasks
-    const repeatingTasks = todayTasks.filter(t => t.isRepeating);
-    const nonRepeatingTasks = todayTasks.filter(t => !t.isRepeating);
+    const repeatingTasks = todayTasks.filter((t) => t.isRepeating);
+    const nonRepeatingTasks = todayTasks.filter((t) => !t.isRepeating);
 
     // Build notification body
     let body = '';
@@ -786,12 +795,7 @@ export async function rescheduleAllReminders(): Promise<void> {
 
       // Schedule all reminders for this task
       if (reminders.length > 0) {
-        await scheduleTaskReminders(
-          task.id,
-          task.description,
-          reminders,
-          task.dueDate || null,
-        );
+        await scheduleTaskReminders(task.id, task.description, reminders, task.dueDate || null);
         scheduledCount += reminders.length;
       }
     }

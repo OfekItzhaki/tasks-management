@@ -53,7 +53,7 @@ export default function ProfilePage() {
       setUser({ ...user, notificationFrequency: previousFrequency });
       alert(
         t('profile.updateFailed') ||
-        'Failed to update notification frequency. Please try again.'
+          'Failed to update notification frequency. Please try again.'
       );
     }
   };
@@ -73,7 +73,7 @@ export default function ProfilePage() {
       setUser({ ...user, trashRetentionDays: previousDays });
       alert(
         t('profile.updateFailed') ||
-        'Failed to update trash retention. Please try again.'
+          'Failed to update trash retention. Please try again.'
       );
     }
   };
@@ -253,10 +253,11 @@ export default function ProfilePage() {
                     <button
                       key={freq}
                       onClick={() => handleFrequencyChange(freq)}
-                      className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${user?.notificationFrequency === freq
-                        ? 'bg-accent text-white shadow-lg'
-                        : 'bg-hover text-secondary hover:bg-hover/80'
-                        }`}
+                      className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${
+                        user?.notificationFrequency === freq
+                          ? 'bg-accent text-white shadow-lg'
+                          : 'bg-hover text-secondary hover:bg-hover/80'
+                      }`}
                     >
                       {freq.charAt(0) + freq.slice(1).toLowerCase()}
                     </button>
@@ -279,10 +280,11 @@ export default function ProfilePage() {
                     <button
                       key={days}
                       onClick={() => handleTrashRetentionChange(days)}
-                      className={`px-4 py-2 rounded-xl text-sm font-bold transition-all whitespace-nowrap ${user?.trashRetentionDays === days
-                        ? 'bg-accent text-white shadow-lg'
-                        : 'bg-hover text-secondary hover:bg-hover/80'
-                        }`}
+                      className={`px-4 py-2 rounded-xl text-sm font-bold transition-all whitespace-nowrap ${
+                        user?.trashRetentionDays === days
+                          ? 'bg-accent text-white shadow-lg'
+                          : 'bg-hover text-secondary hover:bg-hover/80'
+                      }`}
                     >
                       {days} {t('common.days', { defaultValue: 'days' })}
                     </button>

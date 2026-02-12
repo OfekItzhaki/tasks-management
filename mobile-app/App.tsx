@@ -6,7 +6,11 @@ import { AuthProvider } from './src/context/AuthContext';
 import { ThemeProvider, useTheme } from './src/context/ThemeContext';
 import AppNavigator from './src/navigation/AppNavigator';
 import * as Notifications from 'expo-notifications';
-import { requestNotificationPermissions, rescheduleAllReminders, updateDailyTasksNotification } from './src/services/notifications.service';
+import {
+  requestNotificationPermissions,
+  rescheduleAllReminders,
+  updateDailyTasksNotification,
+} from './src/services/notifications.service';
 import { TokenStorage } from './src/utils/storage';
 import './src/i18n';
 
@@ -29,7 +33,8 @@ function AppContent() {
             await updateDailyTasksNotification();
           } catch (error: any) {
             // Silently ignore auth errors - background task shouldn't show alerts
-            const isAuthError = error?.response?.status === 401 ||
+            const isAuthError =
+              error?.response?.status === 401 ||
               error?.message?.toLowerCase()?.includes('unauthorized');
             if (!isAuthError) {
               if (process.env.EXPO_PUBLIC_SENTRY_DSN) Sentry.captureException(error);
@@ -42,8 +47,8 @@ function AppContent() {
 
     initializeNotifications().catch((error) => {
       // Silently ignore auth errors during startup - user will login if needed
-      const isAuthError = error?.response?.status === 401 ||
-        error?.message?.toLowerCase()?.includes('unauthorized');
+      const isAuthError =
+        error?.response?.status === 401 || error?.message?.toLowerCase()?.includes('unauthorized');
       if (!isAuthError) {
         if (process.env.EXPO_PUBLIC_SENTRY_DSN) Sentry.captureException(error);
         console.error('Error initializing notifications:', error);
@@ -64,7 +69,7 @@ function AppContent() {
             console.error('Error updating daily tasks notification:', error);
           }
         }
-      }
+      },
     );
 
     // Listen for notifications received while app is in foreground
@@ -81,7 +86,7 @@ function AppContent() {
             console.error('Error updating daily tasks notification:', error);
           }
         }
-      }
+      },
     );
 
     return () => {

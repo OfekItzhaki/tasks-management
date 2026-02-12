@@ -362,83 +362,84 @@ export default function ListsPage() {
       {lists.some(
         (l) => l.type === ListType.TRASH || l.type === ListType.FINISHED
       ) && (
-          <div
-            className="mt-12 animate-slide-up"
-            style={{ animationDelay: '0.2s' }}
-          >
-            <h2 className="text-sm font-bold text-tertiary uppercase tracking-wider mb-4 px-1">
-              {t('lists.system', { defaultValue: 'System Lists' })}
-            </h2>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {lists
-                .filter(
-                  (l) => l.type === ListType.TRASH || l.type === ListType.FINISHED
-                )
-                .map((list) => (
-                  <Link
-                    key={list.id}
-                    to={`/lists/${list.id}/tasks?isTrashView=${list.type === ListType.TRASH}`}
-                    className="group relative p-6 h-24 rounded-2xl border border-border-subtle bg-surface hover:border-accent/50 hover:bg-accent/5 transition-all duration-200 flex items-center justify-between"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div
-                        className={`w-10 h-10 rounded-xl flex items-center justify-center ${list.type === ListType.TRASH
-                            ? 'bg-red-100 text-red-600 dark:bg-red-900/20'
-                            : 'bg-green-100 text-green-600 dark:bg-green-900/20'
-                          }`}
-                      >
-                        {list.type === ListType.TRASH ? (
-                          <svg
-                            className="w-5 h-5"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                            />
-                          </svg>
-                        ) : (
-                          <svg
-                            className="w-5 h-5"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M5 13l4 4L19 7"
-                            />
-                          </svg>
-                        )}
-                      </div>
-                      <h3 className="text-lg font-bold text-primary group-hover:text-accent transition-colors">
-                        {list.name}
-                      </h3>
-                    </div>
-                    <svg
-                      className="w-5 h-5 text-tertiary group-hover:text-accent transition-colors"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
+        <div
+          className="mt-12 animate-slide-up"
+          style={{ animationDelay: '0.2s' }}
+        >
+          <h2 className="text-sm font-bold text-tertiary uppercase tracking-wider mb-4 px-1">
+            {t('lists.system', { defaultValue: 'System Lists' })}
+          </h2>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {lists
+              .filter(
+                (l) => l.type === ListType.TRASH || l.type === ListType.FINISHED
+              )
+              .map((list) => (
+                <Link
+                  key={list.id}
+                  to={`/lists/${list.id}/tasks?isTrashView=${list.type === ListType.TRASH}`}
+                  className="group relative p-6 h-24 rounded-2xl border border-border-subtle bg-surface hover:border-accent/50 hover:bg-accent/5 transition-all duration-200 flex items-center justify-between"
+                >
+                  <div className="flex items-center gap-4">
+                    <div
+                      className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                        list.type === ListType.TRASH
+                          ? 'bg-red-100 text-red-600 dark:bg-red-900/20'
+                          : 'bg-green-100 text-green-600 dark:bg-green-900/20'
+                      }`}
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9 5l7 7-7 7"
-                      />
-                    </svg>
-                  </Link>
-                ))}
-            </div>
+                      {list.type === ListType.TRASH ? (
+                        <svg
+                          className="w-5 h-5"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                          />
+                        </svg>
+                      ) : (
+                        <svg
+                          className="w-5 h-5"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M5 13l4 4L19 7"
+                          />
+                        </svg>
+                      )}
+                    </div>
+                    <h3 className="text-lg font-bold text-primary group-hover:text-accent transition-colors">
+                      {list.name}
+                    </h3>
+                  </div>
+                  <svg
+                    className="w-5 h-5 text-tertiary group-hover:text-accent transition-colors"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5l7 7-7 7"
+                    />
+                  </svg>
+                </Link>
+              ))}
           </div>
-        )}
+        </div>
+      )}
 
       {/* Empty State */}
       {lists.length === 0 && !showCreate && (

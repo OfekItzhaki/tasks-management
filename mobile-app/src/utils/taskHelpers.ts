@@ -23,17 +23,12 @@ export const normalizeTask = sharedNormalizeTask as unknown as (task: any) => Ta
 
 /**
  * Check if a task has repeating reminders
- * A task is repeating if it has weekly reminders (specificDayOfWeek) 
+ * A task is repeating if it has weekly reminders (specificDayOfWeek)
  * or daily reminders (client-side via displayEveryDayReminders)
  */
-export function isRepeatingTask(
-  task: Task,
-  displayEveryDayReminders?: any[],
-): boolean {
-  const hasWeeklyReminder = task.specificDayOfWeek !== null &&
-    task.specificDayOfWeek !== undefined;
-  const hasDailyReminders = displayEveryDayReminders &&
-    displayEveryDayReminders.length > 0;
+export function isRepeatingTask(task: Task, displayEveryDayReminders?: any[]): boolean {
+  const hasWeeklyReminder = task.specificDayOfWeek !== null && task.specificDayOfWeek !== undefined;
+  const hasDailyReminders = displayEveryDayReminders && displayEveryDayReminders.length > 0;
   return hasWeeklyReminder || hasDailyReminders || false;
 }
 
@@ -45,12 +40,18 @@ export const isOverdue = sharedIsOverdue as unknown as (task: Task) => boolean;
 /**
  * Filter tasks by search query
  */
-export const filterTasksByQuery = sharedFilterTasksByQuery as unknown as (tasks: Task[], query: string) => Task[];
+export const filterTasksByQuery = sharedFilterTasksByQuery as unknown as (
+  tasks: Task[],
+  query: string,
+) => Task[];
 
 /**
  * Sort tasks by various criteria
  */
-export const sortTasks = sharedSortTasks as unknown as (tasks: Task[], sortBy: SortOption) => Task[];
+export const sortTasks = sharedSortTasks as unknown as (
+  tasks: Task[],
+  sortBy: SortOption,
+) => Task[];
 
 /**
  * Get formatted sort option label
@@ -60,4 +61,6 @@ export const getSortLabel = sharedGetSortLabel;
 /**
  * Calculate steps progress percentage
  */
-export const calculateStepsProgress = sharedCalculateStepsProgress as unknown as (task: Task) => number;
+export const calculateStepsProgress = sharedCalculateStepsProgress as unknown as (
+  task: Task,
+) => number;

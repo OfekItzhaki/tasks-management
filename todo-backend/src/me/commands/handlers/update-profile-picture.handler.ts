@@ -9,9 +9,7 @@ interface CloudinaryResponse {
 }
 
 @CommandHandler(UpdateProfilePictureCommand)
-export class UpdateProfilePictureHandler
-  implements ICommandHandler<UpdateProfilePictureCommand>
-{
+export class UpdateProfilePictureHandler implements ICommandHandler<UpdateProfilePictureCommand> {
   constructor(
     private readonly cloudinaryService: CloudinaryService,
     private readonly prisma: PrismaService,

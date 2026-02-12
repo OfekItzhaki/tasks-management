@@ -78,8 +78,7 @@ export default {
     defaultTitle: 'משימות',
     renameTitle: 'לחץ כדי לשנות שם',
     deleteList: 'מחק רשימה',
-    deleteListConfirm:
-      'למחוק את הרשימה "{{name}}"? פעולה זו תמחק את כל המשימות ברשימה.',
+    deleteListConfirm: 'למחוק את הרשימה "{{name}}"? פעולה זו תמחק את כל המשימות ברשימה.',
     createFab: 'צור משימה חדשה',
     empty: 'לא נמצאו משימות.',
     loadFailed: 'טעינת המשימות נכשלה',
@@ -106,8 +105,7 @@ export default {
     restored: 'המשימה שוחזרה',
     restoreFailed: 'שחזור המשימה נכשל',
     deleteForever: 'מחיקה לצמיתות',
-    deleteForeverConfirm:
-      'למחוק את המשימה "{{description}}" לצמיתות? לא ניתן לבטל פעולה זו.',
+    deleteForeverConfirm: 'למחוק את המשימה "{{description}}" לצמיתות? לא ניתן לבטל פעולה זו.',
     deletedForever: 'המשימה נמחקה לצמיתות',
     deleteForeverFailed: 'מחיקה לצמיתות נכשלה',
   },
