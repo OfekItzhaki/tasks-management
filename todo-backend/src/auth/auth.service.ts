@@ -30,7 +30,7 @@ export class AuthService {
     private readonly todoListsService: TodoListsService,
     private readonly jwtService: JwtService,
     private readonly prisma: PrismaService,
-  ) { }
+  ) {}
 
   async validateUser(email: string, password: string) {
     this.logger.debug(`Validating user: ${email}`);
@@ -329,10 +329,7 @@ export class AuthService {
       if (error instanceof ForbiddenException) throw error;
 
       if (axios.isAxiosError(error)) {
-        this.logger.error(
-          `Turnstile network error: ${error.message}`,
-          error.response?.data,
-        );
+        this.logger.error(`Turnstile network error: ${error.message}`, error.response?.data);
       } else {
         this.logger.error('Unexpected error verifying Turnstile token', error);
       }

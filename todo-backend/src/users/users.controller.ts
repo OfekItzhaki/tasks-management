@@ -47,7 +47,7 @@ class UsersController {
   constructor(
     private userService: UsersService,
     private cloudinaryService: CloudinaryService,
-  ) { }
+  ) {}
 
   @Post()
   @ApiOperation({ summary: 'Register a new user' })
