@@ -467,7 +467,6 @@ export default function LoginPage() {
                     </div>
                   </div>
                 )}
-
               {/* Step 3: Password */}
               {((!isRegistering && !isResettingPassword) ||
                 (isRegistering && regStep === 3) ||
