@@ -70,6 +70,7 @@ export default defineConfig(({ mode }) => {
     resolve: {
       alias: {
         '@': path.resolve(__dirname, './src'),
+        '@tasks-management/frontend-services': path.resolve(__dirname, '../frontend-services/src/index.ts'),
       },
     },
     server: {
