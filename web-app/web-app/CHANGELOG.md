@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.4](https://github.com/OfekItzhaki/horizon-flux/compare/web-app-v1.3.3...web-app-v1.3.4) (2026-02-14)
+
+
+### Bug Fixes
+
+* resolve missing ShareRole export and optimize dev config ([#85](https://github.com/OfekItzhaki/horizon-flux/issues/85)) ([7edcd24](https://github.com/OfekItzhaki/horizon-flux/commit/7edcd24e9afbae1bf007bf2d68eca08358b069e7))
+
 ## [1.3.3](https://github.com/OfekItzhaki/horizon-flux/compare/web-app-v1.3.2...web-app-v1.3.3) (2026-02-13)
 
 
