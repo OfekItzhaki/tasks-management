@@ -40,7 +40,7 @@ export class UsersService {
   constructor(
     private prisma: PrismaService,
     private emailService: EmailService,
-  ) {}
+  ) { }
 
   private sanitizeUser<
     T extends {
@@ -155,29 +155,7 @@ export class UsersService {
     return result;
   }
 
-  private async createDefaultLists(userId: string) {
-    const defaultLists: Array<{
-      name: string;
-      type: ListType;
-      isSystem?: boolean;
-    }> = [
-      { name: 'Daily', type: ListType.DAILY },
-      { name: 'Weekly', type: ListType.WEEKLY },
-      { name: 'Monthly', type: ListType.MONTHLY },
-      { name: 'Yearly', type: ListType.YEARLY },
-      // System list for archived completed tasks (created once per user)
-      { name: 'Finished Tasks', type: ListType.DONE, isSystem: true },
-    ];
 
-    await this.prisma.toDoList.createMany({
-      data: defaultLists.map((list) => ({
-        name: list.name,
-        type: list.type,
-        isSystem: Boolean(list.isSystem ?? false),
-        ownerId: userId,
-      })),
-    });
-  }
 
   async initUser(email: string): Promise<User> {
     const existingUser = await this.findByEmail(email);
@@ -214,7 +192,7 @@ export class UsersService {
     });
 
     // Create default lists for the new user
-    await this.createDefaultLists(user.id);
+
 
     return user;
   }
@@ -303,7 +281,6 @@ export class UsersService {
       } as Prisma.UserCreateInput,
     });
 
-    await this.createDefaultLists(user.id);
     this.sendOtp(user.email, otp, user.name || undefined).catch(console.error);
 
     return this.sanitizeUser(user)!;

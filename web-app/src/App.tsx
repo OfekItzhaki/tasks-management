@@ -3,6 +3,7 @@ import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import LoginPage from './pages/LoginPage';
 import ListsPage from './pages/ListsPage';
+import SharedPage from './pages/SharedPage';
 import TasksPage from './pages/TasksPage';
 import TaskDetailsPage from './pages/TaskDetailsPage';
 import ProfilePage from './pages/ProfilePage';
@@ -31,6 +32,7 @@ function App() {
           >
             <Route index element={<Navigate to="/lists" replace />} />
             <Route path="lists" element={<ListsPage />} />
+            <Route path="shared" element={<SharedPage />} />
             <Route path="lists/:listId/tasks" element={<TasksPage />} />
             <Route path="trash" element={<TasksPage isTrashView />} />
             <Route path="tasks/:taskId" element={<TaskDetailsPage />} />

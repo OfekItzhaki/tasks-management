@@ -86,8 +86,9 @@ export default function TasksPage({ isTrashView = false }: TasksPageProps) {
 
   const { data: list } = useQuery<ListWithSystemFlag, ApiError>({
     queryKey: ['list', effectiveListId],
-    enabled: !!effectiveListId,
+    enabled: !!effectiveListId && effectiveListId !== 'shared', // Don't fetch list for 'shared' virtual ID
     initialData: () => {
+      if (effectiveListId === 'shared') return undefined;
       const cachedLists = queryClient.getQueryData<ListWithSystemFlag[]>([
         'lists',
       ]);
@@ -97,6 +98,25 @@ export default function TasksPage({ isTrashView = false }: TasksPageProps) {
     },
     queryFn: () => listsService.getListById(effectiveListId!),
   });
+
+  // Virtual List for Shared Tasks
+  const isSharedView = effectiveListId === 'shared';
+  const sharedListMock: ListWithSystemFlag | undefined = isSharedView ? {
+    id: 'shared',
+    name: t('nav.shared', { defaultValue: 'Shared Tasks' }),
+    type: ListType.DAILY, // Using DAILY as a placeholder for generic list
+    ownerId: 'system',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    isSystem: true,
+    taskBehavior: TaskBehavior.ONE_OFF,
+    completionPolicy: CompletionPolicy.KEEP,
+    order: 0,
+    deletedAt: null
+  } : undefined;
+
+  const activeList = isSharedView ? sharedListMock : list;
+
 
   const {
     data: tasks = [],
@@ -563,6 +583,8 @@ export default function TasksPage({ isTrashView = false }: TasksPageProps) {
     }
   };
 
+  const completedCount = tasks.filter((t) => t.completed).length;
+
   // Show loading skeleton ONLY during initial load (not during background refetches)
   if (isLoading) {
     return (
@@ -613,19 +635,17 @@ export default function TasksPage({ isTrashView = false }: TasksPageProps) {
         </Link>
       </div>
 
-      <div
-        className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4 animate-slide-up"
-        style={{ animationDelay: '0.1s' }}
-      >
+      {/* Header */}
+      <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 animate-slide-up">
         <div className="min-w-0 flex-1">
           {isEditingListName ? (
             <form
               onSubmit={(e) => {
                 e.preventDefault();
-                if (!list || !listNameDraft.trim()) return;
+                if (!activeList || !listNameDraft.trim()) return;
                 setIsEditingListName(false); // Close immediately (Optimistic)
                 updateListMutation.mutate({
-                  id: list.id,
+                  id: activeList.id,
                   data: {
                     name: listNameDraft.trim(),
                     taskBehavior: taskBehaviorDraft,
@@ -730,41 +750,42 @@ export default function TasksPage({ isTrashView = false }: TasksPageProps) {
             </form>
           ) : (
             <div className="flex items-center gap-4">
-              <h1
-                className="text-4xl font-bold text-primary cursor-pointer hover:text-accent transition-colors flex items-center gap-3 break-words whitespace-normal leading-snug pb-2"
-                onClick={() => {
-                  if (!list?.isSystem) {
-                    setListNameDraft(list?.name || '');
-                    setTaskBehaviorDraft(
-                      list?.taskBehavior || TaskBehavior.ONE_OFF
-                    );
-                    setCompletionPolicyDraft(
-                      list?.completionPolicy || CompletionPolicy.MOVE_TO_DONE
-                    );
-                    setIsEditingListName(true);
-                  }
-                }}
-              >
-                {list?.name ?? t('tasks.defaultTitle')}
-
-                {!list?.isSystem && (
-                  <svg
-                    className="w-5 h-5 opacity-20"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
+              <h1 className="text-4xl font-bold text-primary flex items-center gap-3">
+                {activeList?.name || t('tasks.defaultTitle', { defaultValue: 'Tasks' })}
+                {!isTrashView && !isFinishedList && !isSharedView && !activeList?.isSystem && (
+                  <button
+                    onClick={() => setIsEditingListName(true)}
+                    className="text-tertiary hover:text-accent transition-colors"
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-                    />
-                  </svg>
+                    <svg
+                      className="w-6 h-6"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                      />
+                    </svg>
+                  </button>
                 )}
               </h1>
+              {!isTrashView && !isSharedView && (
+                <p className="mt-2 text-secondary">
+                  {completedCount} / {tasks.length}{' '}
+                  {t('tasks.completed', { defaultValue: 'completed' })}
+                </p>
+              )}
+              {isSharedView && (
+                <p className="mt-2 text-secondary">
+                  Tasks shared with you from other users.
+                </p>
+              )}
 
-              {!isTrashView && list && !list.isSystem && (
+              {!isTrashView && activeList && !activeList.isSystem && !isSharedView && (
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
@@ -805,15 +826,15 @@ export default function TasksPage({ isTrashView = false }: TasksPageProps) {
               : t('tasks.bulk.mode', { defaultValue: 'Bulk Actions' })}
           </button>
 
-          {list && !list.isSystem && !isBulkMode && (
+          {activeList && !activeList.isSystem && !isBulkMode && (
             <button
               onClick={() => {
                 if (
                   window.confirm(
-                    t('tasks.deleteListConfirm', { name: list.name })
+                    t('tasks.deleteListConfirm', { name: activeList.name })
                   )
                 ) {
-                  deleteListMutation.mutate({ id: list.id });
+                  deleteListMutation.mutate({ id: activeList.id });
                 }
               }}
               className="p-2.5 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-all"
@@ -865,7 +886,7 @@ export default function TasksPage({ isTrashView = false }: TasksPageProps) {
         </div>
       )}
 
-      {showCreate && !isBulkMode && !isTrashView && !isFinishedList && (
+      {showCreate && !isBulkMode && !isTrashView && !isFinishedList && !isSharedView && activeList?.type !== ListType.TRASH && activeList?.type !== ListType.DONE && (
         <div className="premium-card p-6 mb-8 animate-scale-in">
           <form
             onSubmit={(e) => {
@@ -921,7 +942,7 @@ export default function TasksPage({ isTrashView = false }: TasksPageProps) {
           style={{ animationDelay: '0.2s' }}
         >
           {/* Add Task Button - Always First */}
-          {!showCreate && !isBulkMode && !isFinishedList && !isTrashView && (
+          {!showCreate && !isBulkMode && !isFinishedList && !isTrashView && !isSharedView && activeList?.type !== ListType.TRASH && activeList?.type !== ListType.DONE && (
             <button
               onClick={() => setShowCreate(true)}
               aria-label="create-task-button"
@@ -951,18 +972,21 @@ export default function TasksPage({ isTrashView = false }: TasksPageProps) {
             items={sortedTasks.map((t) => t.id)}
             strategy={verticalListSortingStrategy}
           >
-            {/* Grouping Logic for Trash and Done Lists */}
-            {isTrashView || isFinishedList
+            {/* Grouping Logic for Trash, Done, and Shared Lists */}
+            {isTrashView || isFinishedList || isSharedView
               ? Object.entries(
                 sortedTasks.reduce(
                   (groups, task) => {
-                    // For Done list, group by originalListId. for Trash, group by todoListId
+                    // For Done list, group by originalListId. for Trash/Shared, group by todoListId
                     const sourceListId = isFinishedList
                       ? task.originalListId || 'unknown'
                       : task.todoListId;
 
                     const listName =
                       allLists.find((l) => l.id === sourceListId)?.name ||
+                      // Fallback for shared tasks where we might not have the list in allLists
+                      // casting to any because todoList might not be in standard Task type
+                      (task as any).todoList?.name ||
                       t('tasks.unknownList', {
                         defaultValue: 'Unknown List',
                       });

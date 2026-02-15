@@ -14,7 +14,7 @@ export class ListSharesService {
   constructor(
     private prisma: PrismaService,
     private eventsGateway: EventsGateway,
-  ) {}
+  ) { }
 
   private async ensureOwnedList(todoListId: string, ownerId: string) {
     const list = await this.prisma.toDoList.findFirst({
@@ -133,7 +133,7 @@ export class ListSharesService {
     // Filter out deleted lists and return only the list objects
     return shares
       .map((share) => share.toDoList)
-      .filter((list) => list !== null && list.deletedAt === null);
+      .filter((list) => list !== null && (list.deletedAt === null || list.deletedAt === undefined));
   }
 
   async getListShares(todoListId: string, ownerId: string) {

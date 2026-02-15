@@ -53,7 +53,7 @@ export default function ProfilePage() {
       setUser({ ...user, notificationFrequency: previousFrequency });
       alert(
         t('profile.updateFailed') ||
-          'Failed to update notification frequency. Please try again.'
+        'Failed to update notification frequency. Please try again.'
       );
     }
   };
@@ -73,7 +73,7 @@ export default function ProfilePage() {
       setUser({ ...user, trashRetentionDays: previousDays });
       alert(
         t('profile.updateFailed') ||
-          'Failed to update trash retention. Please try again.'
+        'Failed to update trash retention. Please try again.'
       );
     }
   };
@@ -253,11 +253,10 @@ export default function ProfilePage() {
                     <button
                       key={freq}
                       onClick={() => handleFrequencyChange(freq)}
-                      className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${
-                        user?.notificationFrequency === freq
+                      className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${user?.notificationFrequency === freq
                           ? 'bg-accent text-white shadow-lg'
                           : 'bg-hover text-secondary hover:bg-hover/80'
-                      }`}
+                        }`}
                     >
                       {freq.charAt(0) + freq.slice(1).toLowerCase()}
                     </button>
@@ -275,20 +274,40 @@ export default function ProfilePage() {
                     defaultValue: 'Trash Retention (Days)',
                   })}
                 </label>
-                <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-none">
-                  {[7, 14, 30, 60, 90].map((days) => (
-                    <button
-                      key={days}
-                      onClick={() => handleTrashRetentionChange(days)}
-                      className={`px-4 py-2 rounded-xl text-sm font-bold transition-all whitespace-nowrap ${
-                        user?.trashRetentionDays === days
-                          ? 'bg-accent text-white shadow-lg'
-                          : 'bg-hover text-secondary hover:bg-hover/80'
-                      }`}
-                    >
-                      {days} {t('common.days', { defaultValue: 'days' })}
-                    </button>
-                  ))}
+                <div className="space-y-4">
+                  {/* Quick Select Buttons */}
+                  <div className="flex flex-wrap gap-3">
+                    {[7, 14, 30, 60, 90].map((days) => (
+                      <button
+                        key={days}
+                        onClick={() => handleTrashRetentionChange(days)}
+                        className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all border ${user?.trashRetentionDays === days
+                            ? 'bg-accent text-white border-accent shadow-md'
+                            : 'bg-surface text-secondary border-border-subtle hover:border-accent hover:text-primary'
+                          }`}
+                      >
+                        {days} {t('common.days', { defaultValue: 'days' })}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Slider Control */}
+                  <div className="px-1">
+                    <input
+                      type="range"
+                      min="1"
+                      max="90"
+                      step="1"
+                      value={user?.trashRetentionDays || 30}
+                      onChange={(e) => handleTrashRetentionChange(Number(e.target.value))}
+                      className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700 accent-accent"
+                    />
+                    <div className="flex justify-between text-xs text-tertiary mt-2 font-medium">
+                      <span>1 day</span>
+                      <span className="text-accent font-bold">{user?.trashRetentionDays || 30} days</span>
+                      <span>90 days</span>
+                    </div>
+                  </div>
                 </div>
                 <p className="text-xs text-tertiary">
                   {t('profile.trashRetentionDesc', {

@@ -25,10 +25,22 @@ export class TasksService {
     private taskAccess: TaskAccessHelper,
     @Inject(forwardRef(() => TaskSchedulerService))
     private taskScheduler: TaskSchedulerService,
-  ) {}
+  ) { }
 
   async create(todoListId: string, createTaskDto: CreateTaskDto, ownerId: string) {
     await this.taskAccess.ensureListAccess(todoListId, ownerId, ShareRole.EDITOR);
+
+    // Prevent creating tasks in system lists (Trash and Done)
+    const list = await this.prisma.toDoList.findUnique({
+      where: { id: todoListId },
+      select: { type: true, name: true },
+    });
+
+    if (list && (list.type === ListType.TRASH || list.type === ListType.DONE)) {
+      throw new BadRequestException(
+        `Cannot create tasks directly in "${list.name}" list. Tasks are moved here automatically.`
+      );
+    }
 
     const task = await this.prisma.task.create({
       data: {

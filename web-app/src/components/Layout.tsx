@@ -1,4 +1,4 @@
-import { Outlet, Link, useLocation } from 'react-router-dom';
+import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTranslation } from 'react-i18next';
 import { supportedLanguages } from '../i18n';
@@ -13,6 +13,7 @@ export default function Layout() {
   const { t, i18n } = useTranslation();
   const { themeMode, setThemeMode } = useTheme();
   const location = useLocation();
+  const navigate = useNavigate();
 
   const handleLogout = async () => {
     await logout();
@@ -73,13 +74,21 @@ export default function Layout() {
                 className={`hidden sm:flex items-center gap-4 ${isRtl ? 'flex-row-reverse' : ''}`}
               >
                 {/* Lists Dropdown */}
-                <div className="relative" ref={dropdownRef}>
+                <div
+                  className="relative"
+                  ref={dropdownRef}
+                  onMouseEnter={() => setIsDropdownOpen(true)}
+                  onMouseLeave={() => setIsDropdownOpen(false)}
+                >
                   <button
-                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                    onClick={() => {
+                      setIsDropdownOpen(false);
+                      navigate('/lists');
+                    }}
                     className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all ${location.pathname.startsWith('/lists') ||
-                        location.pathname.startsWith('/trash')
-                        ? 'bg-accent/10 text-accent'
-                        : 'text-secondary hover:text-primary hover:bg-hover'
+                      location.pathname.startsWith('/trash')
+                      ? 'bg-accent/10 text-accent'
+                      : 'text-secondary hover:text-primary hover:bg-hover'
                       }`}
                   >
                     {t('nav.lists')}
@@ -179,10 +188,20 @@ export default function Layout() {
                 </div>
 
                 <Link
+                  to="/shared"
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${location.pathname.startsWith('/shared')
+                    ? 'bg-accent text-white shadow-sm'
+                    : 'text-secondary hover:text-primary hover:bg-hover'
+                    }`}
+                >
+                  {t('nav.shared', { defaultValue: 'Shared' })}
+                </Link>
+
+                <Link
                   to="/analytics"
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${location.pathname.startsWith('/analytics')
-                      ? 'bg-accent text-white shadow-sm'
-                      : 'text-secondary hover:text-primary hover:bg-hover'
+                    ? 'bg-accent text-white shadow-sm'
+                    : 'text-secondary hover:text-primary hover:bg-hover'
                     }`}
                 >
                   {t('nav.analytics', { defaultValue: 'Analytics' })}
@@ -201,8 +220,8 @@ export default function Layout() {
                     key={mode}
                     onClick={() => setThemeMode(mode)}
                     className={`p-1.5 rounded-md transition-all ${themeMode === mode
-                        ? 'bg-surface text-accent shadow-sm'
-                        : 'text-tertiary hover:text-secondary'
+                      ? 'bg-surface text-accent shadow-sm'
+                      : 'text-tertiary hover:text-secondary'
                       }`}
                     title={t(`theme.${mode}`, {
                       defaultValue:
