@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.0](https://github.com/OfekItzhaki/horizon-flux/compare/web-app-v1.3.4...web-app-v1.4.0) (2026-02-15)
+
+
+### Features
+
+* **auth:** specialized email templates and password reset UI improvements ([#87](https://github.com/OfekItzhaki/horizon-flux/issues/87)) ([9c39984](https://github.com/OfekItzhaki/horizon-flux/commit/9c39984b93454059058aba4e508e02b2e2216df8))
+
 ## [1.3.4](https://github.com/OfekItzhaki/horizon-flux/compare/web-app-v1.3.3...web-app-v1.3.4) (2026-02-14)
 
 
