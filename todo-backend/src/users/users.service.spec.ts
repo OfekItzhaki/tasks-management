@@ -103,7 +103,7 @@ describe('UsersService', () => {
           }),
           expect.objectContaining({
             name: 'Finished Tasks',
-            type: ListType.FINISHED,
+            type: ListType.DONE,
             ownerId: '1',
             isSystem: true,
           }),

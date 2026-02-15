@@ -49,4 +49,10 @@ export class TaskSharesController {
   ) {
     return this.taskSharesService.updateShareRole(taskId, userId, role, user.userId);
   }
+
+  @Get('my-shared-tasks')
+  @ApiOperation({ summary: 'Get all tasks shared with the current user' })
+  async getTasksSharedWithMe(@CurrentUser() user: CurrentUserPayload) {
+    return this.taskSharesService.getTasksSharedWithMe(user.userId);
+  }
 }

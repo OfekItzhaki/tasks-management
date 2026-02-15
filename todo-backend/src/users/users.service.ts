@@ -166,7 +166,7 @@ export class UsersService {
       { name: 'Monthly', type: ListType.MONTHLY },
       { name: 'Yearly', type: ListType.YEARLY },
       // System list for archived completed tasks (created once per user)
-      { name: 'Finished Tasks', type: ListType.FINISHED, isSystem: true },
+      { name: 'Finished Tasks', type: ListType.DONE, isSystem: true },
     ];
 
     await this.prisma.toDoList.createMany({

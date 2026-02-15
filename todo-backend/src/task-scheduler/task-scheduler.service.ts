@@ -82,7 +82,7 @@ export class TaskSchedulerService implements OnModuleInit {
     let finishedList = await this.prisma.toDoList.findFirst({
       where: {
         ownerId,
-        type: ListType.FINISHED,
+        type: ListType.DONE,
         isSystem: true,
         deletedAt: null,
       },
@@ -93,7 +93,7 @@ export class TaskSchedulerService implements OnModuleInit {
       finishedList = await this.prisma.toDoList.create({
         data: {
           name: this.FINISHED_LIST_NAME,
-          type: ListType.FINISHED,
+          type: ListType.DONE,
           isSystem: true,
           ownerId,
         },

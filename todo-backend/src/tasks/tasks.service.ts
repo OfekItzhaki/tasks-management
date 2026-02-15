@@ -167,7 +167,7 @@ export class TasksService {
         const doneList = await this.prisma.toDoList.findFirst({
           where: {
             ownerId: userId,
-            type: ListType.FINISHED,
+            type: ListType.DONE,
             deletedAt: null,
           },
         });
@@ -300,7 +300,7 @@ export class TasksService {
     }
 
     // Case 2: Task was archived (completed in a system list)
-    if (task.todoList.type === ListType.FINISHED) {
+    if (task.todoList.type === ListType.DONE) {
       if (!task.originalListId) {
         throw new BadRequestException('Original list information not available');
       }
@@ -352,7 +352,7 @@ export class TasksService {
       throw new NotFoundException(`Task with ID ${id} not found`);
     }
 
-    if (!allowActive && !task.deletedAt && task.todoList.type !== ListType.FINISHED) {
+    if (!allowActive && !task.deletedAt && task.todoList.type !== ListType.DONE) {
       throw new BadRequestException('Only deleted or archived tasks can be permanently deleted.');
     }
 

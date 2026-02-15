@@ -69,7 +69,7 @@ export class TodoListsService {
       },
       {
         name: 'Done',
-        type: ListType.FINISHED,
+        type: ListType.DONE,
         taskBehavior: 'ONE_OFF',
         completionPolicy: 'KEEP',
         isSystem: true,
@@ -116,13 +116,13 @@ export class TodoListsService {
     const systemLists = await this.prisma.toDoList.findMany({
       where: {
         ownerId,
-        type: { in: [ListType.TRASH, ListType.FINISHED] },
+        type: { in: [ListType.TRASH, ListType.DONE] },
         deletedAt: null,
       },
     });
 
     const hasTrash = systemLists.some((l) => l.type === ListType.TRASH);
-    const hasDone = systemLists.some((l) => l.type === ListType.FINISHED);
+    const hasDone = systemLists.some((l) => l.type === ListType.DONE);
 
     if (!hasTrash || !hasDone) {
       if (!hasTrash) {
@@ -142,7 +142,7 @@ export class TodoListsService {
         await this.prisma.toDoList.create({
           data: {
             name: 'Done',
-            type: ListType.FINISHED,
+            type: ListType.DONE,
             ownerId,
             taskBehavior: 'ONE_OFF',
             completionPolicy: 'KEEP',

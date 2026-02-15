@@ -29,6 +29,13 @@ export class TaskSharingService {
     async updateShareRole(taskId: string, userId: string, role: ShareRole): Promise<TaskShare> {
         return apiClient.patch<TaskShare>(`/task-shares/${taskId}/share/${userId}/role`, { role });
     }
+
+    /**
+     * Get all tasks shared with the current user
+     */
+    async getTasksSharedWithMe(): Promise<TaskShare[]> {
+        return apiClient.get<TaskShare[]>('/task-shares/my-shared-tasks');
+    }
 }
 
 export const taskSharingService = new TaskSharingService();

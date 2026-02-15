@@ -171,4 +171,23 @@ export class TaskSharesService {
 
     return updated;
   }
+
+  async getTasksSharedWithMe(userId: string) {
+    return this.prisma.taskShare.findMany({
+      where: {
+        sharedWithId: userId,
+        task: {
+          deletedAt: null,
+        },
+      },
+      include: {
+        task: {
+          include: {
+            steps: { where: { deletedAt: null } },
+            todoList: true,
+          },
+        },
+      },
+    });
+  }
 }
