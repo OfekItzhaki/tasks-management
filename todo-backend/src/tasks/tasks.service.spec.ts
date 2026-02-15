@@ -20,6 +20,8 @@ describe('TasksService', () => {
     toDoList: {
       findFirst: jest.fn(),
       findFirstOrThrow: jest.fn(),
+      findUnique: jest.fn(),
+      findUniqueOrThrow: jest.fn(),
     },
   };
 
@@ -145,11 +147,15 @@ describe('TasksService', () => {
         todoListId,
       };
 
-      mockPrismaService.toDoList.findFirst.mockResolvedValue({
+      const mockList = {
         id: todoListId,
         ownerId,
+        type: ListType.CUSTOM,
         deletedAt: null,
-      });
+        shares: [],
+      };
+      mockPrismaService.toDoList.findFirst.mockResolvedValue(mockList);
+      mockPrismaService.toDoList.findUnique.mockResolvedValue(mockList);
       mockPrismaService.task.create.mockResolvedValue(mockTask);
 
       const result = await service.create(todoListId, createDto, ownerId);
@@ -179,11 +185,15 @@ describe('TasksService', () => {
         todoListId,
       };
 
-      mockPrismaService.toDoList.findFirst.mockResolvedValue({
+      const mockList = {
         id: todoListId,
         ownerId,
+        type: ListType.CUSTOM,
         deletedAt: null,
-      });
+        shares: [],
+      };
+      mockPrismaService.toDoList.findFirst.mockResolvedValue(mockList);
+      mockPrismaService.toDoList.findUnique.mockResolvedValue(mockList);
       mockPrismaService.task.create.mockResolvedValue(mockTask);
 
       const result = await service.create(todoListId, createDto, ownerId);
@@ -210,11 +220,15 @@ describe('TasksService', () => {
         todoListId,
       };
 
-      mockPrismaService.toDoList.findFirst.mockResolvedValue({
+      const mockList = {
         id: todoListId,
         ownerId,
+        type: ListType.CUSTOM,
         deletedAt: null,
-      });
+        shares: [],
+      };
+      mockPrismaService.toDoList.findFirst.mockResolvedValue(mockList);
+      mockPrismaService.toDoList.findUnique.mockResolvedValue(mockList);
       mockPrismaService.task.create.mockResolvedValue(mockTask);
 
       const result = await service.create(todoListId, createDto, ownerId);
@@ -240,11 +254,15 @@ describe('TasksService', () => {
         todoListId,
       };
 
-      mockPrismaService.toDoList.findFirst.mockResolvedValue({
+      const mockList = {
         id: todoListId,
         ownerId,
+        type: ListType.CUSTOM,
         deletedAt: null,
-      });
+        shares: [],
+      };
+      mockPrismaService.toDoList.findFirst.mockResolvedValue(mockList);
+      mockPrismaService.toDoList.findUnique.mockResolvedValue(mockList);
       mockPrismaService.task.create.mockResolvedValue(mockTask);
 
       const result = await service.create(todoListId, createDto, ownerId);
@@ -259,6 +277,7 @@ describe('TasksService', () => {
 
     it('should throw error if list does not exist', async () => {
       mockPrismaService.toDoList.findFirst.mockResolvedValue(null);
+      mockPrismaService.toDoList.findUnique.mockResolvedValue(null);
 
       await expect(service.create(todoListId, { description: 'Test' }, ownerId)).rejects.toThrow();
     });

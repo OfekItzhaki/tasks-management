@@ -9,10 +9,9 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
-import { ListType, Prisma } from '@prisma/client';
+import { ListType, Prisma, ShareRole } from '@prisma/client';
 import { TaskSchedulerService } from '../task-scheduler/task-scheduler.service';
 import { TaskAccessHelper } from './helpers/task-access.helper';
-import { ShareRole } from '@prisma/client';
 
 import { TaskOccurrenceHelper } from './helpers/task-occurrence.helper';
 
@@ -29,6 +28,20 @@ export class TasksService {
 
   async create(todoListId: string, createTaskDto: CreateTaskDto, ownerId: string) {
     await this.taskAccess.ensureListAccess(todoListId, ownerId, ShareRole.EDITOR);
+
+    const list = await this.prisma.toDoList.findUnique({
+      where: { id: todoListId },
+    });
+
+    if (!list) {
+      throw new NotFoundException(`List with ID ${todoListId} not found`);
+    }
+
+    if (list.type === ListType.DONE || list.type === ListType.TRASH) {
+      throw new BadRequestException(
+        `Cannot manually add tasks to ${list.type.toLowerCase()} lists`,
+      );
+    }
 
     const task = await this.prisma.task.create({
       data: {
@@ -167,7 +180,7 @@ export class TasksService {
         const doneList = await this.prisma.toDoList.findFirst({
           where: {
             ownerId: userId,
-            type: ListType.FINISHED,
+            type: ListType.DONE,
             deletedAt: null,
           },
         });
@@ -300,7 +313,7 @@ export class TasksService {
     }
 
     // Case 2: Task was archived (completed in a system list)
-    if (task.todoList.type === ListType.FINISHED) {
+    if (task.todoList.type === ListType.DONE) {
       if (!task.originalListId) {
         throw new BadRequestException('Original list information not available');
       }
@@ -352,7 +365,7 @@ export class TasksService {
       throw new NotFoundException(`Task with ID ${id} not found`);
     }
 
-    if (!allowActive && !task.deletedAt && task.todoList.type !== ListType.FINISHED) {
+    if (!allowActive && !task.deletedAt && task.todoList.type !== ListType.DONE) {
       throw new BadRequestException('Only deleted or archived tasks can be permanently deleted.');
     }
 

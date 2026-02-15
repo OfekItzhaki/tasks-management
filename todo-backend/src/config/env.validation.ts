@@ -16,6 +16,7 @@ export const envSchema = z.object({
   SMTP_USER: z.string().optional(),
   SMTP_PASSWORD: z.string().optional(),
   SMTP_FROM: z.string().optional(),
+  RESEND_FROM: z.string().default('Horizon Flux <noreply@ofeklabs.dev>'),
 
   // Redis config
   REDIS_HOST: z.string().default('localhost'),

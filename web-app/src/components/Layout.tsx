@@ -1,4 +1,4 @@
-import { Outlet, Link, useLocation } from 'react-router-dom';
+import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTranslation } from 'react-i18next';
 import { supportedLanguages } from '../i18n';
@@ -13,6 +13,7 @@ export default function Layout() {
   const { t, i18n } = useTranslation();
   const { themeMode, setThemeMode } = useTheme();
   const location = useLocation();
+  const navigate = useNavigate();
 
   const handleLogout = async () => {
     await logout();
@@ -75,7 +76,10 @@ export default function Layout() {
                 {/* Lists Dropdown */}
                 <div className="relative" ref={dropdownRef}>
                   <button
-                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                    onClick={() => {
+                      setIsDropdownOpen(!isDropdownOpen);
+                      navigate('/lists');
+                    }}
                     className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
                       location.pathname.startsWith('/lists') ||
                       location.pathname.startsWith('/trash')

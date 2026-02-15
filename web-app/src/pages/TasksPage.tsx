@@ -158,6 +158,7 @@ export default function TasksPage({ isTrashView = false }: TasksPageProps) {
   }, [taskBehaviorDraft]);
 
   const isFinishedList = list?.type === ListType.FINISHED;
+  const isTrashList = list?.type === ListType.TRASH;
 
   // Optimistic Action Queue
   const pendingActions = useRef<
@@ -863,51 +864,55 @@ export default function TasksPage({ isTrashView = false }: TasksPageProps) {
         </div>
       )}
 
-      {showCreate && !isBulkMode && !isTrashView && !isFinishedList && (
-        <div className="premium-card p-6 mb-8 animate-scale-in">
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (newTaskDescription.trim() && effectiveListId) {
-                createTaskMutation.mutate({
-                  description: newTaskDescription.trim(),
-                });
-              }
-            }}
-          >
-            <div className="flex flex-col sm:flex-row gap-4">
-              <input
-                value={newTaskDescription}
-                onChange={(e) => setNewTaskDescription(e.target.value)}
-                autoFocus
-                aria-label="new-task-input"
-                className="premium-input flex-1"
-                placeholder={t('tasks.placeholder', {
-                  defaultValue: 'What needs to be done?',
-                })}
-              />
-              <div className="flex gap-2">
-                <button
-                  type="submit"
-                  disabled={
-                    createTaskMutation.isPending || !newTaskDescription.trim()
-                  }
-                  className="px-6 py-3 bg-accent text-white rounded-xl text-xs font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all disabled:opacity-50"
-                >
-                  {t('common.create')}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowCreate(false)}
-                  className="px-6 py-3 bg-gray-100 dark:bg-[#2a2a2a] text-gray-900 dark:text-white rounded-xl text-xs font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all"
-                >
-                  {t('common.cancel')}
-                </button>
+      {showCreate &&
+        !isBulkMode &&
+        !isTrashView &&
+        !isTrashList &&
+        !isFinishedList && (
+          <div className="premium-card p-6 mb-8 animate-scale-in">
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (newTaskDescription.trim() && effectiveListId) {
+                  createTaskMutation.mutate({
+                    description: newTaskDescription.trim(),
+                  });
+                }
+              }}
+            >
+              <div className="flex flex-col sm:flex-row gap-4">
+                <input
+                  value={newTaskDescription}
+                  onChange={(e) => setNewTaskDescription(e.target.value)}
+                  autoFocus
+                  aria-label="new-task-input"
+                  className="premium-input flex-1"
+                  placeholder={t('tasks.placeholder', {
+                    defaultValue: 'What needs to be done?',
+                  })}
+                />
+                <div className="flex gap-2">
+                  <button
+                    type="submit"
+                    disabled={
+                      createTaskMutation.isPending || !newTaskDescription.trim()
+                    }
+                    className="px-6 py-3 bg-accent text-white rounded-xl text-xs font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all disabled:opacity-50"
+                  >
+                    {t('common.create')}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowCreate(false)}
+                    className="px-6 py-3 bg-gray-100 dark:bg-[#2a2a2a] text-gray-900 dark:text-white rounded-xl text-xs font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all"
+                  >
+                    {t('common.cancel')}
+                  </button>
+                </div>
               </div>
-            </div>
-          </form>
-        </div>
-      )}
+            </form>
+          </div>
+        )}
 
       <DndContext
         sensors={sensors}
@@ -919,32 +924,36 @@ export default function TasksPage({ isTrashView = false }: TasksPageProps) {
           style={{ animationDelay: '0.2s' }}
         >
           {/* Add Task Button - Always First */}
-          {!showCreate && !isBulkMode && !isFinishedList && !isTrashView && (
-            <button
-              onClick={() => setShowCreate(true)}
-              aria-label="create-task-button"
-              className="w-full h-16 rounded-2xl border-2 border-dashed border-border-subtle hover:border-accent hover:bg-accent/5 flex items-center justify-center gap-3 transition-all duration-200 group"
-            >
-              <div className="w-8 h-8 rounded-full bg-hover group-hover:bg-accent group-hover:text-white flex items-center justify-center transition-all">
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 4v16m8-8H4"
-                  />
-                </svg>
-              </div>
-              <span className="text-sm font-semibold uppercase tracking-wider text-tertiary group-hover:text-accent transition-colors">
-                {t('common.createTask', { defaultValue: 'New Task' })}
-              </span>
-            </button>
-          )}
+          {!showCreate &&
+            !isBulkMode &&
+            !isFinishedList &&
+            !isTrashList &&
+            !isTrashView && (
+              <button
+                onClick={() => setShowCreate(true)}
+                aria-label="create-task-button"
+                className="w-full h-16 rounded-2xl border-2 border-dashed border-border-subtle hover:border-accent hover:bg-accent/5 flex items-center justify-center gap-3 transition-all duration-200 group"
+              >
+                <div className="w-8 h-8 rounded-full bg-hover group-hover:bg-accent group-hover:text-white flex items-center justify-center transition-all">
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 4v16m8-8H4"
+                    />
+                  </svg>
+                </div>
+                <span className="text-sm font-semibold uppercase tracking-wider text-tertiary group-hover:text-accent transition-colors">
+                  {t('common.createTask', { defaultValue: 'New Task' })}
+                </span>
+              </button>
+            )}
           <SortableContext
             items={sortedTasks.map((t) => t.id)}
             strategy={verticalListSortingStrategy}
@@ -961,9 +970,11 @@ export default function TasksPage({ isTrashView = false }: TasksPageProps) {
 
                       const listName =
                         allLists.find((l) => l.id === sourceListId)?.name ||
-                        t('tasks.unknownList', {
-                          defaultValue: 'Unknown List',
-                        });
+                        (sourceListId === 'unknown'
+                          ? t('tasks.unknownList', {
+                              defaultValue: 'Unknown List',
+                            })
+                          : sourceListId); // Show ID if name not found
 
                       if (!groups[listName]) {
                         groups[listName] = { oneOff: [], recurring: [] };

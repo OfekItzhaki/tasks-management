@@ -5,15 +5,20 @@ import { PrismaService } from '../prisma/prisma.service';
 import { EmailService } from '../email/email.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { ListType } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
+
+import { TodoListsService } from '../todo-lists/todo-lists.service';
 
 jest.mock('bcrypt');
 jest.mock('crypto');
 
 const mockEmailService = {
   sendVerificationEmail: jest.fn().mockResolvedValue(undefined),
+};
+
+const mockTodoListsService = {
+  seedDefaultLists: jest.fn().mockResolvedValue(undefined),
 };
 
 describe('UsersService', () => {
@@ -37,6 +42,7 @@ describe('UsersService', () => {
         UsersService,
         { provide: PrismaService, useValue: mockPrismaService },
         { provide: EmailService, useValue: mockEmailService },
+        { provide: TodoListsService, useValue: mockTodoListsService },
       ],
     }).compile();
 
@@ -79,36 +85,7 @@ describe('UsersService', () => {
       const result = await service.createUser(createUserDto);
 
       expect(mockPrismaService.user.create).toHaveBeenCalled();
-      expect(mockPrismaService.toDoList.createMany).toHaveBeenCalledWith({
-        data: expect.arrayContaining([
-          expect.objectContaining({
-            name: 'Daily',
-            type: ListType.DAILY,
-            ownerId: '1',
-          }),
-          expect.objectContaining({
-            name: 'Weekly',
-            type: ListType.WEEKLY,
-            ownerId: '1',
-          }),
-          expect.objectContaining({
-            name: 'Monthly',
-            type: ListType.MONTHLY,
-            ownerId: '1',
-          }),
-          expect.objectContaining({
-            name: 'Yearly',
-            type: ListType.YEARLY,
-            ownerId: '1',
-          }),
-          expect.objectContaining({
-            name: 'Finished Tasks',
-            type: ListType.FINISHED,
-            ownerId: '1',
-            isSystem: true,
-          }),
-        ]),
-      });
+      expect(mockTodoListsService.seedDefaultLists).toHaveBeenCalledWith('1');
       expect(result).not.toHaveProperty('passwordHash');
       expect(result).not.toHaveProperty('emailVerificationOtp');
     });

@@ -13,7 +13,7 @@ export class TaskSchedulerService implements OnModuleInit {
   private readonly ARCHIVE_DELAY_MINUTES = 5;
 
   // System list name for finished tasks
-  private readonly FINISHED_LIST_NAME = 'Finished Tasks';
+  private readonly FINISHED_LIST_NAME = 'Done';
 
   // Prevent log spam when DB is down/misconfigured
   private lastDbErrorLogAtMs = 0;
@@ -82,7 +82,7 @@ export class TaskSchedulerService implements OnModuleInit {
     let finishedList = await this.prisma.toDoList.findFirst({
       where: {
         ownerId,
-        type: ListType.FINISHED,
+        type: ListType.DONE,
         isSystem: true,
         deletedAt: null,
       },
@@ -93,7 +93,7 @@ export class TaskSchedulerService implements OnModuleInit {
       finishedList = await this.prisma.toDoList.create({
         data: {
           name: this.FINISHED_LIST_NAME,
-          type: ListType.FINISHED,
+          type: ListType.DONE,
           isSystem: true,
           ownerId,
         },

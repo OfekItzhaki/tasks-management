@@ -38,25 +38,25 @@ export class TodoListsService {
       isSystem?: boolean;
     }[] = [
       {
-        name: 'Daily Tasks',
+        name: 'Daily',
         type: ListType.DAILY,
         taskBehavior: 'RECURRING',
         completionPolicy: 'KEEP',
       },
       {
-        name: 'Weekly Tasks',
+        name: 'Weekly',
         type: ListType.WEEKLY,
         taskBehavior: 'RECURRING',
         completionPolicy: 'KEEP',
       },
       {
-        name: 'Monthly Tasks',
+        name: 'Monthly',
         type: ListType.MONTHLY,
         taskBehavior: 'RECURRING',
         completionPolicy: 'KEEP',
       },
       {
-        name: 'Yearly Tasks',
+        name: 'Yearly',
         type: ListType.YEARLY,
         taskBehavior: 'RECURRING',
         completionPolicy: 'KEEP',
@@ -69,7 +69,7 @@ export class TodoListsService {
       },
       {
         name: 'Done',
-        type: ListType.FINISHED,
+        type: ListType.DONE,
         taskBehavior: 'ONE_OFF',
         completionPolicy: 'KEEP',
         isSystem: true,
@@ -84,6 +84,24 @@ export class TodoListsService {
     ];
 
     for (const dl of defaultLists) {
+      // Deduplication: check if a list of this type already exists for the user
+      const existing = await this.prisma.toDoList.findFirst({
+        where: {
+          ownerId: userId,
+          type: dl.type,
+          // For CUSTOM lists (like Hot Tasks), we might want to check by name too
+          ...(dl.type === ListType.CUSTOM ? { name: dl.name } : {}),
+          deletedAt: null,
+        },
+      });
+
+      if (existing) {
+        this.logger.debug(
+          `List of type ${dl.type} already exists for user ${userId}, skipping seeding`,
+        );
+        continue;
+      }
+
       const list = await this.prisma.toDoList.create({
         data: {
           name: dl.name,
@@ -95,20 +113,17 @@ export class TodoListsService {
         },
       });
 
-      // Add 4 default tasks to each list except Trash
-      if (dl.type !== ListType.TRASH) {
-        for (let i = 1; i <= 4; i++) {
-          await this.prisma.task.create({
-            data: {
-              description: `Example ${dl.name} Task ${i}`,
-              todoListId: list.id,
-              order: i,
-            },
-          });
-        }
+      // Only create example tasks for non-system, non-trash lists if it's a fresh creation
+      if (!dl.isSystem && dl.type !== ListType.TRASH) {
+        await this.prisma.task.create({
+          data: {
+            description: `Example ${dl.name} task`,
+            todoListId: list.id,
+          },
+        });
       }
     }
-    this.logger.log(`Default lists seeded for userId=${userId}`);
+    this.logger.log(`Default lists checked/seeded for userId=${userId}`);
   }
 
   async findAll(ownerId: string) {
@@ -116,19 +131,19 @@ export class TodoListsService {
     const systemLists = await this.prisma.toDoList.findMany({
       where: {
         ownerId,
-        type: { in: [ListType.TRASH, ListType.FINISHED] },
+        type: { in: [ListType.TRASH, ListType.DONE] },
         deletedAt: null,
       },
     });
 
     const hasTrash = systemLists.some((l) => l.type === ListType.TRASH);
-    const hasDone = systemLists.some((l) => l.type === ListType.FINISHED);
+    const hasDone = systemLists.some((l) => l.type === ListType.DONE);
 
     if (!hasTrash || !hasDone) {
       if (!hasTrash) {
         await this.prisma.toDoList.create({
           data: {
-            name: 'Trash', // Localize? Backend usually English or key
+            name: 'Trash',
             type: ListType.TRASH,
             ownerId,
             taskBehavior: 'ONE_OFF',
@@ -142,7 +157,7 @@ export class TodoListsService {
         await this.prisma.toDoList.create({
           data: {
             name: 'Done',
-            type: ListType.FINISHED,
+            type: ListType.DONE,
             ownerId,
             taskBehavior: 'ONE_OFF',
             completionPolicy: 'KEEP',

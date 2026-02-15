@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { authService } from '../services/auth.service';
+import { authService } from '@tasks-management/frontend-services';
 
 export default function VerifyEmailPage() {
   const { token } = useParams<{ token: string }>();

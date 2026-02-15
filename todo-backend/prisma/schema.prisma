@@ -121,7 +121,7 @@ enum ListType {
   MONTHLY
   YEARLY
   CUSTOM
-  FINISHED // System list for archived completed tasks
+  DONE     // System list for archived completed tasks
   TRASH    // System list for soft-deleted tasks
 }
 

@@ -29,4 +29,13 @@ export class EmailService {
       title,
     });
   }
+
+  async sendPasswordResetEmail(email: string, otp: string, name?: string): Promise<void> {
+    console.log(`[EmailService] Queueing password reset email for: ${email} (OTP: ${otp})`);
+    await this.emailQueue.add('sendPasswordResetEmail', {
+      email,
+      otp,
+      name,
+    });
+  }
 }
